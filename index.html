@@ -366,25 +366,6 @@
       const d = String(now.getDate()).padStart(2, '0');
       return `${y}-${m}-${d}`;
     };
-    function isValidAppsScriptUrl(value=''){
-      const url = String(value || '').trim();
-      return /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/i.test(url);
-    }
-    function normaliseScriptUrl(value=''){
-      const raw = String(value || '').trim();
-      if (!raw) return DEFAULT_SCRIPT_URL;
-      const cleaned = raw.replace(/#.*$/, '').replace(/\/+$/, '');
-      if (isValidAppsScriptUrl(cleaned)) return cleaned;
-      return DEFAULT_SCRIPT_URL;
-    }
-    function resolveScriptUrl(){
-      const input = byId('scriptUrlInput');
-      const stored = localStorage.getItem(STORAGE_KEYS.scriptUrl) || '';
-      const resolved = normaliseScriptUrl((input && input.value) || stored || DEFAULT_SCRIPT_URL);
-      if (input) input.value = resolved;
-      if (stored !== resolved) localStorage.setItem(STORAGE_KEYS.scriptUrl, resolved);
-      return resolved;
-    }
     const safeDate = value => { const d = new Date(value); return isNaN(d.getTime()) ? null : d; };
     const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     function getBudgetMemory(){
@@ -1021,7 +1002,7 @@
     }
 
     function writeSettings(){
-      localStorage.setItem(STORAGE_KEYS.scriptUrl, resolveScriptUrl());
+      localStorage.setItem(STORAGE_KEYS.scriptUrl, byId('scriptUrlInput').value.trim() || DEFAULT_SCRIPT_URL);
       localStorage.setItem(STORAGE_KEYS.fallbackMode, byId('fallbackMode').value);
       logDiagnostic('Settings saved.');
     }
@@ -1182,7 +1163,7 @@
     }
 
     async function runConnectionTest(){
-      const scriptUrl = resolveScriptUrl();
+      const scriptUrl = byId('scriptUrlInput').value.trim();
       if (!scriptUrl) return false;
       showLoading('Testing connection...');
       try {
@@ -1200,7 +1181,7 @@
 
     async function loadLiveData(showOverlay = true){
       if (isLoadingData) return;
-      const scriptUrl = resolveScriptUrl();
+      const scriptUrl = byId('scriptUrlInput').value.trim() || DEFAULT_SCRIPT_URL;
       const snapshot = captureDashboardInputs();
       isLoadingData = true;
       if (showOverlay) showLoading('Loading live data from Google Sheets...');
@@ -1893,7 +1874,7 @@
       if (!current?.values?.invDate) byId('invDate').value = todayISO();
       if (!current?.values?.payDate) byId('payDate').value = todayISO();
       if (!current?.values?.newProjCreatedAt) byId('newProjCreatedAt').value = todayISO();
-      byId('scriptUrlInput').value = resolveScriptUrl();
+      byId('scriptUrlInput').value = localStorage.getItem(STORAGE_KEYS.scriptUrl) || DEFAULT_SCRIPT_URL;
       byId('fallbackMode').value = localStorage.getItem(STORAGE_KEYS.fallbackMode) || 'auto';
       populateAnalysisFilters();
       restoreDashboardInputs(current);
@@ -1976,7 +1957,7 @@ ${error.message}`);
       }
     }
     async function postJsonToScript(payload){
-      const scriptUrl = resolveScriptUrl();
+      const scriptUrl = byId('scriptUrlInput').value.trim() || DEFAULT_SCRIPT_URL;
       return safeFetchJson(scriptUrl, getFetchOptions('POST', payload));
     }
     async function saveRevenue(){
@@ -2124,7 +2105,6 @@ ${error.message}`);
 
     function init(){
       initTabs();
-      resolveScriptUrl();
       populateInputs();
       byId('period').onchange = e => { state.period = e.target.value; render(); };
       byId('division').onchange = e => { state.division = e.target.value; render(); };
