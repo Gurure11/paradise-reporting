@@ -310,7 +310,7 @@
   </div>
 
   <script>
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfVn2PmgiBCREcaL4uSjGR7T_T0vvty4laaSyBK0QfuNjsKACHfo9tQ8ptk_tRxRQ0/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz4CMKGdXAzlrTDDYcKN1BjCRu8HsQOEs5lVeQ0B5jWK4fTN8fZcNqpTo-OXAncg5hKyQ/exec';
     const STORAGE_KEYS = { scriptUrl:'onpoint.scriptUrl', fallbackMode:'onpoint.fallbackMode', revenueBudgetMemory:'onpoint.revenueBudgetMemory', straightLineMemory:'onpoint.straightLineMemory', formDraft:'onpoint.formDraft' };
     const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
     const DIVISION_COLORS = ['#0f172a','#334155','#475569','#64748b','#94a3b8','#1e293b','#475569'];
@@ -1061,23 +1061,15 @@
     }
     function normaliseRevenue(raw){
       return raw.map(row => ({
-        date: normaliseDate(
-          row.Date || row.date || row.Timestamp || row.timestamp || row.RecordedAt || row.recordedAt || row.CreatedAt || row.createdAt
-        ),
-        manager: row.Manager || row.manager || row['Project Manager'] || row.projectManager || '',
-        costCenter: normalizeCostCenterName(
-          row.CostCenter || row['Cost Center'] || row.Division || row.division || row.costCenter || ''
-        ),
-        projectName: row.ProjectName || row['Project Name'] || row.Project || row.projectName || row.project || '',
-        amount: num(
-          row.Amount || row['Amount'] || row['Actual Revenue'] || row.Revenue || row.revenue || row.amount
-        ),
-        budget: num(
-          row['Projected Budget'] || row.ProjectedBudget || row.projectedBudget || row.Budget || row.budget
-        ),
+        date: normaliseDate(row.Date || row.date),
+        manager: row.Manager || row.manager || '',
+        costCenter: normalizeCostCenterName(row.CostCenter || row.Division || row.costCenter || ''),
+        projectName: row.ProjectName || row.projectName || '',
+        amount: num(row.Amount || row.amount),
+        budget: num(row.Budget || row.budget),
         quality: num(row.Quality || row.quality || 80),
         safety: num(row.Safety || row.safety || 0)
-      })).filter(row => row.projectName || row.amount || row.budget || row.date);
+      }));
     }
     function normaliseInvoices(raw){
       return raw.map(row => {
@@ -1228,12 +1220,7 @@
       return preferred.filter(r => !period || isDateInPeriod(r.date, period));
     }
     function projectRevenueForPeriod(project, period){
-      const matchedRows = getRevenueRowsForProject(project, period);
-      if (matchedRows.length) return matchedRows.reduce((s,r)=>s+r.amount,0);
-      return revenueData
-        .filter(r => sameText(r.projectName, project.project))
-        .filter(r => !period || isDateInPeriod(r.date, period))
-        .reduce((s,r)=>s+r.amount,0);
+      return getRevenueRowsForProject(project, period).reduce((s,r)=>s+r.amount,0);
     }
     function projectCashForPeriod(project, period){
       return invoiceData
@@ -1515,6 +1502,10 @@
       );
     }
 
+    function revenueSheetActualForPeriod(periodLabel, filters = {}){
+      return periodRevenueRows(periodLabel, filters).reduce((sum, row) => sum + num(row.amount), 0);
+    }
+
     function renderConnectionProgressBars(){
       const container = byId('connectionProgressBars');
       const activePeriod = state.period || 'Daily';
@@ -1525,7 +1516,7 @@
       }
       container.innerHTML = costCenters.map(name => {
         const filters = { costCenter:name, manager: state.manager, project: 'All' };
-        const actual = actualRevenueForPeriod(activePeriod, filters);
+        const actual = revenueSheetActualForPeriod(activePeriod, filters);
         const projectedTarget = sumProjectTargets(activePeriod, filters);
         const straightLineBudget = straightLineBudgetForPeriod(activePeriod, filters);
         const projectedAchievementPct = projectedPct(actual, projectedTarget);
@@ -1728,18 +1719,13 @@
       buildTable(byId('scorecardTable'), [{label:'Rank',class:'right'},{label:'PM'},{label:'Daily A',class:'right'},{label:'Daily T',class:'right'},{label:'Daily %',class:'right'},{label:'Weekly A',class:'right'},{label:'Weekly T',class:'right'},{label:'Weekly %',class:'right'},{label:'Monthly A',class:'right'},{label:'Monthly T',class:'right'},{label:'Monthly %',class:'right'},{label:'Quarter A',class:'right'},{label:'Quarter T',class:'right'},{label:'Quarter %',class:'right'},{label:'Year A',class:'right'},{label:'Year T',class:'right'},{label:'Year %',class:'right'},{label:'GP%',class:'right'},{label:'DDL',class:'right'},{label:'SFT',class:'right'},{label:'QLT',class:'right'},{label:'Cash',class:'right'},{label:'Acts',class:'right'},{label:'Overall',class:'right'}], pmBalancedScorecard.map(row => [cell('#'+row.rank,'right'),cell(row.name),cell(money(row.dailyActual),'right'),cell(money(row.dailyTarget),'right'),cell(badge(row.dailyScore+'%',statusTone(row.dailyScore)),'right'),cell(money(row.weeklyActual),'right'),cell(money(row.weeklyTarget),'right'),cell(badge(row.weeklyScore+'%',statusTone(row.weeklyScore)),'right'),cell(money(row.monthlyActual),'right'),cell(money(row.monthlyTarget),'right'),cell(badge(row.monthlyScore+'%',statusTone(row.monthlyScore)),'right'),cell(money(row.quarterlyActual),'right'),cell(money(row.quarterlyTarget),'right'),cell(badge(row.quarterlyScore+'%',statusTone(row.quarterlyScore)),'right'),cell(money(row.yearlyActual),'right'),cell(money(row.yearlyTarget),'right'),cell(badge(row.yearlyScore+'%',statusTone(row.yearlyScore)),'right'),cell(row.profitability+'%','right'),cell(row.deadlines+'%','right'),cell(row.safety+'%','right'),cell(row.quality+'%','right'),cell(money(row.cash),'right'),cell(String(row.actionCount),'right'),cell(badge(row.overallScore+'%',statusTone(row.overallScore)),'right')]));
 
       const actionLayer = filtered.map(project => {
-        const actualRevenue = revenueData
-          .filter(row => sameText(row.projectName, project.project))
-          .filter(row => !state.period || isDateInPeriod(row.date, state.period))
-          .filter(row => !project.pm || !row.manager || sameText(row.manager, project.pm))
-          .reduce((sum, row) => sum + num(row.amount), 0);
-        const fallbackRevenue = actualRevenue || projectRevenueForPeriod(project, state.period);
+        const actualRevenue = projectRevenueForPeriod(project, state.period);
         const projectKey = normalizeTextKey(project.project || '');
-        let targetRevenue = num(project['target'+state.period] || project['projected'+state.period] || project.projectedBudget || 0);
+        let targetRevenue = project['target'+state.period];
         if (state.period === 'Monthly' && PROJECT_TARGET_OVERRIDES[projectKey] != null) {
           targetRevenue = num(PROJECT_TARGET_OVERRIDES[projectKey]);
         }
-        return { ...project, periodRevenue:fallbackRevenue, periodTarget:targetRevenue, score:pct(fallbackRevenue,targetRevenue) };
+        return { ...project, periodRevenue:actualRevenue, periodTarget:targetRevenue, score:pct(actualRevenue,targetRevenue) };
       }).sort((a,b)=>b.periodRevenue-a.periodRevenue || b.score-a.score);
       buildTable(byId('projectPerfTable'), [{label:'Project'},{label:'Revenue',class:'right'},{label:'Projected Budget',class:'right'},{label:'Profit',class:'right'},{label:'Deadline',class:'right'},{label:'Quality',class:'right'}], actionLayer.map(item => [cell(`<div><div style="font-weight:600;">${item.project}</div><div class="muted" style="font-size:12px;">${item.division} • ${item.pm}</div></div>`),cell(money(item.periodRevenue),'right'),cell(money(item.periodTarget),'right'),cell(badge(item.gpPercent+'%',statusTone(item.gpPercent*4)),'right'),cell(badge(item.deadlineScore+'%',statusTone(item.deadlineScore)),'right'),cell(badge(item.qualityScore+'%',statusTone(item.qualityScore)),'right')]));
       buildTable(byId('actionTable'), [{label:'Project'},{label:'Owner'},{label:'Due'},{label:'Status',class:'right'},{label:'Recovery'}], actionLayer.map(item => [cell(`<div><div style="font-weight:600;">${item.project}</div><div class="muted" style="font-size:12px;">${item.pm} • ${item.client}</div></div>`),cell(item.actionOwner),cell(item.actionDue),cell(badge(item.actionStatus,actionTone(item.actionStatus)),'right'),cell(item.recovery)]));
