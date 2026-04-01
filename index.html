@@ -310,7 +310,7 @@
   </div>
 
   <script>
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwpNiZI4j9wDz86w6rjhkeU2rxbuH7x8ba7dV1_tu-kftdEGePKcx4o8q1aUocGgupDsw/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDwAW--0HDNkZ27Rg7Gt46-N2Ia8e5-LSUH_a9TNpIMvQUzmuR249rQ9HzScGCapPbmg/exec';
     const STORAGE_KEYS = { scriptUrl:'onpoint.scriptUrl', fallbackMode:'onpoint.fallbackMode', revenueBudgetMemory:'onpoint.revenueBudgetMemory', straightLineMemory:'onpoint.straightLineMemory', formDraft:'onpoint.formDraft' };
     const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
     const DIVISION_COLORS = ['#0f172a','#334155','#475569','#64748b','#94a3b8','#1e293b','#475569'];
@@ -1092,7 +1092,7 @@
         const managerValue = readField(row, ['Manager','manager','ProjectManager','projectManager','PM','pm','RecordedBy','recordedBy','B','b','ColumnB','columnB']);
         const costCenterValue = readField(row, ['CostCenter','costCenter','Cost Centre','CostCentre','Cost Center','Division','division','Department','department','C','c','ColumnC','columnC']);
         const projectValue = readField(row, ['ProjectName','projectName','Project Name','Project','project','D','d','ColumnD','columnD']);
-        const amountValue = readField(row, ['Amount','amount','ActualRevenue','actualRevenue','Actual Revenue','Revenue','revenue','Income','income','L','l','ColumnL','columnL']);
+        const amountValue = readField(row, ['Actuals','actuals','Amount','amount','ActualRevenue','actualRevenue','Actual Revenue','Revenue','revenue','Income','income','L','l','ColumnL','columnL']);
         const budgetValue = readField(row, ['Budget','budget','DailyBudget','dailyBudget','Daily Budget','Budget Revenue','BudgetRevenue','Target','target','F','f','ColumnF','columnF']);
         const qualityValue = readField(row, ['Quality','quality','Quality %','QualityPercent','qualityPercent','G','g','ColumnG','columnG']);
         const safetyValue = readField(row, ['Safety','safety','Safety Incidents','SafetyIncidents','safetyIncidents','H','h','ColumnH','columnH']);
@@ -1118,7 +1118,7 @@
         const explicitType = String(row.EntryType || row.entryType || row.Type || row.type || '').trim();
         const paymentReceived = String(row.PaymentReceived || row.paymentReceived).toLowerCase() === 'true';
         const type = explicitType || (paymentReceived ? 'Payment Received' : 'Invoice Issued');
-        const amount = num(row.Amount || row.amount || row.PaymentAmount || row.paymentAmount);
+        const amount = num(row.Actuals || row.actuals || row.Amount || row.amount || row.PaymentAmount || row.paymentAmount);
         return {
           date: normaliseDate(row.Date || row.date),
           manager,
@@ -1140,7 +1140,7 @@
         manager: row.ProjectManager || row['PROJECT MANAGER'] || row.Manager || row.manager || row.pm || '',
         costCenter: normalizeCostCenterName(row.CostCenter || row['COST CENTER'] || row.Division || row.division || ''),
         budget: num(row.Budget || row['BUDGET'] || row.MonthlyBudget || row['MONTHLY BUDGET']),
-        actual: num(row.Actual || row['ACTUAL'] || row.Amount || row['AMOUNT']),
+        actual: num(row.Actual || row['ACTUAL'] || row.Actuals || row['ACTUALS'] || row.Amount || row['AMOUNT']),
         variance: num(row.Variance || row['VARIANCE']),
         performancePct: num(row['% PERFOMANCE'] || row['% PERFORMANCE'] || row.Performance || row.performance || row.PerformancePct || row.performancePct)
       })).filter(row => row.manager || row.budget || row.actual);
@@ -1300,7 +1300,7 @@
         const cls = projectsResult.ok && revenueResult.ok ? 'b-green' : 'b-amber';
         const text = projectsResult.ok && revenueResult.ok ? 'Live Connected' : 'Partially Connected';
         setConnection(text, cls);
-        setStatusSummary(`Connection test finished.<br><br>Projects endpoint: ${projectsResult.ok ? 'OK' : 'Failed'} (${projectsResult.rows.length} rows)<br>Revenue endpoint: ${revenueResult.ok ? 'OK' : 'Failed'} (${revenueResult.rows.length} rows)`);
+        setStatusSummary(`Connection test finished.<br><br>Projects endpoint: ${projectsResult.ok ? 'OK' : 'Failed'} (${projectsResult.rows.length} rows)<br>Revenue endpoint: ${revenueResult.ok ? 'OK' : 'Failed'} (${revenueResult.rows.length} rows)<br>Actuals column: Revenue!Actuals<br>Projected / Straight-line source: Straightline sheet`);
         return true;
       } catch (error) {
         setConnection('Connection Failed', 'b-red');
@@ -1339,7 +1339,7 @@
         if (!invoicesResult.ok) warnings.push('Invoices failed.');
         if (!managerBudgetsResult.ok && !usingRevenueBudgetFallback) warnings.push('Manager budgets failed.');
         setConnection(warnings.length ? 'Partially Connected' : 'Live Connected', warnings.length ? 'b-amber' : 'b-green');
-        setStatusSummary(`Loaded live data.<br><br>Projects: ${projectsData.length}${usingRevenueProjectFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue rows: ${revenueData.length}<br>Invoice rows: ${invoiceData.length}<br>Manager budgets: ${managerBudgetData.length}${usingRevenueBudgetFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue source: ${revenueResult.ok ? 'Revenue sheet connected' : 'Revenue sheet failed'}<br>Projected Budget source: Budget column on Revenue sheet<br>Actuals source: Amount column on Revenue sheet<br>Fallback projects: ${usingRevenueProjectFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Fallback manager budgets: ${usingRevenueBudgetFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Last sync: ${new Date().toLocaleTimeString()}`);
+        setStatusSummary(`Loaded live data.<br><br>Projects: ${projectsData.length}${usingRevenueProjectFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue rows: ${revenueData.length}<br>Invoice rows: ${invoiceData.length}<br>Manager budgets: ${managerBudgetData.length}${usingRevenueBudgetFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue source: ${revenueResult.ok ? 'Revenue sheet connected' : 'Revenue sheet failed'}<br>Projected Budget source: Projected column on Straightline sheet<br>Actuals source: Actuals column on Revenue sheet<br>Fallback projects: ${usingRevenueProjectFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Fallback manager budgets: ${usingRevenueBudgetFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Last sync: ${new Date().toLocaleTimeString()}`);
         populateInputs(snapshot);
         render();
       } finally {
@@ -1738,7 +1738,7 @@
       const todayVariance = todayRevenue - comparisonTarget;
       const todayProfitability = profitabilityForRows(todayRows);
       byId('dailyRevenueSummary').innerHTML = [
-        { label:'Daily actuals', value:money(todayRevenue), note:'Sum of Amount values from Revenue sheet for today' },
+        { label:'Daily actuals', value:money(todayRevenue), note:'Sum of Actuals values from Revenue sheet for today' },
         { label:'Daily projected budget', value:money(todayTarget), note:'Sum of Budget values from Revenue sheet for today' },
         { label:'Straight-line budget', value:money(todayBudget), note:'From Projects sheet month-aligned straight-line budgets' },
         { label:'Daily variance', value:money(todayVariance), note:'Actual minus selected budget basis for today' },
