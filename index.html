@@ -310,7 +310,7 @@
   </div>
 
   <script>
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxDwAW--0HDNkZ27Rg7Gt46-N2Ia8e5-LSUH_a9TNpIMvQUzmuR249rQ9HzScGCapPbmg/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAKcYOZm9ZuZ8tbwoxMz4XoKEuMSfw23mURCJDghYKlQXyJbZ8jR_mXxaP_J0BX5qjtg/exec';
     const STORAGE_KEYS = { scriptUrl:'onpoint.scriptUrl', fallbackMode:'onpoint.fallbackMode', revenueBudgetMemory:'onpoint.revenueBudgetMemory', straightLineMemory:'onpoint.straightLineMemory', formDraft:'onpoint.formDraft' };
     const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
     const DIVISION_COLORS = ['#0f172a','#334155','#475569','#64748b','#94a3b8','#1e293b','#475569'];
@@ -1339,7 +1339,7 @@
         if (!invoicesResult.ok) warnings.push('Invoices failed.');
         if (!managerBudgetsResult.ok && !usingRevenueBudgetFallback) warnings.push('Manager budgets failed.');
         setConnection(warnings.length ? 'Partially Connected' : 'Live Connected', warnings.length ? 'b-amber' : 'b-green');
-        setStatusSummary(`Loaded live data.<br><br>Projects: ${projectsData.length}${usingRevenueProjectFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue rows: ${revenueData.length}<br>Invoice rows: ${invoiceData.length}<br>Manager budgets: ${managerBudgetData.length}${usingRevenueBudgetFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue source: ${revenueResult.ok ? 'Revenue sheet connected' : 'Revenue sheet failed'}<br>Projected Budget source: Projected column on Straightline sheet<br>Actuals source: Actuals column on Revenue sheet<br>Fallback projects: ${usingRevenueProjectFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Fallback manager budgets: ${usingRevenueBudgetFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Last sync: ${new Date().toLocaleTimeString()}`);
+        setStatusSummary(`Loaded live data.<br><br>Projects: ${projectsData.length}${usingRevenueProjectFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue rows: ${revenueData.length}<br>Invoice rows: ${invoiceData.length}<br>Manager budgets: ${managerBudgetData.length}${usingRevenueBudgetFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue source: ${revenueResult.ok ? 'Revenue sheet connected' : 'Revenue sheet failed'}<br>Projected Budget source: Projected column on Straightline sheet in the Revenue workbook<br>Actuals source: Actuals column E on Revenue sheet<br>Fallback projects: ${usingRevenueProjectFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Fallback manager budgets: ${usingRevenueBudgetFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Last sync: ${new Date().toLocaleTimeString()}`);
         populateInputs(snapshot);
         render();
       } finally {
@@ -1739,8 +1739,8 @@
       const todayProfitability = profitabilityForRows(todayRows);
       byId('dailyRevenueSummary').innerHTML = [
         { label:'Daily actuals', value:money(todayRevenue), note:'Sum of Actuals values from Revenue sheet for today' },
-        { label:'Daily projected budget', value:money(todayTarget), note:'Sum of Budget values from Revenue sheet for today' },
-        { label:'Straight-line budget', value:money(todayBudget), note:'From Projects sheet month-aligned straight-line budgets' },
+        { label:'Daily projected budget', value:money(todayTarget), note:'Sum of Projected values from Straightline sheet for today or matching month' },
+        { label:'Straight-line budget', value:money(todayBudget), note:'From Straightline sheet using Straightline Budget values' },
         { label:'Daily variance', value:money(todayVariance), note:'Actual minus selected budget basis for today' },
         { label:'Daily profitability %', value:todayProfitability + '%', note:'Weighted from project margin % set per project' }
       ].map(item => `<div class="mini-stat"><div class="label">${item.label}</div><div class="value">${item.value}</div><div class="muted" style="margin-top:6px;">${item.note}</div></div>`).join('');
@@ -1792,7 +1792,8 @@
       const confirmedTotal = scopedProjects.filter(p => String(p.status).toLowerCase() === 'confirmed').reduce((s,p) => s + p.totalIncome, 0);
       const forecastTotal = scopedProjects.filter(p => String(p.status).toLowerCase() === 'forecast').reduce((s,p) => s + p.totalIncome, 0);
       const totalOrderBook = confirmedTotal + forecastTotal;
-      const ytd = periodSummaries['Yearly'].actual;
+      const groupYtdRows = periodRevenueRows('Yearly', { costCenter:'All', manager:'All', project:'All' }).filter(row => rowMatchesQuery(row, state.query));
+      const ytd = groupYtdRows.reduce((sum, row) => sum + num(row.amount), 0);
       const btye = Math.max(0, confirmedTotal - ytd);
       const mtd = periodSummaries['Monthly'].actual;
       const dailyRows = periodSummaries['Daily'].rows;
@@ -1804,7 +1805,7 @@
         { title:'Total Forecast', value:money(forecastTotal), sub:'All forecast from Projects' },
         { title:'Total Order Book', value:money(totalOrderBook), sub:'Confirmed + forecast' },
         { title:'MTD Actual', value:money(mtd), sub:'This month actual revenue' },
-        { title:'Group YTD', value:money(ytd), sub:'Year-to-date revenue' },
+        { title:'Group YTD', value:money(ytd), sub:'Year-to-date Actuals from Revenue sheet' },
         { title:'Group BTYE', value:money(btye), sub:'Total Confirmed - Group YTD' }
       ].map(kpi => `<div class="kpi"><div class="kpi-title">${kpi.title}</div><div class="kpi-value">${kpi.value}</div><div class="kpi-sub">${kpi.sub}</div></div>`).join('');
 
