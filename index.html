@@ -310,7 +310,7 @@
   </div>
 
   <script>
-    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzTd1uGCY6QJnzHfJEexcgF_STffAatDAF3niBa5vE28U3bZFr4m4g7OkMHGPg6TtZo7Q/exec';
+    const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxEzFzI7W6PgBRAKa5B2DEsYloZWdpebCV8x2I81vxlmULKSekvPJsvb3tuerwpGPqG/exec';
     const STORAGE_KEYS = { scriptUrl:'onpoint.scriptUrl', fallbackMode:'onpoint.fallbackMode', revenueBudgetMemory:'onpoint.revenueBudgetMemory', straightLineMemory:'onpoint.straightLineMemory', formDraft:'onpoint.formDraft' };
     const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
     const DIVISION_COLORS = ['#0f172a','#334155','#475569','#64748b','#94a3b8','#1e293b','#475569'];
@@ -1358,7 +1358,7 @@
         const cls = projectsResult.ok && revenueResult.ok ? 'b-green' : 'b-amber';
         const text = projectsResult.ok && revenueResult.ok ? 'Live Connected' : 'Partially Connected';
         setConnection(text, cls);
-        setStatusSummary(`Connection test finished.<br><br>Projects endpoint: ${projectsResult.ok ? 'OK' : 'Failed'} (${projectsResult.rows.length} rows)<br>Revenue endpoint: ${revenueResult.ok ? 'OK' : 'Failed'} (${revenueResult.rows.length} rows)<br>Actuals column: Revenue!Actuals<br>Projected column: Straightline!Projected<br>Straight-line Budget column: Straightline!Straightline Budget`);
+        setStatusSummary(`Connection test finished.<br><br>Projects endpoint: ${projectsResult.ok ? 'OK' : 'Failed'} (${projectsResult.rows.length} rows)<br>Revenue endpoint: ${revenueResult.ok ? 'OK' : 'Failed'} (${revenueResult.rows.length} rows)<br>Actuals column: Revenue!Actuals<br>Projected column: Revenue!Budget<br>Straight-line Budget column: Straightline!Straightline Budget`);
         return true;
       } catch (error) {
         setConnection('Connection Failed', 'b-red');
@@ -1397,7 +1397,7 @@
         if (!invoicesResult.ok) warnings.push('Invoices failed.');
         if (!managerBudgetsResult.ok && !usingRevenueBudgetFallback) warnings.push('Manager budgets failed.');
         setConnection(warnings.length ? 'Partially Connected' : 'Live Connected', warnings.length ? 'b-amber' : 'b-green');
-        setStatusSummary(`Loaded live data.<br><br>Projects: ${projectsData.length}${usingRevenueProjectFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue rows: ${revenueData.length}<br>Invoice rows: ${invoiceData.length}<br>Manager budgets: ${managerBudgetData.length}${usingRevenueBudgetFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue source: ${revenueResult.ok ? 'Revenue sheet connected' : 'Revenue sheet failed'}<br>Projected Budget source: Straightline!Projected<br>Straight-line Budget source: Straightline!Straightline Budget<br>Actuals source: Revenue!Actuals<br>Fallback projects: ${usingRevenueProjectFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Fallback manager budgets: ${usingRevenueBudgetFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Last sync: ${new Date().toLocaleTimeString()}`);
+        setStatusSummary(`Loaded live data.<br><br>Projects: ${projectsData.length}${usingRevenueProjectFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue rows: ${revenueData.length}<br>Invoice rows: ${invoiceData.length}<br>Manager budgets: ${managerBudgetData.length}${usingRevenueBudgetFallback ? ' (derived from Revenue sheet)' : ''}<br>Revenue source: ${revenueResult.ok ? 'Revenue sheet connected' : 'Revenue sheet failed'}<br>Projected Budget source: Revenue!Budget<br>Straight-line Budget source: Projects workbook Straightline month columns (e.g. Mar26)<br>Actuals source: Revenue!Actuals<br>Fallback projects: ${usingRevenueProjectFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Fallback manager budgets: ${usingRevenueBudgetFallback ? 'Enabled from Revenue sheet' : 'Not needed'}<br>Last sync: ${new Date().toLocaleTimeString()}`);
         populateInputs(snapshot);
         render();
       } finally {
