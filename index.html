@@ -174,7 +174,7 @@
   </div>
 
 <script>
-const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbya4pFbdZYDEYgz_exysfGaMeX8ffjmTRiBtsEkY9-xGKYo1CvErv6Zd1PnIETs-3-jEg/exec';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyj0catmUmIH6-WPINk24avuzguPwTtT1wxcIFfm7Br5xPE21hsuMOv7WbYLo1884Qw/exec';
 const SCRIPT_URL_KEY = 'onpoint_dashboard_script_url';
 const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
 const DEFAULT_COST_CENTERS = ['Onpoint Ontime','Aqua Telecoms','Nkanyezi','Distinct Hire'];
@@ -193,11 +193,49 @@ function clearScriptUrl(){ localStorage.removeItem(SCRIPT_URL_KEY); $('scriptUrl
 function ensureScriptUrl(){ const url = getScriptUrl(); if(!url) throw new Error('Paste your deployed Apps Script /exec URL into the URL box, then click Save URL.'); if(!/\/exec(\?|$)/.test(url)) throw new Error('Use the Apps Script /exec URL, not /dev.'); return url; }
 function setConn(txt, cls){ $('connBadge').className = `badge ${cls}`; $('connBadge').textContent = txt; }
 function showToast(message, type='success'){ const wrap=$('toastWrap'); if(!wrap) return; const el=document.createElement('div'); el.className=`toast ${type}`; el.textContent=message; wrap.appendChild(el); setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),250); }, 2800); }
-function getFetchOptions(method='GET', payload, signal){ const opt = { method, headers:{}, signal }; if (method === 'POST') { opt.headers['Content-Type']='text/plain;charset=utf-8'; opt.body = JSON.stringify(payload || {}); } return opt; }
-async function parseJsonResponse(resp){ const txt = await resp.text(); if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${txt.slice(0,200)}`); try { return JSON.parse(txt); } catch { throw new Error(`Non-JSON response: ${txt.slice(0,200)}`); } }
-async function withTimeoutFetch(url, options={}, timeoutMs=45000){ const controller = new AbortController(); const timer = setTimeout(()=>controller.abort(), timeoutMs); try { return await fetch(url, Object.assign({}, options, { signal: controller.signal })); } catch (e) { if (e.name === 'AbortError') throw new Error('Request timed out'); throw e; } finally { clearTimeout(timer); } }
-async function fetchAction(action){ const base = ensureScriptUrl(); const url = `${base}?action=${encodeURIComponent(action)}&_=${Date.now()}`; log('GET', url); const resp = await withTimeoutFetch(url, getFetchOptions('GET'), 45000); const payload = await parseJsonResponse(resp); if (payload && payload.success === false) throw new Error(payload.error || `Failed to load ${action}`); return Array.isArray(payload) ? payload : (payload.rows || payload.data || []); }
-async function postAction(payload){ const base = ensureScriptUrl(); log('POST', payload.action, payload); const resp = await withTimeoutFetch(base, getFetchOptions('POST', payload), 45000); const data = await parseJsonResponse(resp); if (data && data.success === false) throw new Error(data.error || `Failed to ${payload.action}`); return data; }
+
+function jsonpRequest(params){
+  return new Promise((resolve, reject) => {
+    const base = ensureScriptUrl();
+    const callbackName = '__onpoint_jsonp_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    const q = new URLSearchParams(Object.assign({}, params, { callback: callbackName, _: Date.now() }));
+    const url = `${base}?${q.toString()}`;
+    let cleaned = false;
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      try { delete window[callbackName]; } catch(e) { window[callbackName] = undefined; }
+      if (script.parentNode) script.parentNode.removeChild(script);
+    };
+    const timer = setTimeout(() => {
+      cleanup();
+      reject(new Error('Request timed out or was blocked. Check Apps Script deployment and use the /exec URL.'));
+    }, 45000);
+    window[callbackName] = (payload) => {
+      clearTimeout(timer);
+      cleanup();
+      if (payload && payload.success === false) reject(new Error(payload.error || 'Apps Script returned an error.'));
+      else resolve(payload);
+    };
+    script.onerror = () => {
+      clearTimeout(timer);
+      cleanup();
+      reject(new Error('Browser blocked the request or Apps Script URL is not reachable.'));
+    };
+    script.src = url;
+    document.body.appendChild(script);
+    log('JSONP', url);
+  });
+}
+async function fetchAction(action){
+  const payload = await jsonpRequest({ action });
+  return Array.isArray(payload) ? payload : (payload.rows || payload.data || []);
+}
+async function postAction(payload){
+  return await jsonpRequest(payload || {});
+}
+`); return data; }
 function normaliseDate(v){ if (!v) return ''; const s = String(v); const m = s.match(/^(\d{4}-\d{2}-\d{2})/); if (m) return m[1]; const d = new Date(v); if (isNaN(d)) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function normalizeCostCenterName(v){ const s = lower(v).replace(/[^a-z0-9]/g,''); const map = { onpoint:'Onpoint Ontime', onpointontime:'Onpoint Ontime', onpointgrouphq:'Onpoint Ontime', aquatelecoms:'Aqua Telecoms', nkanyezi:'Nkanyezi', nkanyeziprojects:'Nkanyezi', distincthire:'Distinct Hire' }; return map[s] || text(v); }
 function daysInMonth(dateStr){ const d = dateStr ? new Date(`${normaliseDate(dateStr)}T00:00:00`) : new Date(); return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); }
@@ -266,7 +304,7 @@ function renderProjectsTables(){ buildTable($('projectsTable'), [{label:'Created
 function renderInvoiceTables(){ buildTable($('invoicesTable'), [{label:'Date'},{label:'Manager'},{label:'ProjectName'},{label:'InvoiceNumber'},{label:'Amount',class:'right'},{label:'Paid'},{label:'PaymentDate'},{label:'CostCenter'}], filteredInvoices().slice().sort((a,b)=>normaliseDate(b.Date).localeCompare(normaliseDate(a.Date))).map(r => [escapeHtml(normaliseDate(r.Date)), escapeHtml(r.Manager), escapeHtml(r.ProjectName), escapeHtml(r.InvoiceNumber), money(r.Amount), `<span class="badge ${r.PaymentReceived?'ok':'warn'}">${r.PaymentReceived?'Yes':'No'}</span>`, escapeHtml(normaliseDate(r.PaymentDate)), escapeHtml(normalizeCostCenterName(r.CostCenter))])); }
 function renderCostCenterTables(){ const rows = costCenterPeriodRows(state.filters.period); buildTable($('costCenterTable'), [{label:'Cost Center'},{label:'Actual',class:'right'},{label:'Projected',class:'right'},{label:'Straight-line',class:'right'},{label:'Actual vs Projected %',class:'right'},{label:'Actual vs Straight-line %',class:'right'}], rows.map(r => { const p = r.Projected ? Math.round((r.Actual/r.Projected)*100) : 0; const s = r.Straightline ? Math.round((r.Actual/r.Straightline)*100) : 0; return [escapeHtml(r.CostCenter), money(r.Actual), money(r.Projected), money(r.Straightline), `<span class="badge ${perfBadgeClass(p)}">${p}%</span>`, `<span class="badge ${perfBadgeClass(s)}">${s}%</span>`]; })); buildTable($('managerTable'), [{label:'Manager'},{label:'Actual',class:'right'},{label:'Projected',class:'right'},{label:'Straight-line',class:'right'},{label:'Actual vs Projected %',class:'right'},{label:'Actual vs Straight-line %',class:'right'}], managerPerformanceRows(state.filters.period).map(r => [escapeHtml(r.Manager), money(r.Actual), money(r.Projected), money(r.Straightline), `<span class="badge ${perfBadgeClass(r.ActualVsProjectedPct)}">${r.ActualVsProjectedPct}%</span>`, `<span class="badge ${perfBadgeClass(r.ActualVsStraightPct)}">${r.ActualVsStraightPct}%</span>`])); }
 function renderAll(){ populateFilters(); renderHeadlineKpis(); renderProgressCards(); renderExecutiveDashboard(); renderRevenueTables(); renderProjectsTables(); renderInvoiceTables(); renderCostCenterTables(); }
-async function testConnection(){ try { const rows = await fetchAction('ping'); setConn('Connected','ok'); showToast('Connection successful','success'); log('PING OK', rows); } catch (e) { setConn('Connection failed','bad'); showToast(e.message || 'Connection failed','error'); log('PING ERROR', e.message || String(e)); } }
+async function testConnection(){ try { const rows = await jsonpRequest({action:'ping'}); setConn('Connected','ok'); showToast('Connection successful','success'); log('PING OK', rows); } catch (e) { setConn('Connection failed','bad'); showToast(e.message || 'Connection failed','error'); log('PING ERROR', e.message || String(e)); } }
 async function saveRevenue(){ try { const payload = { action:'addRevenue', date:$('revDate').value, manager:$('revManager').value, costCenter:$('revCostCenter').value, projectName:$('revProjectName').value, amount:$('revAmount').value, budget:$('revBudget').value, quality:$('revQuality').value, safety:$('revSafety').value }; await postAction(payload); showToast('Daily revenue saved','success'); await loadAll(); } catch (e) { showToast(e.message || 'Save failed','error'); log('SAVE REVENUE ERROR', e.message || String(e)); } }
 async function saveProject(){ try { const payload = { action:'addProject', createdAt:$('projCreatedAt').value, division:$('projDivision').value, manager:$('projManager').value, projectName:$('projName').value, location:$('projLocation').value, status:$('projStatus').value, totalIncome:$('projIncome').value, margin:$('projMargin').value, startDate:$('projStartDate').value, endDate:$('projEndDate').value, remarks:$('projRemarks').value }; await postAction(payload); showToast('Project saved','success'); await loadAll(); } catch (e) { showToast(e.message || 'Save failed','error'); log('SAVE PROJECT ERROR', e.message || String(e)); } }
 async function saveInvoice(){ try { const payload = { action:'addInvoice', date:$('invDate').value, manager:$('invManager').value, projectName:$('invProjectName').value, invoiceNumber:$('invNumber').value, amount:$('invAmount').value, paymentReceived:$('invPaid').value === 'true', paymentDate:$('invPaymentDate').value, costCenter:$('invCostCenter').value, notes:$('invNotes').value }; await postAction(payload); showToast('Invoice saved','success'); await loadAll(); } catch (e) { showToast(e.message || 'Save failed','error'); log('SAVE INVOICE ERROR', e.message || String(e)); } }
