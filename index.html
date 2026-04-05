@@ -42,7 +42,7 @@
     <div class="card hero">
       <div>
         <h2 style="margin:0 0 8px">Live Google Sheets dashboard</h2>
-        <div class="muted">Actual is read from Revenue sheet column <strong>E / Actuals</strong>. Revenue projected per period is read from Revenue column <strong>F / Projected Budget</strong>. Straight-line Budget is read from the <strong>Straightline</strong> sheet and scaled by the selected period. Total Confirmed, Total Forecast, Total Orders, MTD, Group YTD and Group BTYE are read from the Orders sheet.</div>
+        <div class="muted">Total Confirmed and Total Forecast are read from spreadsheet <strong>1y6g1PYRPlRxhL5br9hKmy8aBQ7V50j0r</strong>, tab <strong>Projects Input</strong>, using the <strong>Status</strong> column. Straight-line Budget is read from spreadsheet <strong>1BjnvNUGxXSEUPyv2vuAa0yiwGRE5bea4Ah0kUctseqs</strong>, tab <strong>Straightline</strong>. Daily Revenue input, MTD, Group YTD and period revenue totals are read from spreadsheet <strong>1wl599p4871pR2tOZmIuq44pdDy6N2PggKrmMrfD8wv0</strong>, tab <strong>Revenue</strong>.</div>
         <div class="urlbox">
           <input id="scriptUrlInput" placeholder="Paste your Apps Script /exec URL here" />
           <button id="saveUrlBtn" type="button">Save URL</button>
@@ -174,7 +174,7 @@
   </div>
 
 <script>
-const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxlGlpBaLUEncyJMwWhrHl2_7qk8ue1sg_4N5G0F9lp0EsaiQdySv0jTv7tvpVWHa7F/exec';
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwor8fO815JsULsmLkQjvS-XN2SGvQlJ5LFJzUt5xDL2YtKw5Ny4v0NF8IatKfqhYkl/exec';
 const SCRIPT_URL_KEY = 'onpoint_dashboard_script_url';
 const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
 const DEFAULT_COST_CENTERS = ['Onpoint Ontime','Aqua Telecoms','Nkanyezi','Distinct Hire'];
