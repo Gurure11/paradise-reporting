@@ -238,7 +238,8 @@
   </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs778OhAlOxj01IZbZSSmYDyCwOUCLfOIVbOkVldBUY-hiKi_SGuMdiKfs3KjbwG9R/exec';
+const MAIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzcLigJ_ZS6FqntLKf1vGWHy7IFiMSSS2Y4TS782umIEUDAjhLuRSxZKlGlewXXp_NZ/exec';
+const PAYMENT_SCRIPT_URL = localStorage.getItem('ONPOINT_PAYMENT_SCRIPT_URL') || MAIN_SCRIPT_URL;
 const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
 const DEFAULT_COST_CENTERS = ['Onpoint Ontime','Aqua Telecoms','Nkanyezi','Distinct Hire'];
 const DEFAULT_PROJECT_OPTIONS = ['COT Metering', 'COE Streetlights', 'Msunduzi E50', 'Msunduzi Streetlights', 'Msunduzi E33', 'Msunduzi E47', 'Moqhaka Streetlights', 'Moqhaka Metering', 'Centlec CD11', 'Centlec Transformers CD32', 'Centlec CD45', 'Midvaal Mechanical', 'Eskom SPU', 'Eskom FSOU Substation', 'Eskom ECOU', 'Eskom LOU General Buildings', 'Eskom KZN Minor Reticulation', 'Randwest Electrical', 'Randwest Roads & Stormwater', 'Randwest Water rand sanitation', 'Randwest Bulk', 'RAL', 'Stellenbosh', 'Liquid ECPG', 'Liquid ECSOD', 'Liquid Gauteng SOD', 'Telkom', 'MTN', 'Centlec', 'Eskom Harvard', 'City Power', 'Umhlathuze Municipality', 'Eskom WC', 'COE Buildings', 'Midvaal Water', 'Midvaal Electricity', 'Uthukela', 'Kgetleng River', 'Ray Nkonyeni Facility', 'Ray Nkonyeni Electrical Material', 'Ray Nkonyeni Mast', 'Ray Nkonyeni Meter Reading', 'Ramotshere Electrical Supplies', 'Newcastle Substations', 'Ubuntu', 'IDT North West Buidlings', 'Amajuba Generator', 'uPhongolo', 'Abaquilisi Battery Supplies', 'Abaquilisi Streetlights'];
@@ -319,8 +320,26 @@ function showToast(message, type='success'){ const wrap=$('toastWrap'); if(!wrap
 function getFetchOptions(method='GET', payload, signal){ const opt = { method, headers:{}, signal }; if (method === 'POST') { opt.headers['Content-Type']='text/plain;charset=utf-8'; opt.body = JSON.stringify(payload || {}); } return opt; }
 async function parseJsonResponse(resp){ const txt = await resp.text(); if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${txt.slice(0,200)}`); try { return JSON.parse(txt); } catch { throw new Error(`Non-JSON response: ${txt.slice(0,200)}`); } }
 async function withTimeoutFetch(url, options={}, timeoutMs=45000){ const controller = new AbortController(); const timer = setTimeout(()=>controller.abort(), timeoutMs); try { return await fetch(url, Object.assign({}, options, { signal: controller.signal })); } catch (e) { if (e.name === 'AbortError') throw new Error('Request timed out'); throw e; } finally { clearTimeout(timer); } }
-async function fetchAction(action){ const url = `${SCRIPT_URL}?action=${encodeURIComponent(action)}&_=${Date.now()}`; log('GET', url); const resp = await withTimeoutFetch(url, getFetchOptions('GET'), 45000); const payload = await parseJsonResponse(resp); if (payload && payload.success === false) throw new Error(payload.error || `Failed to load ${action}`); return Array.isArray(payload) ? payload : (payload.rows || payload.data || []); }
-async function postAction(payload){ log('POST', payload.action, payload); const resp = await withTimeoutFetch(SCRIPT_URL, getFetchOptions('POST', payload), 45000); const data = await parseJsonResponse(resp); if (data && data.success === false) throw new Error(data.error || `Failed to ${payload.action}`); return data; }
+function scriptUrlForAction(action){
+  return action === 'addPayment' ? PAYMENT_SCRIPT_URL : MAIN_SCRIPT_URL;
+}
+async function fetchAction(action){
+  const url = `${scriptUrlForAction(action)}?action=${encodeURIComponent(action)}&_=${Date.now()}`;
+  log('GET', url);
+  const resp = await withTimeoutFetch(url, getFetchOptions('GET'), 45000);
+  const payload = await parseJsonResponse(resp);
+  if (payload && payload.success === false) throw new Error(payload.error || `Failed to load ${action}`);
+  return Array.isArray(payload) ? payload : (payload.rows || payload.data || []);
+}
+async function postAction(payload){
+  const action = payload && payload.action ? payload.action : '';
+  const url = scriptUrlForAction(action);
+  log('POST', action, url, payload);
+  const resp = await withTimeoutFetch(url, getFetchOptions('POST', payload), 45000);
+  const data = await parseJsonResponse(resp);
+  if (data && data.success === false) throw new Error(data.error || `Failed to ${action}`);
+  return data;
+}
 function normaliseDate(v){ if (!v) return ''; const s = String(v); const m = s.match(/^(\d{4}-\d{2}-\d{2})/); if (m) return m[1]; const d = new Date(v); if (isNaN(d)) return ''; return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function normalizeCostCenterName(v){ const s = lower(v).replace(/[^a-z0-9]/g,''); const map = { onpoint:'Onpoint Ontime', onpointontime:'Onpoint Ontime', onpointgrouphq:'Onpoint Ontime', aquatelecoms:'Aqua Telecoms', nkanyezi:'Nkanyezi', nkanyeziprojects:'Nkanyezi', distincthire:'Distinct Hire' }; return map[s] || text(v); }
 function daysInMonth(dateStr){ const d = dateStr ? new Date(`${normaliseDate(dateStr)}T00:00:00`) : new Date(); return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate(); }
@@ -1129,7 +1148,8 @@ ${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loadi
 async function savePayment(){ const payload = { action:'addPayment', date:$('payDate').value || todayISO(), manager:$('payManager').value, projectName:$('payProjectName').value, invoiceNumber:$('payInvoiceNumber').value, amount:num($('payAmount').value), paymentReceived:true, paymentDate:$('payDate').value || todayISO(), costCenter:$('payCostCenter').value, notes:$('payNotes').value, entryType:'Payment', createdAt:new Date().toISOString() }; if (!payload.projectName || !payload.invoiceNumber || payload.amount <= 0) return alert('Complete the payment received fields first.'); const btn=$('savePaymentBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising.'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); $('payInvoiceNumber').value=''; $('payAmount').value=''; $('payNotes').value=''; showToast(res.message || 'Payment received has been successfully saved','success'); alert(res.message || 'Payment received has been successfully saved'); } catch (e) { showToast(`Payment received was not saved: ${e.message}`,'error'); alert(`Payment received was not saved.
 
 ${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
-function init(){ bindTabs(); wireFilters(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('savePaymentBtn').onclick = savePayment; $('projSpreadMode').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); else updateProjectTotalFromMonths(); }); $('projIncome').addEventListener('input', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); $('projStartDate').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); $('projEndDate').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); PROJECT_MONTH_IDS.forEach(id => { if($(id)) $(id).addEventListener('input', updateProjectTotalFromMonths); }); $('revDate').value = $('projCreatedAt').value = $('invDate').value = $('payDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
+function init(){
+  log('Configured script URLs', { MAIN_SCRIPT_URL, PAYMENT_SCRIPT_URL }); bindTabs(); wireFilters(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('savePaymentBtn').onclick = savePayment; $('projSpreadMode').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); else updateProjectTotalFromMonths(); }); $('projIncome').addEventListener('input', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); $('projStartDate').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); $('projEndDate').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); PROJECT_MONTH_IDS.forEach(id => { if($(id)) $(id).addEventListener('input', updateProjectTotalFromMonths); }); $('revDate').value = $('projCreatedAt').value = $('invDate').value = $('payDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
