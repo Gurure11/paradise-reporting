@@ -134,8 +134,8 @@
         <div class="card"><h3 style="margin-top:0">Selected period totals</h3><div class="chart-compact"><canvas id="performanceSelectedTotalsChart" height="140"></canvas></div></div>
       </div>
       <div class="grid two section-gap">
-        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Projected</h3><div class="chart-compact"><canvas id="pmActualProjectedChart" height="140"></canvas></div></div>
-        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Straight-line</h3><div class="chart-compact"><canvas id="pmActualStraightlineChart" height="140"></canvas></div></div>
+        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Projected</h3><div class="chart-compact" style="height:420px;max-height:420px;"><canvas id="pmActualProjectedChart" height="380"></canvas></div></div>
+        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Straight-line</h3><div class="chart-compact" style="height:420px;max-height:420px;"><canvas id="pmActualStraightlineChart" height="380"></canvas></div></div>
       </div>
       <div class="grid two section-gap">
         <div class="card"><h3 style="margin-top:0">Performance by cost center</h3><div class="table-wrap"><table id="performanceCostCenterTable"></table></div></div>
@@ -153,7 +153,7 @@
           <div class="field span-3"><label>Cost Center</label><select id="revCostCenter"></select></div>
           <div class="field span-4"><label>Project Name</label><select id="revProjectName"></select></div>
           <div class="field span-2"><label>Amount</label><input id="revAmount" type="number" min="0" step="0.01"></div>
-          <div class="field span-2"><label>Budget</label><input id="revBudget" type="number" min="0" step="0.01"></div>
+          <div class="field span-2"><label>Daily Budget</label><input id="revBudget" type="number" min="0" step="0.01"></div>
           <div class="field span-2"><label>Quality</label><input id="revQuality" type="number" min="0" max="100" value="80"></div>
           <div class="field span-2"><label>Safety</label><input id="revSafety" type="number" min="0" value="0"></div>
           <div class="field span-12"><button id="saveRevenueBtn" type="button">Save Daily Revenue</button></div>
@@ -174,6 +174,7 @@
           <div class="field span-3"><label>Location</label><input id="projLocation"></div>
           <div class="field span-2"><label>Status</label><select id="projStatus"><option>Confirmed</option><option>Forecast</option></select></div>
           <div class="field span-2"><label>TotalIncome</label><input id="projIncome" type="number" min="0" step="0.01"></div>
+          <div class="field span-2"><label>Monthly Budget</label><input id="projMonthlyBudget" type="number" min="0" step="0.01"></div>
           <div class="field span-2"><label>Margin</label><input id="projMargin" type="number" min="0" step="0.01"></div>
           <div class="field span-2"><label>StartDate</label><input id="projStartDate" type="date"></div>
           <div class="field span-2"><label>EndDate</label><input id="projEndDate" type="date"></div>
@@ -207,9 +208,10 @@
   </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdNgO5t6aoCrGaHE4HFToElhd_iyIV6BQUEkK7F7oRq6YFlO8NSa0y5ESLUAR4r5Kq9w/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyK2EH7LTsfGo-LGgV5izwlPDYtE7h-bj49jkCPr4ugKZQOIRY3EcSh1M4NeJggcTil/exec';
 const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
 const DEFAULT_COST_CENTERS = ['Onpoint Ontime','Aqua Telecoms','Nkanyezi','Distinct Hire'];
+const DEFAULT_PROJECT_OPTIONS = ['COT Metering', 'COE Streetlights', 'Msunduzi E50', 'Msunduzi Streetlights', 'Msunduzi E33', 'Msunduzi E47', 'Moqhaka Streetlights', 'Moqhaka Metering', 'Centlec CD11', 'Centlec Transformers CD32', 'Centlec CD45', 'Midvaal Mechanical', 'Eskom SPU', 'Eskom FSOU Substation', 'Eskom ECOU', 'Eskom LOU General Buildings', 'Eskom KZN Minor Reticulation', 'Randwest Electrical', 'Randwest Roads & Stormwater', 'Randwest Water rand sanitation', 'Randwest Bulk', 'RAL', 'Stellenbosh', 'Liquid ECPG', 'Liquid ECSOD', 'Liquid Gauteng SOD', 'Telkom', 'MTN', 'Centlec', 'Eskom Harvard', 'City Power', 'Umhlathuze Municipality', 'Eskom WC', 'COE Buildings', 'Midvaal Water', 'Midvaal Electricity', 'Uthukela', 'Kgetleng River', 'Ray Nkonyeni Facility', 'Ray Nkonyeni Electrical Material', 'Ray Nkonyeni Mast', 'Ray Nkonyeni Meter Reading', 'Ramotshere Electrical Supplies', 'Newcastle Substations', 'Ubuntu', 'IDT North West Buidlings', 'Amajuba Generator', 'uPhongolo', 'Abaquilisi Battery Supplies', 'Abaquilisi Streetlights'];
 const state = { projects:[], revenue:[], invoices:[], managerBudgets:[], orders:[], straightline:[], filters:{ period:'Monthly', division:'All', manager:'All', search:'' } }; let charts = {};
 const $ = id => document.getElementById(id);
 const log = (...args) => { const msg = args.map(v => typeof v === 'string' ? v : JSON.stringify(v,null,2)).join(' '); $('diagnostics').textContent = `${new Date().toLocaleString()}\n${msg}\n\n` + $('diagnostics').textContent; };
@@ -219,6 +221,22 @@ const text = v => String(v ?? '').trim();
 const lower = v => text(v).toLowerCase();
 const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const todayISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+const budgetKeyForProject = project => `onpoint_daily_budget_${String(project || '').trim()}`;
+function saveDailyBudgetForProject(project, budget){
+  const p = String(project || '').trim();
+  if(!p) return;
+  localStorage.setItem(budgetKeyForProject(p), String(budget ?? ''));
+}
+function getDailyBudgetForProject(project){
+  const p = String(project || '').trim();
+  if(!p) return '';
+  return localStorage.getItem(budgetKeyForProject(p)) || '';
+}
+function applyRememberedDailyBudget(){
+  const project = $('revProjectName') ? $('revProjectName').value : '';
+  const remembered = getDailyBudgetForProject(project);
+  if (remembered !== '' && $('revBudget')) $('revBudget').value = remembered;
+}
 const rowVal = (r, i) => Array.isArray(r) ? r[i] : (r && (r[i] ?? r[String(i)]));
 const isDateLike = v => !!normaliseDate(v);
 const isKnownCostCenterLike = v => {
@@ -296,6 +314,25 @@ function filteredOrders(period = state.filters.period){
 function filteredInvoices(period = state.filters.period){ return state.invoices.filter(r => { if (!inPeriod(r.Date, period)) return false; if (state.filters.division !== 'All' && normalizeCostCenterName(r.CostCenter || r.Division) !== state.filters.division) return false; if (state.filters.manager !== 'All' && text(r.Manager) !== state.filters.manager) return false; if (state.filters.search && !`${r.ProjectName} ${r.Manager} ${r.CostCenter}`.toLowerCase().includes(state.filters.search.toLowerCase())) return false; return true; }); }
 function filteredStraightline(period = state.filters.period){ return state.straightline.filter(r => { const hasDate = !!normaliseDate(r.Date); if (hasDate && !inPeriod(r.Date, period)) return false; if (state.filters.division !== 'All' && normalizeCostCenterName(r.CostCenter || r.Division) !== state.filters.division) return false; if (state.filters.manager !== 'All' && text(r.Manager) !== state.filters.manager) return false; if (state.filters.search && !`${r.ProjectName} ${r.Manager} ${r.CostCenter}`.toLowerCase().includes(state.filters.search.toLowerCase())) return false; return true; }); }
 function projectMargin(projectName, manager=''){ const match = state.projects.find(p => lower(p.ProjectName)===lower(projectName) && (!manager || lower(p.Manager)===lower(manager))) || state.projects.find(p => lower(p.ProjectName)===lower(projectName)); return num(match ? match.Margin : 0); }
+function revenueActualForChart(r){ return num((r && (r.Actuals ?? r['Actuals'] ?? r.Amount ?? r['Amount'])) ?? 0); }
+function revenueBudgetForChart(r){ return num((r && (r.Budget ?? r['Budget'] ?? r['Projected Budget'] ?? r.ProjectedBudget)) ?? 0); }
+function chartRevenueRows(period){
+  return state.revenue.filter(r => {
+    if (!inPeriod(r.Date, period)) return false;
+    if (state.filters.division !== 'All' && normalizeCostCenterName(r.CostCenter) !== state.filters.division) return false;
+    if (state.filters.manager !== 'All' && text(r.Manager) !== state.filters.manager) return false;
+    if (state.filters.search && !`${r.ProjectName} ${r.Manager} ${r.CostCenter}`.toLowerCase().includes(state.filters.search.toLowerCase())) return false;
+    return true;
+  });
+}
+function actualProjectedStraightlineChartSnapshot(period){
+  const revenueRows = chartRevenueRows(period);
+  const actual = revenueRows.reduce((s,r)=>s + revenueActualForChart(r), 0);
+  const projected = revenueRows.reduce((s,r)=>s + revenueBudgetForChart(r), 0);
+  const straight = orderStraightlineRowsForPeriod(period).reduce((s,r)=>s + num(r.StraightlineBudget), 0);
+  return { actual, projected, straight };
+}
+function revenueMarginValue(r){ return num((r && (r.Margin ?? r['Margin'])) ?? projectMargin(r?.ProjectName, r?.Manager)); }
 function scalePeriodValue(value, period, dateValue=''){
   const monthly = num(value);
   const ref = normaliseDate(dateValue) ? new Date(`${normaliseDate(dateValue)}T00:00:00`) : new Date();
@@ -440,11 +477,18 @@ function performanceSnapshot(period){
   const confirmedTotal = ordersConfirmedRowsBase().reduce((s,o)=>s+num(o.TotalIncome || o.Amount || o.ConfirmedValue),0);
   const monthlyStraightlineBase = confirmedTotal / 12;
   const straight = scalePeriodValue(monthlyStraightlineBase, period);
-  const grossProfit = revenueRows.reduce((s,r)=>s + (num(r.Amount) * projectMargin(r.ProjectName, r.Manager) / 100), 0);
+  const grossProfit = revenueRows.reduce((s,r)=>s + (num(r.Amount) * revenueMarginValue(r) / 100), 0);
   const profitability = actual ? Math.round((grossProfit / actual) * 100) : 0;
   const invoicesIssued = invoiceRows.reduce((s,r)=>s+num(r.Amount),0);
   const paymentsReceived = invoiceRows.filter(r => r.PaymentReceived).reduce((s,r)=>s+num(r.Amount),0);
   return { revenueRows, invoiceRows, straightRows: [], actual, projected, straight, grossProfit, profitability, invoicesIssued, paymentsReceived, actualVsProjectedPct: projected ? Math.round((actual/projected)*100) : 0, actualVsStraightPct: straight ? Math.round((actual/straight)*100) : 0 };
+}
+
+
+function managerGraphRows(period = state.filters.period){
+  return managerPerformanceRows(period)
+    .slice()
+    .sort((a,b)=>(num(a.Actual)-num(b.Actual)) || (num(a.Straightline)-num(b.Straightline)) || a.Manager.localeCompare(b.Manager));
 }
 
 function managerPerformanceRows(period = state.filters.period){
@@ -612,14 +656,15 @@ function renderPerformanceCharts(snaps, managerRows){
   const managerCtx = managerCanvas?.getContext('2d');
   destroyCharts();
   if (periodCtx) {
+    const chartSnaps = snaps.map(x => ({ period: x.period, snap: actualProjectedStraightlineChartSnapshot(x.period) }));
     charts.periodChart = new Chart(periodCtx, {
       type: 'bar',
       data: {
-        labels: snaps.map(x => x.period),
+        labels: chartSnaps.map(x => x.period),
         datasets: [
-          { label: 'Actual', data: snaps.map(x => Math.round(x.snap.actual)), borderWidth: 1, maxBarThickness: 22 },
-          { label: 'Projected', data: snaps.map(x => Math.round(x.snap.projected)), borderWidth: 1, maxBarThickness: 22 },
-          { label: 'Straight-line', data: snaps.map(x => Math.round(x.snap.straight)), borderWidth: 1, maxBarThickness: 22 }
+          { label: 'Actual', data: chartSnaps.map(x => Math.round(x.snap.actual)), borderWidth: 1, maxBarThickness: 22 },
+          { label: 'Projected', data: chartSnaps.map(x => Math.round(x.snap.projected)), borderWidth: 1, maxBarThickness: 22 },
+          { label: 'Straight-line', data: chartSnaps.map(x => Math.round(x.snap.straight)), borderWidth: 1, maxBarThickness: 22 }
         ]
       },
       options: {
@@ -700,7 +745,10 @@ function renderPerformanceSectionCharts(rows){
   const totalsCtx = $('performanceSelectedTotalsChart')?.getContext('2d');
   const apCtx = $('pmActualProjectedChart')?.getContext('2d');
   const asCtx = $('pmActualStraightlineChart')?.getContext('2d');
-  const topRows = rows.slice(0,8);
+
+  const graphRows = managerGraphRows(state.filters.period);
+  const labels = graphRows.map(r => `${r.Manager} (${r.ActualVsProjectedPct}% / ${r.ActualVsStraightPct}%)`);
+
   if (totalsCtx) {
     charts.performanceTotalsChart = new Chart(totalsCtx, {
       type:'bar',
@@ -712,24 +760,49 @@ function renderPerformanceSectionCharts(rows){
       options:{responsive:true,maintainAspectRatio:false,animation:false,normalized:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},scales:{y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}}
     });
   }
+
   if (apCtx) {
     charts.pmActualProjectedChart = new Chart(apCtx, {
-      type:'bar',
-      data:{labels:topRows.map(r=>r.Manager), datasets:[
-        {label:'Actual', data:topRows.map(r=>Math.round(r.Actual)), maxBarThickness:18},
-        {label:'Projected', data:topRows.map(r=>Math.round(r.Projected)), maxBarThickness:18}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,animation:false,normalized:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},scales:{x:{ticks:{maxRotation:0,minRotation:0,font:{size:10}}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}}
+      data:{
+        labels,
+        datasets:[
+          {type:'bar', label:'Projected', data:graphRows.map(r=>Math.round(r.Projected)), maxBarThickness:18, order:2},
+          {type:'line', label:'Actual contour', data:graphRows.map(r=>Math.round(r.Actual)), tension:0.25, pointRadius:2, borderWidth:2, order:1}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,animation:false,normalized:true,
+        interaction:{mode:'index',intersect:false},
+        plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}, tooltip:{callbacks:{afterBody:(items)=>{
+          const i = items[0].dataIndex;
+          const r = graphRows[i];
+          return [`Straight-line: ${money(r.Straightline)}`, `Actual vs Projected: ${r.ActualVsProjectedPct}%`, `Actual vs Straight-line: ${r.ActualVsStraightPct}%`];
+        }}}},
+        scales:{x:{ticks:{maxRotation:0,minRotation:0,font:{size:12}, autoSkip:false}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}
+      }
     });
   }
+
   if (asCtx) {
     charts.pmActualStraightlineChart = new Chart(asCtx, {
-      type:'bar',
-      data:{labels:topRows.map(r=>r.Manager), datasets:[
-        {label:'Actual', data:topRows.map(r=>Math.round(r.Actual)), maxBarThickness:18},
-        {label:'Straight-line', data:topRows.map(r=>Math.round(r.Straightline)), maxBarThickness:18}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,animation:false,normalized:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}},scales:{x:{ticks:{maxRotation:0,minRotation:0,font:{size:10}}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}}
+      data:{
+        labels,
+        datasets:[
+          {type:'bar', label:'Projected', data:graphRows.map(r=>Math.round(r.Projected)), maxBarThickness:16, order:3},
+          {type:'bar', label:'Straight-line', data:graphRows.map(r=>Math.round(r.Straightline)), maxBarThickness:16, order:2},
+          {type:'line', label:'Actual contour', data:graphRows.map(r=>Math.round(r.Actual)), tension:0.25, pointRadius:2, borderWidth:2, order:1}
+        ]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,animation:false,normalized:true,
+        interaction:{mode:'index',intersect:false},
+        plugins:{legend:{position:'bottom',labels:{boxWidth:10,padding:10}}, tooltip:{callbacks:{afterBody:(items)=>{
+          const i = items[0].dataIndex;
+          const r = graphRows[i];
+          return [`Actual: ${money(r.Actual)}`, `Projected: ${money(r.Projected)}`, `Straight-line: ${money(r.Straightline)}`, `Actual vs Projected: ${r.ActualVsProjectedPct}%`, `Actual vs Straight-line: ${r.ActualVsStraightPct}%`];
+        }}}},
+        scales:{x:{ticks:{maxRotation:0,minRotation:0,font:{size:12}, autoSkip:false}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}
+      }
     });
   }
 }
@@ -815,7 +888,7 @@ function fillSelect(id, values, selected=''){ const el = $(id); const uniq = [..
 function populateFilters(){ fillSelect('periodFilter', PERIODS, state.filters.period); const divisions = ['All', ...new Set([...DEFAULT_COST_CENTERS, ...state.projects.map(p=>normalizeCostCenterName(p.Division)), ...state.revenue.map(r=>normalizeCostCenterName(r.CostCenter)), ...state.orders.map(r=>normalizeCostCenterName(r.Division || r.CostCenter))].filter(Boolean))]; fillSelect('divisionFilter', divisions, state.filters.division); const managers = ['All', ...new Set([...state.projects.map(p=>p.Manager), ...state.revenue.map(r=>r.Manager), ...state.managerBudgets.map(r=>r.ProjectManager), ...state.orders.map(r=>r.Manager)].filter(Boolean))].sort(); fillSelect('managerFilter', managers, state.filters.manager);
   fillSelect('revManager', managers.filter(v=>v!=='All')); fillSelect('projManager', managers.filter(v=>v!=='All')); fillSelect('invManager', managers.filter(v=>v!=='All'));
   const cc = divisions.filter(v=>v!=='All'); fillSelect('revCostCenter', cc); fillSelect('projDivision', cc); fillSelect('invCostCenter', cc);
-  const projects = [...new Set(state.projects.map(p=>p.ProjectName).filter(Boolean))].sort(); fillSelect('revProjectName', projects); fillSelect('invProjectName', projects);
+  const projects = [...new Set([...DEFAULT_PROJECT_OPTIONS, ...state.projects.map(p=>p.ProjectName), ...state.revenue.map(r=>r.ProjectName), ...state.orders.map(r=>r.ProjectName)].filter(Boolean))].sort(); fillSelect('revProjectName', projects); fillSelect('invProjectName', projects); applyRememberedDailyBudget();
 }
 function renderKPIs(){
   const orders = filteredOrders(state.filters.period);
@@ -868,7 +941,7 @@ function renderSummary(){
   const revenueRows = filteredRevenue();
   const revActual = revenueRows.reduce((s,r)=>s+num(r.Amount),0);
   const revProjected = revenueRows.reduce((s,r)=>s+num(r.Budget),0);
-  const profitability = revActual ? Math.round((revenueRows.reduce((s,r)=>s + (num(r.Amount) * projectMargin(r.ProjectName, r.Manager) / 100), 0) / revActual) * 100) : 0;
+  const profitability = revActual ? Math.round((revenueRows.reduce((s,r)=>s + (num(r.Amount) * revenueMarginValue(r) / 100), 0) / revActual) * 100) : 0;
   $('revenueStats').innerHTML = [
     ['Actual', money(revActual), `${state.filters.period} / Revenue`],
     ['Projected', money(revProjected), `${state.filters.period} / Revenue`],
@@ -902,7 +975,9 @@ function mapRevenueRow(r){
     Amount: num(r.Amount || r.amount || r.Actual || r.actual || r.Actuals || r.actuals || r['Actuals'] || r['Actual'] || r['E'] || r.E || rowVal(r,4)),
     Budget: num(r.Budget || r.budget || r.Projected || r.projected || r['Projected'] || r['Projected Budget'] || r.ProjectedBudget || r.projectedBudget || r['F'] || r.F || rowVal(r,5)),
     Quality: num(r.Quality || r.quality || rowVal(r,6) || 80),
-    Safety: num(r.Safety || r.safety || rowVal(r,7) || 0)
+    Safety: num(r.Safety || r.safety || rowVal(r,7) || 0),
+    CreatedAt: normaliseDate(r.CreatedAt || r.createdAt || rowVal(r,8)),
+    Margin: num(r.Margin || r.margin || r['Margin'] || r['J'] || r.J || rowVal(r,9))
   });
 }
 
@@ -1007,9 +1082,27 @@ async function saveRevenue(){
     btn.textContent=old; btn.classList.remove('btn-loading');
   }
 }
-async function saveProject(){ const payload = { action:'addProject', createdAt:$('projCreatedAt').value || todayISO(), division:$('projDivision').value, manager:$('projManager').value, projectName:$('projName').value, location:$('projLocation').value, status:$('projStatus').value, totalIncome:num($('projIncome').value), margin:num($('projMargin').value), startDate:$('projStartDate').value, endDate:$('projEndDate').value, remarks:$('projRemarks').value }; if (!payload.projectName || !payload.division || !payload.manager) return alert('Enter Project Name, Division and Manager first.'); const btn=$('saveProjectBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising...'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); await loadData(); $('projName').value=''; $('projLocation').value=''; $('projIncome').value=''; $('projMargin').value=''; $('projStartDate').value=''; $('projEndDate').value=''; $('projRemarks').value=''; showToast(res.message || 'Project has been successfully saved','success'); alert(res.message || 'Project has been successfully saved'); } catch (e) { showToast(`Project was not saved: ${e.message}`,'error'); alert(`Project was not saved.\n\n${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
+function monthCountInclusive(startDate, endDate){
+  const start = normaliseDate(startDate);
+  const end = normaliseDate(endDate);
+  if (!start || !end) return 0;
+  const s = new Date(`${start}T00:00:00`);
+  const e = new Date(`${end}T00:00:00`);
+  if (isNaN(s) || isNaN(e) || e < s) return 0;
+  return ((e.getFullYear() - s.getFullYear()) * 12) + (e.getMonth() - s.getMonth()) + 1;
+}
+function autoProjectTotalFromMonthlyBudget(){
+  const monthlyBudgetInput = $('projMonthlyBudget');
+  const totalIncomeInput = $('projIncome');
+  if (!monthlyBudgetInput || !totalIncomeInput) return;
+  const monthlyBudget = num(monthlyBudgetInput.value);
+  if (!monthlyBudget) return;
+  const months = monthCountInclusive($('projStartDate').value, $('projEndDate').value);
+  if (months > 0) totalIncomeInput.value = String(Math.round(monthlyBudget * months * 100) / 100);
+}
+async function saveProject(){ const payload = { action:'addProject', createdAt:$('projCreatedAt').value || todayISO(), division:$('projDivision').value, manager:$('projManager').value, projectName:$('projName').value, location:$('projLocation').value, status:$('projStatus').value, totalIncome:num($('projIncome').value), monthlyBudget:num($('projMonthlyBudget').value), margin:num($('projMargin').value), startDate:$('projStartDate').value, endDate:$('projEndDate').value, remarks:$('projRemarks').value }; if (!payload.projectName || !payload.division || !payload.manager) return alert('Enter Project Name, Division and Manager first.'); const btn=$('saveProjectBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising...'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); await loadData(); $('projName').value=''; $('projLocation').value=''; $('projIncome').value=''; $('projMonthlyBudget').value=''; $('projMargin').value=''; $('projStartDate').value=''; $('projEndDate').value=''; $('projRemarks').value=''; showToast(res.message || 'Project has been successfully saved','success'); alert(res.message || 'Project has been successfully saved'); } catch (e) { showToast(`Project was not saved: ${e.message}`,'error'); alert(`Project was not saved.\n\n${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
 async function saveInvoice(){ const payload = { action:'addInvoice', date:$('invDate').value || todayISO(), manager:$('invManager').value, projectName:$('invProjectName').value, invoiceNumber:$('invNumber').value, amount:num($('invAmount').value), paymentReceived:$('invPaid').value==='true', paymentDate:$('invPaymentDate').value, costCenter:$('invCostCenter').value, notes:$('invNotes').value }; if (!payload.projectName || payload.amount <= 0) return alert('Complete the invoice fields first.'); await postAction(payload); await loadData(); }
-function init(){ bindTabs(); wireFilters(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('revDate').value = $('projCreatedAt').value = $('invDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
+function init(){ bindTabs(); wireFilters(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('projMonthlyBudget').addEventListener('input', autoProjectTotalFromMonthlyBudget); $('projStartDate').addEventListener('change', autoProjectTotalFromMonthlyBudget); $('projEndDate').addEventListener('change', autoProjectTotalFromMonthlyBudget); $('revDate').value = $('projCreatedAt').value = $('invDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
