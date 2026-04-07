@@ -133,9 +133,9 @@
         <div class="card"><h3 style="margin-top:0">Performance by project manager</h3><div class="table-wrap"><table id="performanceManagerTable"></table></div></div>
         <div class="card"><h3 style="margin-top:0">Selected period totals</h3><div class="chart-compact"><canvas id="performanceSelectedTotalsChart" height="140"></canvas></div></div>
       </div>
-      <div class="grid two section-gap">
-        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Projected</h3><div class="chart-compact" style="height:420px;max-height:420px;"><canvas id="pmActualProjectedChart" height="380"></canvas></div></div>
-        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Straight-line</h3><div class="chart-compact" style="height:420px;max-height:420px;"><canvas id="pmActualStraightlineChart" height="380"></canvas></div></div>
+      <div class="grid section-gap" style="grid-template-columns:1fr;">
+        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Projected</h3><div class="chart-compact" style="height:520px;max-height:520px;"><canvas id="pmActualProjectedChart" height="480"></canvas></div></div>
+        <div class="card"><h3 style="margin-top:0">Project managers comparison: Actual vs Straight-line</h3><div class="chart-compact" style="height:520px;max-height:520px;"><canvas id="pmActualStraightlineChart" height="480"></canvas></div></div>
       </div>
       <div class="grid two section-gap">
         <div class="card"><h3 style="margin-top:0">Performance by cost center</h3><div class="table-wrap"><table id="performanceCostCenterTable"></table></div></div>
@@ -154,8 +154,7 @@
           <div class="field span-4"><label>Project Name</label><select id="revProjectName"></select></div>
           <div class="field span-2"><label>Amount</label><input id="revAmount" type="number" min="0" step="0.01"></div>
           <div class="field span-2"><label>Daily Budget</label><input id="revBudget" type="number" min="0" step="0.01"></div>
-          <div class="field span-2"><label>Quality</label><input id="revQuality" type="number" min="0" max="100" value="80"></div>
-          <div class="field span-2"><label>Safety</label><input id="revSafety" type="number" min="0" value="0"></div>
+                    <div class="field span-2"><label>Safety</label><input id="revSafety" type="number" min="0" value="0"></div>
           <div class="field span-12"><button id="saveRevenueBtn" type="button">Save Daily Revenue</button></div>
         </div>
       </div>
@@ -165,20 +164,39 @@
 
     <div class="panel" id="projectsPanel">
       <div class="card">
-        <h3 style="margin-top:0">Add Project</h3>
+        <h3 style="margin-top:0">Add New Project</h3>
         <div class="form-grid">
           <div class="field span-2"><label>CreatedAt</label><input id="projCreatedAt" type="date"></div>
+          <div class="field span-2"><label>Spread Method</label><select id="projSpreadMode"><option value="manual">Input per month</option><option value="even">Spread evenly</option></select></div>
+          <div class="field span-2"><label>TotalIncome</label><input id="projIncome" type="number" min="0" step="0.01"></div>
+          <div class="field span-2"><label>StartDate</label><input id="projStartDate" type="date"></div>
+          <div class="field span-2"><label>EndDate</label><input id="projEndDate" type="date"></div>
+          <div class="field span-2"><label>Margin</label><input id="projMargin" type="number" min="0" step="0.01"></div>
+          <div class="span-12">
+            <div class="table-wrap"><table><thead><tr>
+            <th>Mar-26</th><th>Apr-26</th><th>May-26</th><th>Jun-26</th><th>Jul-26</th><th>Aug-26</th><th>Sep-26</th><th>Oct-26</th><th>Nov-26</th><th>Dec-26</th><th>Jan-27</th><th>Feb-27</th>
+            </tr></thead><tbody><tr>
+            <td><input id="projMar26" type="number" min="0" step="0.01"></td>
+            <td><input id="projApr26" type="number" min="0" step="0.01"></td>
+            <td><input id="projMay26" type="number" min="0" step="0.01"></td>
+            <td><input id="projJun26" type="number" min="0" step="0.01"></td>
+            <td><input id="projJul26" type="number" min="0" step="0.01"></td>
+            <td><input id="projAug26" type="number" min="0" step="0.01"></td>
+            <td><input id="projSep26" type="number" min="0" step="0.01"></td>
+            <td><input id="projOct26" type="number" min="0" step="0.01"></td>
+            <td><input id="projNov26" type="number" min="0" step="0.01"></td>
+            <td><input id="projDec26" type="number" min="0" step="0.01"></td>
+            <td><input id="projJan27" type="number" min="0" step="0.01"></td>
+            <td><input id="projFeb27" type="number" min="0" step="0.01"></td>
+            </tr></tbody></table></div>
+          </div>
           <div class="field span-2"><label>Division</label><select id="projDivision"></select></div>
           <div class="field span-2"><label>Manager</label><select id="projManager"></select></div>
           <div class="field span-3"><label>ProjectName</label><input id="projName"></div>
           <div class="field span-3"><label>Location</label><input id="projLocation"></div>
           <div class="field span-2"><label>Status</label><select id="projStatus"><option>Confirmed</option><option>Forecast</option></select></div>
-          <div class="field span-2"><label>TotalIncome</label><input id="projIncome" type="number" min="0" step="0.01"></div>
-          <div class="field span-2"><label>Monthly Budget</label><input id="projMonthlyBudget" type="number" min="0" step="0.01"></div>
-          <div class="field span-2"><label>Margin</label><input id="projMargin" type="number" min="0" step="0.01"></div>
-          <div class="field span-2"><label>StartDate</label><input id="projStartDate" type="date"></div>
-          <div class="field span-2"><label>EndDate</label><input id="projEndDate" type="date"></div>
           <div class="field span-4"><label>Remarks</label><input id="projRemarks"></div>
+          <input id="projMonthlyBudget" type="hidden">
           <div class="field span-12"><button id="saveProjectBtn" type="button">Save Project</button></div>
         </div>
       </div>
@@ -194,11 +212,23 @@
           <div class="field span-3"><label>ProjectName</label><select id="invProjectName"></select></div>
           <div class="field span-2"><label>InvoiceNumber</label><input id="invNumber"></div>
           <div class="field span-2"><label>Amount</label><input id="invAmount" type="number" min="0" step="0.01"></div>
-          <div class="field span-1"><label>Paid</label><select id="invPaid"><option value="false">No</option><option value="true">Yes</option></select></div>
           <div class="field span-2"><label>PaymentDate</label><input id="invPaymentDate" type="date"></div>
           <div class="field span-2"><label>CostCenter</label><select id="invCostCenter"></select></div>
           <div class="field span-4"><label>Notes</label><input id="invNotes"></div>
           <div class="field span-12"><button id="saveInvoiceBtn" type="button">Save Invoice</button></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h3 style="margin-top:0">Today's Payments Received</h3>
+        <div class="form-grid">
+          <div class="field span-2"><label>Date</label><input id="payDate" type="date"></div>
+          <div class="field span-3"><label>Name of Project</label><select id="payProjectName"></select></div>
+          <div class="field span-2"><label>Invoice number</label><input id="payInvoiceNumber"></div>
+          <div class="field span-2"><label>Amount Paid</label><input id="payAmount" type="number" min="0" step="0.01"></div>
+          <div class="field span-3"><label>Project manager</label><select id="payManager"></select></div>
+          <div class="field span-2"><label>CostCenter</label><select id="payCostCenter"></select></div>
+          <div class="field span-4"><label>Notes</label><input id="payNotes"></div>
+          <div class="field span-12"><button id="savePaymentBtn" type="button">Save Payment Received</button></div>
         </div>
       </div>
       <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Invoices</h3><div class="table-wrap"><table id="invoicesTable"></table></div></div>
@@ -208,7 +238,7 @@
   </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyK2EH7LTsfGo-LGgV5izwlPDYtE7h-bj49jkCPr4ugKZQOIRY3EcSh1M4NeJggcTil/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxs778OhAlOxj01IZbZSSmYDyCwOUCLfOIVbOkVldBUY-hiKi_SGuMdiKfs3KjbwG9R/exec';
 const PERIODS = ['Daily','Weekly','Monthly','Quarterly','Yearly'];
 const DEFAULT_COST_CENTERS = ['Onpoint Ontime','Aqua Telecoms','Nkanyezi','Distinct Hire'];
 const DEFAULT_PROJECT_OPTIONS = ['COT Metering', 'COE Streetlights', 'Msunduzi E50', 'Msunduzi Streetlights', 'Msunduzi E33', 'Msunduzi E47', 'Moqhaka Streetlights', 'Moqhaka Metering', 'Centlec CD11', 'Centlec Transformers CD32', 'Centlec CD45', 'Midvaal Mechanical', 'Eskom SPU', 'Eskom FSOU Substation', 'Eskom ECOU', 'Eskom LOU General Buildings', 'Eskom KZN Minor Reticulation', 'Randwest Electrical', 'Randwest Roads & Stormwater', 'Randwest Water rand sanitation', 'Randwest Bulk', 'RAL', 'Stellenbosh', 'Liquid ECPG', 'Liquid ECSOD', 'Liquid Gauteng SOD', 'Telkom', 'MTN', 'Centlec', 'Eskom Harvard', 'City Power', 'Umhlathuze Municipality', 'Eskom WC', 'COE Buildings', 'Midvaal Water', 'Midvaal Electricity', 'Uthukela', 'Kgetleng River', 'Ray Nkonyeni Facility', 'Ray Nkonyeni Electrical Material', 'Ray Nkonyeni Mast', 'Ray Nkonyeni Meter Reading', 'Ramotshere Electrical Supplies', 'Newcastle Substations', 'Ubuntu', 'IDT North West Buidlings', 'Amajuba Generator', 'uPhongolo', 'Abaquilisi Battery Supplies', 'Abaquilisi Streetlights'];
@@ -298,6 +328,14 @@ function startOfPeriod(period, refDate = new Date()){ const d = new Date(refDate
 function endOfPeriod(period, refDate = new Date()){ const s = startOfPeriod(period, refDate); if (period === 'Daily') return new Date(s.getFullYear(), s.getMonth(), s.getDate()+1); if (period === 'Weekly') return new Date(s.getFullYear(), s.getMonth(), s.getDate()+7); if (period === 'Monthly') return new Date(s.getFullYear(), s.getMonth()+1, 1); if (period === 'Quarterly') return new Date(s.getFullYear(), s.getMonth()+3, 1); return new Date(s.getFullYear()+1, 2, 1); }
 function inPeriod(dateValue, period){ const d = new Date(`${normaliseDate(dateValue)}T00:00:00`); if (isNaN(d)) return false; return d >= startOfPeriod(period) && d < endOfPeriod(period); }
 function elapsedPct(period){ const now = new Date(); const start = startOfPeriod(period, now); const end = endOfPeriod(period, now); return Math.max(0, Math.min(100, Math.round(((now - start) / Math.max(end - start,1)) * 100))); }
+
+const PROJECT_MONTH_IDS = ['projMar26','projApr26','projMay26','projJun26','projJul26','projAug26','projSep26','projOct26','projNov26','projDec26','projJan27','projFeb27'];
+const PROJECT_MONTH_META = [{id:'projMar26',y:2026,m:2},{id:'projApr26',y:2026,m:3},{id:'projMay26',y:2026,m:4},{id:'projJun26',y:2026,m:5},{id:'projJul26',y:2026,m:6},{id:'projAug26',y:2026,m:7},{id:'projSep26',y:2026,m:8},{id:'projOct26',y:2026,m:9},{id:'projNov26',y:2026,m:10},{id:'projDec26',y:2026,m:11},{id:'projJan27',y:2027,m:0},{id:'projFeb27',y:2027,m:1}];
+function clearProjectMonthInputs(){ PROJECT_MONTH_IDS.forEach(id => { if ($(id)) $(id).value=''; }); }
+function activeProjectMonthMeta(){ const s=normaliseDate($('projStartDate')?.value); const e=normaliseDate($('projEndDate')?.value); if(!s||!e) return []; const sd=new Date(`${s}T00:00:00`); const ed=new Date(`${e}T00:00:00`); if(isNaN(sd)||isNaN(ed)||ed<sd) return []; return PROJECT_MONTH_META.filter(x=>{ const d=new Date(x.y,x.m,1); return d>=new Date(sd.getFullYear(),sd.getMonth(),1)&&d<=new Date(ed.getFullYear(),ed.getMonth(),1); }); }
+function spreadProjectEvenly(){ if(($('projSpreadMode')?.value||'manual')!=='even') return; clearProjectMonthInputs(); const total=num($('projIncome')?.value); const active=activeProjectMonthMeta(); if(!total||!active.length) return; const per=total/active.length; let running=0; active.forEach((x,i)=>{ let v=per; if(i===active.length-1) v=total-running; running+=v; if($(x.id)) $(x.id).value=String(Math.round(v*100)/100); }); }
+function updateProjectTotalFromMonths(){ if(($('projSpreadMode')?.value||'manual')!=='manual') return; const total=PROJECT_MONTH_IDS.reduce((s,id)=>s+num($(id)?.value),0); if($('projIncome')) $('projIncome').value=total?String(Math.round(total*100)/100):''; }
+function syncPaymentFieldsFromInvoiceFields(){ if($('payManager')&&$('invManager')) $('payManager').innerHTML=$('invManager').innerHTML; if($('payProjectName')&&$('invProjectName')) $('payProjectName').innerHTML=$('invProjectName').innerHTML; if($('payCostCenter')&&$('invCostCenter')) $('payCostCenter').innerHTML=$('invCostCenter').innerHTML; }
 function buildTable(el, headers, rows){ el.innerHTML = `<thead><tr>${headers.map(h=>`<th class="${h.class||''}">${h.label}</th>`).join('')}</tr></thead><tbody>${rows.length ? rows.map(r=>`<tr>${r.map((c,i)=>`<td class="${headers[i].class||''}">${c}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${headers.length}" class="muted">No data</td></tr>`}</tbody>`; }
 function filteredRevenue(){ return state.revenue.filter(r => { if (!inPeriod(r.Date, state.filters.period)) return false; if (state.filters.division !== 'All' && normalizeCostCenterName(r.CostCenter) !== state.filters.division) return false; if (state.filters.manager !== 'All' && text(r.Manager) !== state.filters.manager) return false; if (state.filters.search && !`${r.ProjectName} ${r.Manager} ${r.CostCenter}`.toLowerCase().includes(state.filters.search.toLowerCase())) return false; return true; }); }
 function filteredProjects(){ return state.projects.filter(r => { if (state.filters.division !== 'All' && normalizeCostCenterName(r.Division) !== state.filters.division) return false; if (state.filters.manager !== 'All' && text(r.Manager) !== state.filters.manager) return false; if (state.filters.search && !`${r.ProjectName} ${r.Manager} ${r.Division}`.toLowerCase().includes(state.filters.search.toLowerCase())) return false; return true; }); }
@@ -747,7 +785,7 @@ function renderPerformanceSectionCharts(rows){
   const asCtx = $('pmActualStraightlineChart')?.getContext('2d');
 
   const graphRows = managerGraphRows(state.filters.period);
-  const labels = graphRows.map(r => `${r.Manager} (${r.ActualVsProjectedPct}% / ${r.ActualVsStraightPct}%)`);
+  const labels = graphRows.map(r => r.Manager);
 
   if (totalsCtx) {
     charts.performanceTotalsChart = new Chart(totalsCtx, {
@@ -778,7 +816,7 @@ function renderPerformanceSectionCharts(rows){
           const r = graphRows[i];
           return [`Straight-line: ${money(r.Straightline)}`, `Actual vs Projected: ${r.ActualVsProjectedPct}%`, `Actual vs Straight-line: ${r.ActualVsStraightPct}%`];
         }}}},
-        scales:{x:{ticks:{maxRotation:0,minRotation:0,font:{size:12}, autoSkip:false}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}
+        scales:{x:{ticks:{maxRotation:90,minRotation:90,font:{size:12}, autoSkip:false}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}
       }
     });
   }
@@ -801,7 +839,7 @@ function renderPerformanceSectionCharts(rows){
           const r = graphRows[i];
           return [`Actual: ${money(r.Actual)}`, `Projected: ${money(r.Projected)}`, `Straight-line: ${money(r.Straightline)}`, `Actual vs Projected: ${r.ActualVsProjectedPct}%`, `Actual vs Straight-line: ${r.ActualVsStraightPct}%`];
         }}}},
-        scales:{x:{ticks:{maxRotation:0,minRotation:0,font:{size:12}, autoSkip:false}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}
+        scales:{x:{ticks:{maxRotation:90,minRotation:90,font:{size:12}, autoSkip:false}},y:{beginAtZero:true,ticks:{maxTicksLimit:5}}}
       }
     });
   }
@@ -1063,16 +1101,16 @@ async function loadData(){
     testBtn.classList.remove('btn-loading'); refreshBtn.classList.remove('btn-loading');
   }
 }
-function renderAll(){ renderKPIs(); renderProgressCards(); renderSummary(); renderPerformanceSection(); }
+function renderAll(){ renderKPIs(); renderProgressCards(); renderSummary(); renderPerformanceSection(); syncPaymentFieldsFromInvoiceFields(); }
 async function saveRevenue(){
-  const payload = { action:'addRevenue', date:$('revDate').value || todayISO(), manager:$('revManager').value, costCenter:$('revCostCenter').value, projectName:$('revProjectName').value, amount:num($('revAmount').value), budget:num($('revBudget').value), quality:num($('revQuality').value), safety:num($('revSafety').value) };
+  const payload = { action:'addRevenue', date:$('revDate').value || todayISO(), manager:$('revManager').value, costCenter:$('revCostCenter').value, projectName:$('revProjectName').value, amount:num($('revAmount').value), budget:num($('revBudget').value), safety:num($('revSafety').value) };
   if (!payload.date || !payload.projectName || payload.amount <= 0) return alert('Complete the revenue fields first.');
   const btn=$('saveRevenueBtn'); const old=btn.textContent;
   btn.textContent='⟳ Synchronising...'; btn.classList.add('btn-loading');
   try {
     const res = await postAction(payload);
     await loadData();
-    $('revAmount').value=''; $('revBudget').value=''; $('revQuality').value='80'; $('revSafety').value='0';
+    $('revAmount').value=''; $('revBudget').value=''; $('revSafety').value='0';
     showToast(res.message || 'Daily revenue has been successfully saved','success');
     alert(res.message || 'Daily revenue has been successfully saved');
   } catch (e) {
@@ -1082,27 +1120,16 @@ async function saveRevenue(){
     btn.textContent=old; btn.classList.remove('btn-loading');
   }
 }
-function monthCountInclusive(startDate, endDate){
-  const start = normaliseDate(startDate);
-  const end = normaliseDate(endDate);
-  if (!start || !end) return 0;
-  const s = new Date(`${start}T00:00:00`);
-  const e = new Date(`${end}T00:00:00`);
-  if (isNaN(s) || isNaN(e) || e < s) return 0;
-  return ((e.getFullYear() - s.getFullYear()) * 12) + (e.getMonth() - s.getMonth()) + 1;
-}
-function autoProjectTotalFromMonthlyBudget(){
-  const monthlyBudgetInput = $('projMonthlyBudget');
-  const totalIncomeInput = $('projIncome');
-  if (!monthlyBudgetInput || !totalIncomeInput) return;
-  const monthlyBudget = num(monthlyBudgetInput.value);
-  if (!monthlyBudget) return;
-  const months = monthCountInclusive($('projStartDate').value, $('projEndDate').value);
-  if (months > 0) totalIncomeInput.value = String(Math.round(monthlyBudget * months * 100) / 100);
-}
-async function saveProject(){ const payload = { action:'addProject', createdAt:$('projCreatedAt').value || todayISO(), division:$('projDivision').value, manager:$('projManager').value, projectName:$('projName').value, location:$('projLocation').value, status:$('projStatus').value, totalIncome:num($('projIncome').value), monthlyBudget:num($('projMonthlyBudget').value), margin:num($('projMargin').value), startDate:$('projStartDate').value, endDate:$('projEndDate').value, remarks:$('projRemarks').value }; if (!payload.projectName || !payload.division || !payload.manager) return alert('Enter Project Name, Division and Manager first.'); const btn=$('saveProjectBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising...'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); await loadData(); $('projName').value=''; $('projLocation').value=''; $('projIncome').value=''; $('projMonthlyBudget').value=''; $('projMargin').value=''; $('projStartDate').value=''; $('projEndDate').value=''; $('projRemarks').value=''; showToast(res.message || 'Project has been successfully saved','success'); alert(res.message || 'Project has been successfully saved'); } catch (e) { showToast(`Project was not saved: ${e.message}`,'error'); alert(`Project was not saved.\n\n${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
-async function saveInvoice(){ const payload = { action:'addInvoice', date:$('invDate').value || todayISO(), manager:$('invManager').value, projectName:$('invProjectName').value, invoiceNumber:$('invNumber').value, amount:num($('invAmount').value), paymentReceived:$('invPaid').value==='true', paymentDate:$('invPaymentDate').value, costCenter:$('invCostCenter').value, notes:$('invNotes').value }; if (!payload.projectName || payload.amount <= 0) return alert('Complete the invoice fields first.'); await postAction(payload); await loadData(); }
-function init(){ bindTabs(); wireFilters(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('projMonthlyBudget').addEventListener('input', autoProjectTotalFromMonthlyBudget); $('projStartDate').addEventListener('change', autoProjectTotalFromMonthlyBudget); $('projEndDate').addEventListener('change', autoProjectTotalFromMonthlyBudget); $('revDate').value = $('projCreatedAt').value = $('invDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
+async function saveProject(){ const payload = { action:'addProject', createdAt:$('projCreatedAt').value || todayISO(), division:$('projDivision').value, manager:$('projManager').value, projectName:$('projName').value, location:$('projLocation').value, status:$('projStatus').value, totalIncome:num($('projIncome').value), monthlyBudget:(() => { const active=activeProjectMonthMeta(); return active.length ? (num($('projIncome').value)/active.length) : 0; })(), margin:num($('projMargin').value), startDate:$('projStartDate').value, endDate:$('projEndDate').value, remarks:$('projRemarks').value, mar26:num($('projMar26').value), apr26:num($('projApr26').value), may26:num($('projMay26').value), jun26:num($('projJun26').value), jul26:num($('projJul26').value), aug26:num($('projAug26').value), sep26:num($('projSep26').value), oct26:num($('projOct26').value), nov26:num($('projNov26').value), dec26:num($('projDec26').value), jan27:num($('projJan27').value), feb27:num($('projFeb27').value) }; if (!payload.projectName || !payload.division || !payload.manager) return alert('Enter Project Name, Division and Manager first.'); const btn=$('saveProjectBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising.'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); await loadData(); $('projName').value=''; $('projLocation').value=''; $('projIncome').value=''; $('projMargin').value=''; $('projStartDate').value=''; $('projEndDate').value=''; $('projRemarks').value=''; $('projSpreadMode').value='manual'; clearProjectMonthInputs(); showToast(res.message || 'Project has been successfully saved','success'); alert(res.message || 'Project has been successfully saved'); } catch (e) { showToast(`Project was not saved: ${e.message}`,'error'); alert(`Project was not saved.
+
+${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
+async function saveInvoice(){ const payload = { action:'addInvoice', date:$('invDate').value || todayISO(), manager:$('invManager').value, projectName:$('invProjectName').value, invoiceNumber:$('invNumber').value, amount:num($('invAmount').value), paymentReceived:false, paymentDate:$('invPaymentDate').value, costCenter:$('invCostCenter').value, notes:$('invNotes').value }; if (!payload.projectName || payload.amount <= 0) return alert('Complete the invoice fields first.'); const btn=$('saveInvoiceBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising.'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); await loadData(); $('invNumber').value=''; $('invAmount').value=''; $('invPaymentDate').value=''; $('invNotes').value=''; showToast(res.message || 'Invoice has been successfully saved','success'); alert(res.message || 'Invoice has been successfully saved'); } catch (e) { showToast(`Invoice was not saved: ${e.message}`,'error'); alert(`Invoice was not saved.
+
+${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
+async function savePayment(){ const payload = { action:'addPayment', date:$('payDate').value || todayISO(), manager:$('payManager').value, projectName:$('payProjectName').value, invoiceNumber:$('payInvoiceNumber').value, amount:num($('payAmount').value), paymentReceived:true, paymentDate:$('payDate').value || todayISO(), costCenter:$('payCostCenter').value, notes:$('payNotes').value, entryType:'Payment', createdAt:new Date().toISOString() }; if (!payload.projectName || !payload.invoiceNumber || payload.amount <= 0) return alert('Complete the payment received fields first.'); const btn=$('savePaymentBtn'); const old=btn.textContent; btn.textContent='⟳ Synchronising.'; btn.classList.add('btn-loading'); try { const res = await postAction(payload); $('payInvoiceNumber').value=''; $('payAmount').value=''; $('payNotes').value=''; showToast(res.message || 'Payment received has been successfully saved','success'); alert(res.message || 'Payment received has been successfully saved'); } catch (e) { showToast(`Payment received was not saved: ${e.message}`,'error'); alert(`Payment received was not saved.
+
+${e.message}`); } finally { btn.textContent=old; btn.classList.remove('btn-loading'); } }
+function init(){ bindTabs(); wireFilters(); $('testBtn').onclick = () => quickConnectionTest(); $('refreshBtn').onclick = () => loadData(); $('saveRevenueBtn').onclick = saveRevenue; $('saveProjectBtn').onclick = saveProject; $('saveInvoiceBtn').onclick = saveInvoice; $('savePaymentBtn').onclick = savePayment; $('projSpreadMode').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); else updateProjectTotalFromMonths(); }); $('projIncome').addEventListener('input', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); $('projStartDate').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); $('projEndDate').addEventListener('change', ()=>{ if($('projSpreadMode').value==='even') spreadProjectEvenly(); }); PROJECT_MONTH_IDS.forEach(id => { if($(id)) $(id).addEventListener('input', updateProjectTotalFromMonths); }); $('revDate').value = $('projCreatedAt').value = $('invDate').value = $('payDate').value = todayISO(); $('periodFilter').innerHTML = PERIODS.map(p=>`<option ${p===state.filters.period?'selected':''}>${p}</option>`).join(''); $('diagnostics').textContent = 'Waiting for first load...'; loadData(); }
 document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
