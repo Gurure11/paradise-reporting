@@ -345,7 +345,57 @@
     }
 
     function normalizeMonthName(month) {
-      return String(month || '').trim().toUpperCase();
+      var raw = String(month || '').trim();
+      var cleaned = raw.toUpperCase().replace(/[^A-Z]/g, ' ');
+      var parts = cleaned.split(/\s+/).filter(Boolean);
+      var monthMap = {
+        MAR: 'MAR', MARCH: 'MAR',
+        APR: 'APR', APRIL: 'APR',
+        MAY: 'MAY',
+        JUN: 'JUN', JUNE: 'JUN',
+        JUL: 'JUL', JULY: 'JUL',
+        AUG: 'AUG', AUGUST: 'AUG',
+        SEP: 'SEP', SEPT: 'SEP', SEPTEMBER: 'SEP',
+        OCT: 'OCT', OCTOBER: 'OCT',
+        NOV: 'NOV', NOVEMBER: 'NOV',
+        DEC: 'DEC', DECEMBER: 'DEC',
+        JAN: 'JAN', JANUARY: 'JAN',
+        FEB: 'FEB', FEBRUARY: 'FEB'
+      };
+
+      for (var i = 0; i < parts.length; i++) {
+        if (monthMap[parts[i]]) return monthMap[parts[i]];
+      }
+      return monthMap[cleaned] || cleaned;
+    }
+
+    function getCellValue(row, names) {
+      for (var i = 0; i < names.length; i++) {
+        if (row[names[i]] !== undefined && row[names[i]] !== null && row[names[i]] !== '') return row[names[i]];
+      }
+      return '';
+    }
+
+    function getAwardActual(award) {
+      var value = getCellValue(award, [
+        'actual', 'Actual', 'Actual Achieved', 'Actual_Achieved', 'ActualAchieved',
+        'achieved', 'Achieved', 'value', 'Value', 'count', 'Count', 'awards', 'Awards'
+      ]);
+      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
+    }
+
+    function getAwardTarget(award) {
+      var value = getCellValue(award, ['target', 'Target', 'Annual Target', 'Annual_Target', 'AnnualTarget']);
+      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
+    }
+
+    function getAwardEntity(award) {
+      return normalizeEntityName(getCellValue(award, ['entity', 'Entity', 'Cost Center', 'Cost_Center', 'CostCenter', 'Company', 'company']) || 'Unknown');
+    }
+
+    function getAwardMonth(award) {
+      // Awards_Targets column E is headed Month. It can contain values such as MAR, March, or Onpoint March.
+      return normalizeMonthName(getCellValue(award, ['month', 'Month', 'MONTH']));
     }
 
     function ensureMonthlyAwardsFromAwardTargets() {
@@ -353,12 +403,12 @@
 
       for (var a = 0; a < data.awardsTargets.length; a++) {
         var award = data.awardsTargets[a];
-        var entity = normalizeEntityName(award.entity || award.Entity || 'Unknown');
-        var month = normalizeMonthName(award.month || award.Month || '');
-        var actual = Number(award.actual || award.Actual || 0);
+        var entity = getAwardEntity(award);
+        var month = getAwardMonth(award);
+        var actual = getAwardActual(award);
 
         if (!awardMonthMap[entity]) awardMonthMap[entity] = {};
-        if (month) {
+        if (MONTHS.indexOf(month) > -1) {
           awardMonthMap[entity][month] = Number(awardMonthMap[entity][month] || 0) + actual;
         }
       }
@@ -366,9 +416,6 @@
       for (var i = 0; i < data.tenderSummary.length; i++) {
         var row = data.tenderSummary[i];
         row.entity = normalizeEntityName(row.entity || row.Entity);
-
-        // Awards must come only from Awards_Targets.
-        // This prevents demo/static awards and live Awards_Targets from being added together.
         row.awards = {};
 
         if (awardMonthMap[row.entity]) {
@@ -385,8 +432,8 @@
 
       for (var i = 0; i < data.awardsTargets.length; i++) {
         var award = data.awardsTargets[i];
-        if (normalizeEntityName(award.entity || award.Entity) === wanted) {
-          total += Number(award.actual || award.Actual || 0);
+        if (getAwardEntity(award) === wanted) {
+          total += getAwardActual(award);
         }
       }
 
@@ -439,7 +486,7 @@
     }
 
     function renderKPIs() {
-      var awardsTotals = totalRow(data.awardsTargets);
+      var awardsTotals = totalAwardsTargets();
       var directTotals = totalRow(data.directContractsByEntity);
       var privateTotals = totalRow(data.privateSector);
       var cards = [
@@ -458,8 +505,8 @@
     function totalAwardsTargets() {
       var total = { actual: 0, target: 0 };
       for (var i = 0; i < data.awardsTargets.length; i++) {
-        total.actual += Number(data.awardsTargets[i].actual || data.awardsTargets[i].Actual || 0);
-        total.target += Number(data.awardsTargets[i].target || data.awardsTargets[i].Target || 0);
+        total.actual += getAwardActual(data.awardsTargets[i]);
+        total.target += getAwardTarget(data.awardsTargets[i]);
       }
       return total;
     }
@@ -478,7 +525,7 @@
       var awardsRows = [];
       for (var a = 0; a < data.awardsTargets.length; a++) {
         var ar = data.awardsTargets[a];
-        awardsRows.push([normalizeEntityName(ar.entity || ar.Entity), normalizeMonthName(ar.month || ar.Month), integer(ar.target || ar.Target), integer(ar.actual || ar.Actual), percent(ar.actual || ar.Actual, ar.target || ar.Target)]);
+        awardsRows.push([getAwardEntity(ar), getAwardMonth(ar), integer(getAwardTarget(ar)), integer(getAwardActual(ar)), percent(getAwardActual(ar), getAwardTarget(ar))]);
       }
       var awardTotals = totalAwardsTargets();
       awardsRows.push(['<strong>TOTAL</strong>', '', '<strong>' + integer(awardTotals.target) + '</strong>', '<strong>' + integer(awardTotals.actual) + '</strong>', '<strong>' + percent(awardTotals.actual, awardTotals.target) + '</strong>']);
@@ -547,10 +594,10 @@
       charts.awards = new Chart(document.getElementById('awardsChart'), {
         type: 'bar',
         data: {
-          labels: data.awardsTargets.map(function (x) { return x.entity; }),
+          labels: data.awardsTargets.map(function (x) { return getAwardEntity(x) + (getAwardMonth(x) ? ' ' + getAwardMonth(x) : ''); }),
           datasets: [
-            { label: 'Target', data: data.awardsTargets.map(function (x) { return x.target; }), backgroundColor: '#94a3b8' },
-            { label: 'Actual', data: data.awardsTargets.map(function (x) { return x.actual; }), backgroundColor: '#0f766e' }
+            { label: 'Target', data: data.awardsTargets.map(function (x) { return getAwardTarget(x); }), backgroundColor: '#94a3b8' },
+            { label: 'Actual', data: data.awardsTargets.map(function (x) { return getAwardActual(x); }), backgroundColor: '#0f766e' }
           ]
         },
         options: { responsive: true, plugins: { legend: { position: 'top' } } }
