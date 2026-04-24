@@ -220,10 +220,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzv9bHIzgrG1PBSgbrLu2kf6-FXinDxS8iVWN5SEP_AAO0sAb-PPo0BXvTuXd67OUA/exec";
+    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbymGpw_P82vGw-V-Tm5nDAum0nUWijWNhkDWWRfsP68RgA6ptA-w_suWpJWgSKJxnX5ng/exec";
     var SHEET_ID = "1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg";
     var MAIN_SHEET = "Tendering";
     var MONTHS = ["MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB"];
+    var MONTH_LABELS = { MAR: "Mar 2026", APR: "Apr 2026", MAY: "May 2026", JUN: "Jun 2026", JUL: "Jul 2026", AUG: "Aug 2026", SEP: "Sep 2026", OCT: "Oct 2026", NOV: "Nov 2026", DEC: "Dec 2026", JAN: "Jan 2027", FEB: "Feb 2027" };
     var ENTITIES = ["On Point", "Nkanyezi", "Aqua Telecoms", "Distinct", "Aquatech", "Advantedge"];
     var SCOPES = ["Civils", "Roads", "Building", "Electrical", "Telecoms", "Mechanical", "Plant Hire"];
     var SHEET_TABS = [
@@ -253,11 +254,14 @@
         { entity: "Advantedge", tenders: {}, rfqs: {}, awards: {} }
       ],
       awardsTargets: [
-        { entity: "On Point", target: 50, actual: 4 },
-        { entity: "Nkanyezi", target: 30, actual: 2 },
-        { entity: "Aqua Telecoms", target: 24, actual: 0 },
-        { entity: "Distinct", target: 10, actual: 0 }
+        { entity: "On Point", month: "MAR", target: 50, actual: 2 },
+        { entity: "On Point", month: "APR", target: 50, actual: 2 },
+        { entity: "Nkanyezi", month: "MAR", target: 30, actual: 1 },
+        { entity: "Nkanyezi", month: "APR", target: 30, actual: 1 },
+        { entity: "Aqua Telecoms", month: "MAR", target: 24, actual: 0 },
+        { entity: "Distinct", month: "MAR", target: 10, actual: 0 }
       ],
+      directContractSummary: [],
       directContractsByEntity: [
         { entity: "On Point", actual: 135641627.97, target: 480000000 },
         { entity: "Aqua Telecoms", actual: 0, target: 175000000 },
@@ -458,7 +462,7 @@
         html += '<div class="card entity-card">';
         html += '<div class="entity-head"><h2 class="matrix-title">' + entityRow.entity + '</h2></div>';
         html += '<div class="entity-body"><div class="matrix-scroll"><table class="matrix-table"><thead><tr><th>Metric</th>';
-        for (var m = 0; m < MONTHS.length; m++) html += '<th>' + MONTHS[m] + '</th>';
+        for (var m = 0; m < MONTHS.length; m++) html += '<th>' + (MONTH_LABELS[MONTHS[m]] || MONTHS[m]) + '</th>';
         html += '<th>Total</th>';
         html += '</tr></thead><tbody>';
 
@@ -513,12 +517,20 @@
 
     function renderTables() {
       var rows = [];
-      for (var i = 0; i < data.tenderSummary.length; i++) {
-        var row = data.tenderSummary[i], tendersTotal = 0, rfqsTotal = 0, awardsTotal = 0;
-        for (var key in row.tenders) tendersTotal += Number(row.tenders[key] || 0);
-        for (var key2 in row.rfqs) rfqsTotal += Number(row.rfqs[key2] || 0);
-        awardsTotal = getAwardsTotalForEntity(row.entity);
-        rows.push([row.entity, integer(tendersTotal), integer(rfqsTotal), integer(awardsTotal)]);
+      var summarySource = data.directContractSummary && data.directContractSummary.length ? data.directContractSummary : [];
+      if (summarySource.length) {
+        for (var i = 0; i < summarySource.length; i++) {
+          var sr = summarySource[i];
+          rows.push([normalizeEntityName(sr.entity || sr.Entity), integer(sr.tendersTotal || sr.tenders || 0), integer(sr.rfqsTotal || sr.rfqs || 0), integer(sr.awardsTotal || sr.awards || 0)]);
+        }
+      } else {
+        for (var i = 0; i < data.tenderSummary.length; i++) {
+          var row = data.tenderSummary[i], tendersTotal = 0, rfqsTotal = 0, awardsTotal = 0;
+          for (var key in row.tenders) tendersTotal += Number(row.tenders[key] || 0);
+          for (var key2 in row.rfqs) rfqsTotal += Number(row.rfqs[key2] || 0);
+          awardsTotal = getAwardsTotalForEntity(row.entity);
+          rows.push([row.entity, integer(tendersTotal), integer(rfqsTotal), integer(awardsTotal)]);
+        }
       }
       renderTable('tenderSummaryTable', ['Entity', 'Tenders Total', 'RFQs Total', 'Awards Total'], rows);
 
@@ -808,6 +820,7 @@
       if (!result || !result.data) return;
       if (result.data.tenderSummary) data.tenderSummary = result.data.tenderSummary;
       if (result.data.awardsTargets) data.awardsTargets = result.data.awardsTargets;
+      if (result.data.directContractSummary) data.directContractSummary = result.data.directContractSummary;
       if (result.data.directContractsByEntity) data.directContractsByEntity = result.data.directContractsByEntity;
       if (result.data.directContractsByScope) data.directContractsByScope = result.data.directContractsByScope;
       if (result.data.privateSector) data.privateSector = result.data.privateSector;
