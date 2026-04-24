@@ -220,7 +220,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwU5uLy2agtSXXgz3MHAmM33j4lver82ZISdQUC6vYMQYRAWAzbOdtQJ11sTYmTDSjm8w/exec";
+    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1Zw65QovUneVCATnEgiblfIb06Q3v7FyaIasKHDI26Q6nL_nshOBMwGK4ePCw-m0DbA/exec";
     var SHEET_ID = "1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg";
     var MAIN_SHEET = "Tendering";
     var MONTHS = ["MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB"];
@@ -394,15 +394,11 @@
     }
 
     function getAwardMonth(award) {
-      // Dashboard awards must use Awards_Targets column "Headline Month".
-      // Fallbacks are included only so older rows still render if that header is missing.
-      return normalizeMonthName(getCellValue(award, [
-        'Headline Month', 'Headline_Month', 'HeadlineMonth', 'headlineMonth',
-        'month', 'Month', 'MONTH'
-      ]));
+      // Awards_Targets column E is headed Month. It can contain values such as MAR, March, or Onpoint March.
+      return normalizeMonthName(getCellValue(award, ['month', 'Month', 'MONTH']));
     }
 
-    function buildAwardsMonthMap() {
+    function ensureMonthlyAwardsFromAwardTargets() {
       var awardMonthMap = {};
 
       for (var a = 0; a < data.awardsTargets.length; a++) {
@@ -411,42 +407,11 @@
         var month = getAwardMonth(award);
         var actual = getAwardActual(award);
 
-        if (!entity || entity === 'Unknown' || MONTHS.indexOf(month) === -1) continue;
         if (!awardMonthMap[entity]) awardMonthMap[entity] = {};
-        awardMonthMap[entity][month] = Number(awardMonthMap[entity][month] || 0) + actual;
+        if (MONTHS.indexOf(month) > -1) {
+          awardMonthMap[entity][month] = Number(awardMonthMap[entity][month] || 0) + actual;
+        }
       }
-
-      return awardMonthMap;
-    }
-
-    function getAwardsChartRows() {
-      var awardMonthMap = buildAwardsMonthMap();
-      var targetMap = {};
-      var rows = [];
-
-      for (var i = 0; i < data.awardsTargets.length; i++) {
-        var award = data.awardsTargets[i];
-        var entity = getAwardEntity(award);
-        var month = getAwardMonth(award);
-        var target = getAwardTarget(award);
-
-        if (!targetMap[entity]) targetMap[entity] = {};
-        if (MONTHS.indexOf(month) > -1) targetMap[entity][month] = Number(targetMap[entity][month] || 0) + target;
-      }
-
-      ENTITIES.forEach(function(entity) {
-        MONTHS.forEach(function(month) {
-          var actual = awardMonthMap[entity] ? Number(awardMonthMap[entity][month] || 0) : 0;
-          var target = targetMap[entity] ? Number(targetMap[entity][month] || 0) : 0;
-          if (actual || target) rows.push({ entity: entity, month: month, actual: actual, target: target });
-        });
-      });
-
-      return rows;
-    }
-
-    function ensureMonthlyAwardsFromAwardTargets() {
-      var awardMonthMap = buildAwardsMonthMap();
 
       for (var i = 0; i < data.tenderSummary.length; i++) {
         var row = data.tenderSummary[i];
@@ -464,10 +429,12 @@
     function getAwardsTotalForEntity(entity) {
       var total = 0;
       var wanted = normalizeEntityName(entity);
-      var awardMonthMap = buildAwardsMonthMap();
 
-      if (awardMonthMap[wanted]) {
-        for (var m in awardMonthMap[wanted]) total += Number(awardMonthMap[wanted][m] || 0);
+      for (var i = 0; i < data.awardsTargets.length; i++) {
+        var award = data.awardsTargets[i];
+        if (getAwardEntity(award) === wanted) {
+          total += getAwardActual(award);
+        }
       }
 
       return total;
@@ -598,12 +565,12 @@
         var item = details[ed];
         execRows.push([
           normalizeEntityName(item.entity || item.Entity),
-          getCellValue(item, ['awardedCompany', 'AwardedCompany', 'Awarded By / Client', 'Awarded By', 'Client', 'Client Company']) || '',
-          getCellValue(item, ['description', 'Description', 'Award / Description', 'Opportunity', 'Contract Description']) || '',
-          getCellValue(item, ['scope', 'Scope']) || '',
-          normalizeMonthName(getCellValue(item, ['Headline Month', 'Headline_Month', 'month', 'Month'])),
-          currency(getCellValue(item, ['value', 'Value', 'Actual', 'Contract Value', 'Award Value']) || 0),
-          getCellValue(item, ['tenderRef', 'Tender Ref', 'Tender Reference', 'Reference']) || ''
+          item.awardedCompany || item.AwardedCompany || '',
+          item.description || '',
+          item.scope || '',
+          normalizeMonthName(item.month || item.Month),
+          currency(item.value || item.Actual || 0),
+          item.tenderRef || ''
         ]);
       }
       if (document.getElementById('executiveAwardsTable')) {
@@ -624,14 +591,13 @@
       if (typeof Chart === 'undefined') return;
       destroyCharts();
 
-      var awardsChartRows = getAwardsChartRows();
       charts.awards = new Chart(document.getElementById('awardsChart'), {
         type: 'bar',
         data: {
-          labels: awardsChartRows.map(function (x) { return x.entity + ' ' + x.month; }),
+          labels: data.awardsTargets.map(function (x) { return getAwardEntity(x) + (getAwardMonth(x) ? ' ' + getAwardMonth(x) : ''); }),
           datasets: [
-            { label: 'Target', data: awardsChartRows.map(function (x) { return x.target; }), backgroundColor: '#94a3b8' },
-            { label: 'Actual', data: awardsChartRows.map(function (x) { return x.actual; }), backgroundColor: '#0f766e' }
+            { label: 'Target', data: data.awardsTargets.map(function (x) { return getAwardTarget(x); }), backgroundColor: '#94a3b8' },
+            { label: 'Actual', data: data.awardsTargets.map(function (x) { return getAwardActual(x); }), backgroundColor: '#0f766e' }
           ]
         },
         options: { responsive: true, plugins: { legend: { position: 'top' } } }
@@ -846,9 +812,7 @@
       if (result.data.directContractsByScope) data.directContractsByScope = result.data.directContractsByScope;
       if (result.data.privateSector) data.privateSector = result.data.privateSector;
       if (result.data.pipeline) data.pipeline = result.data.pipeline;
-      // Executive Awards Detail is fed from Direct_Contracts in the Apps Script.
-      if (result.data.directContractsDetail) data.awardsDetail = result.data.directContractsDetail;
-      else if (result.data.awardsDetail) data.awardsDetail = result.data.awardsDetail;
+      if (result.data.awardsDetail) data.awardsDetail = result.data.awardsDetail;
     }
 
     function syncLiveData(showAlert) {
