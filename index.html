@@ -220,7 +220,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPqdxgeCSjUlnsTXDG72cF6o_9BwVJjCIkdP97WaR4mtmGTpDlCAMSaWwixYbdMR5GCA/exec";
+    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1Zw65QovUneVCATnEgiblfIb06Q3v7FyaIasKHDI26Q6nL_nshOBMwGK4ePCw-m0DbA/exec";
     var SHEET_ID = "1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg";
     var MAIN_SHEET = "Tendering";
     var MONTHS = ["MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB"];
@@ -358,13 +358,18 @@
         var actual = Number(award.actual || award.Actual || 0);
 
         if (!awardMonthMap[entity]) awardMonthMap[entity] = {};
-        if (month) awardMonthMap[entity][month] = Number(awardMonthMap[entity][month] || 0) + actual;
+        if (month) {
+          awardMonthMap[entity][month] = Number(awardMonthMap[entity][month] || 0) + actual;
+        }
       }
 
       for (var i = 0; i < data.tenderSummary.length; i++) {
         var row = data.tenderSummary[i];
         row.entity = normalizeEntityName(row.entity || row.Entity);
-        if (!row.awards) row.awards = {};
+
+        // Awards must come only from Awards_Targets.
+        // This prevents demo/static awards and live Awards_Targets from being added together.
+        row.awards = {};
 
         if (awardMonthMap[row.entity]) {
           for (var m in awardMonthMap[row.entity]) {
@@ -388,6 +393,15 @@
       return total;
     }
 
+    function monthlyMetricTotal(row, key) {
+      var total = 0;
+      var values = row[key] || {};
+      for (var i = 0; i < MONTHS.length; i++) {
+        total += Number(values[MONTHS[i]] || 0);
+      }
+      return total;
+    }
+
     function renderEntityMatrices() {
       ensureMonthlyAwardsFromAwardTargets();
       var container = document.getElementById('entityMatrixContainer');
@@ -398,6 +412,7 @@
         html += '<div class="entity-head"><h2 class="matrix-title">' + entityRow.entity + '</h2></div>';
         html += '<div class="entity-body"><div class="matrix-scroll"><table class="matrix-table"><thead><tr><th>Metric</th>';
         for (var m = 0; m < MONTHS.length; m++) html += '<th>' + MONTHS[m] + '</th>';
+        html += '<th>Total</th>';
         html += '</tr></thead><tbody>';
 
         var metrics = [
@@ -413,6 +428,8 @@
             var val = entityRow[metrics[x].key] && entityRow[metrics[x].key][month];
             html += '<td>' + (val === 0 || val === null || typeof val === 'undefined' || val === '' ? '' : val) + '</td>';
           }
+          var rowTotal = monthlyMetricTotal(entityRow, metrics[x].key);
+          html += '<td><strong>' + (rowTotal ? rowTotal : '') + '</strong></td>';
           html += '</tr>';
         }
 
