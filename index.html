@@ -220,7 +220,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwcIV6cYcjopMICbaTGV7W7BLhguPF_t8PQG5921ESvA1xYVQBB0tzucNfJdITR1f7olQ/exec";
+    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPqdxgeCSjUlnsTXDG72cF6o_9BwVJjCIkdP97WaR4mtmGTpDlCAMSaWwixYbdMR5GCA/exec";
     var SHEET_ID = "1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg";
     var MAIN_SHEET = "Tendering";
     var MONTHS = ["MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB"];
@@ -332,13 +332,29 @@
     }
 
 
+
+    function normalizeEntityName(name) {
+      var cleaned = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      if (cleaned === 'onpoint' || cleaned === 'on point') return 'On Point';
+      if (cleaned === 'nkanyezi') return 'Nkanyezi';
+      if (cleaned === 'aqua telecoms') return 'Aqua Telecoms';
+      if (cleaned === 'distinct') return 'Distinct';
+      if (cleaned === 'aquatech') return 'Aquatech';
+      if (cleaned === 'advantedge') return 'Advantedge';
+      return String(name || '').trim() || 'Unknown';
+    }
+
+    function normalizeMonthName(month) {
+      return String(month || '').trim().toUpperCase();
+    }
+
     function ensureMonthlyAwardsFromAwardTargets() {
       var awardMonthMap = {};
 
       for (var a = 0; a < data.awardsTargets.length; a++) {
         var award = data.awardsTargets[a];
-        var entity = award.entity || 'Unknown';
-        var month = award.month || award.Month || '';
+        var entity = normalizeEntityName(award.entity || award.Entity || 'Unknown');
+        var month = normalizeMonthName(award.month || award.Month || '');
         var actual = Number(award.actual || award.Actual || 0);
 
         if (!awardMonthMap[entity]) awardMonthMap[entity] = {};
@@ -347,7 +363,9 @@
 
       for (var i = 0; i < data.tenderSummary.length; i++) {
         var row = data.tenderSummary[i];
+        row.entity = normalizeEntityName(row.entity || row.Entity);
         if (!row.awards) row.awards = {};
+
         if (awardMonthMap[row.entity]) {
           for (var m in awardMonthMap[row.entity]) {
             row.awards[m] = awardMonthMap[row.entity][m];
@@ -358,10 +376,15 @@
 
     function getAwardsTotalForEntity(entity) {
       var total = 0;
+      var wanted = normalizeEntityName(entity);
+
       for (var i = 0; i < data.awardsTargets.length; i++) {
         var award = data.awardsTargets[i];
-        if (award.entity === entity) total += Number(award.actual || 0);
+        if (normalizeEntityName(award.entity || award.Entity) === wanted) {
+          total += Number(award.actual || award.Actual || 0);
+        }
       }
+
       return total;
     }
 
@@ -415,6 +438,15 @@
       document.getElementById('kpiGrid').innerHTML = html;
     }
 
+    function totalAwardsTargets() {
+      var total = { actual: 0, target: 0 };
+      for (var i = 0; i < data.awardsTargets.length; i++) {
+        total.actual += Number(data.awardsTargets[i].actual || data.awardsTargets[i].Actual || 0);
+        total.target += Number(data.awardsTargets[i].target || data.awardsTargets[i].Target || 0);
+      }
+      return total;
+    }
+
     function renderTables() {
       var rows = [];
       for (var i = 0; i < data.tenderSummary.length; i++) {
@@ -429,9 +461,9 @@
       var awardsRows = [];
       for (var a = 0; a < data.awardsTargets.length; a++) {
         var ar = data.awardsTargets[a];
-        awardsRows.push([ar.entity, ar.month || '', integer(ar.target), integer(ar.actual), percent(ar.actual, ar.target)]);
+        awardsRows.push([normalizeEntityName(ar.entity || ar.Entity), normalizeMonthName(ar.month || ar.Month), integer(ar.target || ar.Target), integer(ar.actual || ar.Actual), percent(ar.actual || ar.Actual, ar.target || ar.Target)]);
       }
-      var awardTotals = totalRow(data.awardsTargets);
+      var awardTotals = totalAwardsTargets();
       awardsRows.push(['<strong>TOTAL</strong>', '', '<strong>' + integer(awardTotals.target) + '</strong>', '<strong>' + integer(awardTotals.actual) + '</strong>', '<strong>' + percent(awardTotals.actual, awardTotals.target) + '</strong>']);
       renderTable('awardsTable', ['Entity', 'Month', 'Target', 'Actual Achieved', '% Performance'], awardsRows);
 
@@ -468,12 +500,12 @@
       for (var ed = 0; ed < details.length; ed++) {
         var item = details[ed];
         execRows.push([
-          item.entity || '',
-          item.awardedCompany || '',
+          normalizeEntityName(item.entity || item.Entity),
+          item.awardedCompany || item.AwardedCompany || '',
           item.description || '',
           item.scope || '',
-          item.month || '',
-          currency(item.value || 0),
+          normalizeMonthName(item.month || item.Month),
+          currency(item.value || item.Actual || 0),
           item.tenderRef || ''
         ]);
       }
