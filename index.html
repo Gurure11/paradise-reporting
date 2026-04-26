@@ -36,7 +36,7 @@
     .kpi-title { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
     .kpi-value { font-size: 30px; font-weight: 700; }
     .kpi-sub { margin-top: 6px; color: var(--muted); font-size: 13px; }
-    .tabs { margin-top: 20px; background: white; border-radius: 22px; padding: 8px; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; box-shadow: var(--shadow); }
+    .tabs { margin-top: 20px; background: white; border-radius: 22px; padding: 8px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; box-shadow: var(--shadow); }
     .tab-btn { border: 0; background: transparent; padding: 12px 10px; border-radius: 14px; cursor: pointer; font-weight: 600; color: var(--muted); }
     .tab-btn.active { background: #ecfeff; color: var(--primary); }
     .tab-panel { display: none; margin-top: 18px; }
@@ -121,6 +121,7 @@
       <button class="tab-btn" data-tab="awards">Awards</button>
       <button class="tab-btn" data-tab="direct-entity">Direct by Entity</button>
       <button class="tab-btn" data-tab="direct-scope">Direct by Scope</button>
+      <button class="tab-btn" data-tab="direct-contracts">Direct Contracts</button>
       <button class="tab-btn" data-tab="private-sector">Private Sector</button>
       <button class="tab-btn" data-tab="pipeline">Pipeline</button>
       <button class="tab-btn" data-tab="input">Data Input</button>
@@ -147,6 +148,7 @@
     <section id="awards" class="tab-panel"><div class="card"><h2 class="section-title">Awards to Date by Entity</h2><div id="awardsTable"></div></div></section>
     <section id="direct-entity" class="tab-panel"><div class="card"><h2 class="section-title">Value of Direct Contracts to Date by Entity</h2><div id="directEntityTable"></div></div></section>
     <section id="direct-scope" class="tab-panel"><div class="card"><h2 class="section-title">Value of Direct Contracts by Scope</h2><div id="directScopeTable"></div></div></section>
+    <section id="direct-contracts" class="tab-panel"><div class="card"><h2 class="section-title">Direct Contracts</h2><div id="directContractsTable"></div></div></section>
     <section id="private-sector" class="tab-panel"><div class="card"><h2 class="section-title">Private Sector Awards by Entity</h2><div id="privateSectorTable"></div></div></section>
     <section id="pipeline" class="tab-panel"><div class="card"><h2 class="section-title">Pipeline</h2><div id="pipelineTable"></div></div></section>
 
@@ -220,7 +222,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlFsUcpvxwyuJxTm87uOxXkfjuDo_8K9fWamkD3jXbgDoXuoFZDXvpsnPWOCLiJ20fZA/exec";
+    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKz57bwiV7vYafVkx3SQS3XJNxecZUT8ddlXjtq5vQ4R8fq-2d0vwCXv_jbUkeosR-VQ/exec";
     var SHEET_ID = "1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg";
     var MAIN_SHEET = "Tendering";
     var MONTHS = ["MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB"];
@@ -229,8 +231,8 @@
     var SHEET_TABS = [
       { tab: "Tendering", headline: "Tendering Dashboard Overview & KPIs" },
       { tab: "Tender_Summary", headline: "Summary of Tenders, RFQs and Awards by Entity" },
-      { tab: "Awards_Targets", headline: "Awards to Date Against Annual Targets" },
-      { tab: "Direct_Contracts", headline: "Direct Contracts Awarded and Value to Date" },
+      { tab: "Awards_Targets", headline: "Entity | MAR | APR | MAY | JUN | JUL | AUG | SEP | OCT | NOV | DEC | JAN | FEB | Awards to Date | Target | % Performance" },
+      { tab: "Direct_Contracts", headline: "Timestamp | Entity | Scope | Value | Target | Month | CostCenter | Notes | InputBy | AwardedCompany | TenderRef" },
       { tab: "Direct_By_Entity", headline: "Value of Direct Contracts by Entity" },
       { tab: "Direct_By_Scope", headline: "Value of Direct Contracts by Scope" },
       { tab: "Private_Sector", headline: "Private Sector Awards by Entity" },
@@ -272,6 +274,10 @@
         { scope: "Telecoms", actual: 0, target: 75000000 },
         { scope: "Mechanical", actual: 0, target: 100000000 },
         { scope: "Plant Hire", actual: 0, target: 10000000 }
+      ],
+      directContracts: [
+        { Timestamp: "", Entity: "On Point", Scope: "Roads", Value: 107810713.23, Target: 106000000, Month: "MAR", CostCenter: "", Notes: "", InputBy: "", AwardedCompany: "", TenderRef: "" },
+        { Timestamp: "", Entity: "On Point", Scope: "Building", Value: 27830914.74, Target: 105000000, Month: "APR", CostCenter: "", Notes: "", InputBy: "", AwardedCompany: "Coega", TenderRef: "" }
       ],
       privateSector: [
         { entity: "On Point", actual: 0, target: 20000000 },
@@ -379,13 +385,13 @@
     function getAwardActual(award) {
       var value = getCellValue(award, [
         'actual', 'Actual', 'Actual Achieved', 'Actual_Achieved', 'ActualAchieved',
-        'achieved', 'Achieved', 'value', 'Value', 'count', 'Count', 'awards', 'Awards'
+        'achieved', 'Achieved', 'value', 'Value', 'count', 'Count', 'awards', 'Awards', 'award', 'Award', 'Awards to Date', 'Awards_To_Date', 'AwardsToDate', 'Actual Awards', 'Actual_Awards'
       ]);
       return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
     }
 
     function getAwardTarget(award) {
-      var value = getCellValue(award, ['target', 'Target', 'Annual Target', 'Annual_Target', 'AnnualTarget']);
+      var value = getCellValue(award, ['target', 'Target', 'Annual Target', 'Annual_Target', 'AnnualTarget', 'Annual Awards Target', 'Awards Target', 'Awards_Target']);
       return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
     }
 
@@ -504,11 +510,65 @@
 
     function totalAwardsTargets() {
       var total = { actual: 0, target: 0 };
-      for (var i = 0; i < data.awardsTargets.length; i++) {
-        total.actual += getAwardActual(data.awardsTargets[i]);
-        total.target += getAwardTarget(data.awardsTargets[i]);
+      var rows = aggregateAwardsByEntityMonth();
+      for (var i = 0; i < rows.length; i++) {
+        total.actual += Number(rows[i].total || 0);
+        total.target += Number(rows[i].target || 0);
       }
       return total;
+    }
+
+
+    function getAwardsTargetByEntity(entity) {
+      var wanted = normalizeEntityName(entity);
+      var maxTarget = 0;
+      for (var i = 0; i < data.awardsTargets.length; i++) {
+        var award = data.awardsTargets[i];
+        if (getAwardEntity(award) === wanted) maxTarget = Math.max(maxTarget, getAwardTarget(award));
+      }
+      return maxTarget;
+    }
+
+    function aggregateAwardsByEntityMonth() {
+      var map = {};
+      for (var i = 0; i < data.awardsTargets.length; i++) {
+        var award = data.awardsTargets[i];
+        var entity = getAwardEntity(award);
+        var month = getAwardMonth(award);
+        if (!map[entity]) {
+          map[entity] = { entity: entity, target: 0, total: 0, months: {} };
+          for (var m = 0; m < MONTHS.length; m++) map[entity].months[MONTHS[m]] = 0;
+        }
+        map[entity].target = Math.max(map[entity].target || 0, getAwardTarget(award));
+        if (MONTHS.indexOf(month) > -1) map[entity].months[month] += getAwardActual(award);
+      }
+      var rows = [];
+      var used = {};
+      for (var e = 0; e < ENTITIES.length; e++) {
+        var name = ENTITIES[e];
+        if (map[name]) { rows.push(map[name]); used[name] = true; }
+      }
+      for (var key in map) if (!used[key]) rows.push(map[key]);
+      for (var r = 0; r < rows.length; r++) {
+        var total = 0;
+        for (var x = 0; x < MONTHS.length; x++) total += Number(rows[r].months[MONTHS[x]] || 0);
+        rows[r].total = total;
+      }
+      return rows;
+    }
+
+    function getDirectContractValue(contract) {
+      var value = getCellValue(contract, ['Value', 'value', 'Actual', 'actual', 'Amount', 'amount']);
+      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
+    }
+
+    function getDirectContractTarget(contract) {
+      var value = getCellValue(contract, ['Target', 'target']);
+      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
+    }
+
+    function getDirectContractField(contract, names) {
+      return getCellValue(contract, names);
     }
 
     function renderTables() {
@@ -523,13 +583,31 @@
       renderTable('tenderSummaryTable', ['Entity', 'Tenders Total', 'RFQs Total', 'Awards Total'], rows);
 
       var awardsRows = [];
-      for (var a = 0; a < data.awardsTargets.length; a++) {
-        var ar = data.awardsTargets[a];
-        awardsRows.push([getAwardEntity(ar), getAwardMonth(ar), integer(getAwardTarget(ar)), integer(getAwardActual(ar)), percent(getAwardActual(ar), getAwardTarget(ar))]);
+      var awardsMatrix = aggregateAwardsByEntityMonth();
+      var awardTargetTotal = 0, awardActualTotal = 0;
+      for (var a = 0; a < awardsMatrix.length; a++) {
+        var ar = awardsMatrix[a];
+        var rowOut = [ar.entity];
+        for (var am = 0; am < MONTHS.length; am++) rowOut.push(ar.months[MONTHS[am]] ? integer(ar.months[MONTHS[am]]) : '');
+        rowOut.push(integer(ar.total));
+        rowOut.push(integer(ar.target));
+        rowOut.push(percent(ar.total, ar.target));
+        awardActualTotal += Number(ar.total || 0);
+        awardTargetTotal += Number(ar.target || 0);
+        awardsRows.push(rowOut);
       }
-      var awardTotals = totalAwardsTargets();
-      awardsRows.push(['<strong>TOTAL</strong>', '', '<strong>' + integer(awardTotals.target) + '</strong>', '<strong>' + integer(awardTotals.actual) + '</strong>', '<strong>' + percent(awardTotals.actual, awardTotals.target) + '</strong>']);
-      renderTable('awardsTable', ['Entity', 'Month', 'Target', 'Actual Achieved', '% Performance'], awardsRows);
+      var totalAwardRow = ['<strong>TOTAL</strong>'];
+      for (var atm = 0; atm < MONTHS.length; atm++) {
+        var monthTotal = 0;
+        for (var ati = 0; ati < awardsMatrix.length; ati++) monthTotal += Number(awardsMatrix[ati].months[MONTHS[atm]] || 0);
+        totalAwardRow.push(monthTotal ? '<strong>' + integer(monthTotal) + '</strong>' : '');
+      }
+      totalAwardRow.push('<strong>' + integer(awardActualTotal) + '</strong>');
+      totalAwardRow.push('<strong>' + integer(awardTargetTotal) + '</strong>');
+      totalAwardRow.push('<strong>' + percent(awardActualTotal, awardTargetTotal) + '</strong>');
+      awardsRows.push(totalAwardRow);
+      renderTable('awardsTable', ['Entity'].concat(MONTHS).concat(['Awards to Date', 'Target', '% Performance']), awardsRows, 'matrix-table');
+
 
       var deRows = [];
       for (var d = 0; d < data.directContractsByEntity.length; d++) {
@@ -544,6 +622,28 @@
         dsRows.push([dsr.scope, currency(dsr.actual), currency(dsr.target), percent(dsr.actual, dsr.target)]);
       }
       renderTable('directScopeTable', ['Scope', 'Actual', 'Target', '% Performance'], dsRows);
+      var dcRows = [];
+      var contracts = data.directContracts || [];
+      for (var dc = 0; dc < contracts.length; dc++) {
+        var cr = contracts[dc];
+        dcRows.push([
+          getDirectContractField(cr, ['Timestamp', 'timestamp', 'Date', 'date']),
+          normalizeEntityName(getDirectContractField(cr, ['Entity', 'entity'])),
+          getDirectContractField(cr, ['Scope', 'scope']),
+          currency(getDirectContractValue(cr)),
+          currency(getDirectContractTarget(cr)),
+          normalizeMonthName(getDirectContractField(cr, ['Month', 'month'])),
+          getDirectContractField(cr, ['CostCenter', 'Cost Center', 'costCenter', 'costcenter']),
+          getDirectContractField(cr, ['Notes', 'notes']),
+          getDirectContractField(cr, ['InputBy', 'Input By', 'inputBy', 'inputby']),
+          getDirectContractField(cr, ['AwardedCompany', 'Awarded Company', 'awardedCompany', 'Client']),
+          getDirectContractField(cr, ['TenderRef', 'Tender Ref', 'tenderRef', 'Reference'])
+        ]);
+      }
+      if (document.getElementById('directContractsTable')) {
+        renderTable('directContractsTable', ['Timestamp', 'Entity', 'Scope', 'Value', 'Target', 'Month', 'CostCenter', 'Notes', 'InputBy', 'AwardedCompany', 'TenderRef'], dcRows);
+      }
+
 
       var psRows = [];
       for (var p = 0; p < data.privateSector.length; p++) {
@@ -563,23 +663,18 @@
       var details = data.awardsDetail || [];
       for (var ed = 0; ed < details.length; ed++) {
         var item = details[ed];
-        var detailMonth = normalizeMonthName(item.month || item.Month || item.monthAwarded || item.MonthAwarded || item.awardMonth || item.AwardMonth);
-        var detailValue = Number(String(item.value || item.Value || item.actual || item.Actual || 0).replace(/[^0-9.-]/g, '') || 0);
-        var rowCells = [
-          normalizeEntityName(item.entity || item.Entity || item['Cost Center'] || item.CostCenter),
-          item.awardedCompany || item.AwardedCompany || item['Awarded By / Client'] || item.Client || '',
-          item.description || item.Description || item['Award / Description'] || item.Opportunity || '',
-          item.scope || item.Scope || ''
-        ];
-        for (var em = 0; em < MONTHS.length; em++) {
-          rowCells.push(MONTHS[em] === detailMonth && detailValue ? currency(detailValue) : '');
-        }
-        rowCells.push(detailValue ? currency(detailValue) : '');
-        rowCells.push(item.tenderRef || item.TenderRef || item['Tender Ref'] || '');
-        execRows.push(rowCells);
+        execRows.push([
+          normalizeEntityName(item.entity || item.Entity),
+          item.awardedCompany || item.AwardedCompany || '',
+          item.description || '',
+          item.scope || '',
+          normalizeMonthName(item.month || item.Month),
+          currency(item.value || item.Actual || 0),
+          item.tenderRef || ''
+        ]);
       }
       if (document.getElementById('executiveAwardsTable')) {
-        renderTable('executiveAwardsTable', ['Entity', 'Awarded By / Client', 'Award / Description', 'Scope'].concat(MONTHS).concat(['Total', 'Tender Ref']), execRows, 'matrix-table');
+        renderTable('executiveAwardsTable', ['Entity', 'Awarded By / Client', 'Award / Description', 'Scope', 'Month', 'Value', 'Tender Ref'], execRows);
       }
 
       var sheetRows = [];
@@ -596,13 +691,14 @@
       if (typeof Chart === 'undefined') return;
       destroyCharts();
 
+      var awardsChartRows = aggregateAwardsByEntityMonth();
       charts.awards = new Chart(document.getElementById('awardsChart'), {
         type: 'bar',
         data: {
-          labels: data.awardsTargets.map(function (x) { return getAwardEntity(x) + (getAwardMonth(x) ? ' ' + getAwardMonth(x) : ''); }),
+          labels: awardsChartRows.map(function (x) { return x.entity; }),
           datasets: [
-            { label: 'Target', data: data.awardsTargets.map(function (x) { return getAwardTarget(x); }), backgroundColor: '#94a3b8' },
-            { label: 'Actual', data: data.awardsTargets.map(function (x) { return getAwardActual(x); }), backgroundColor: '#0f766e' }
+            { label: 'Target', data: awardsChartRows.map(function (x) { return x.target; }), backgroundColor: '#94a3b8' },
+            { label: 'Awards to Date', data: awardsChartRows.map(function (x) { return x.total; }), backgroundColor: '#0f766e' }
           ]
         },
         options: { responsive: true, plugins: { legend: { position: 'top' } } }
@@ -815,6 +911,8 @@
       if (result.data.awardsTargets) data.awardsTargets = result.data.awardsTargets;
       if (result.data.directContractsByEntity) data.directContractsByEntity = result.data.directContractsByEntity;
       if (result.data.directContractsByScope) data.directContractsByScope = result.data.directContractsByScope;
+      if (result.data.directContracts) data.directContracts = result.data.directContracts;
+      if (result.data.Direct_Contracts) data.directContracts = result.data.Direct_Contracts;
       if (result.data.privateSector) data.privateSector = result.data.privateSector;
       if (result.data.pipeline) data.pipeline = result.data.pipeline;
       if (result.data.awardsDetail) data.awardsDetail = result.data.awardsDetail;
