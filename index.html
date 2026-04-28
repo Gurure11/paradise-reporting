@@ -149,7 +149,7 @@
       Example:
       const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxxxxxx/exec';
     */
-    const SCRIPT_URL = 'PASTE_YOUR_DEPLOYED_APPS_SCRIPT_WEB_APP_URL_HERE';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGzaDLS57aMdrxwwsHxPKJ9HPWQHrIeF_hFEMm-gf1JP1Vuw5ywoTLvGntrGQ9DWkW/exec';
 
     const months = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
     let currentUser = null;
@@ -162,7 +162,7 @@
 
     function api(action, params) {
       return new Promise(function(resolve, reject) {
-        if (!SCRIPT_URL || SCRIPT_URL.indexOf('PASTE_YOUR_DEPLOYED') !== -1) {
+        if (!SCRIPT_URL || SCRIPT_URL.indexOf('https://script.google.com/macros/s/AKfycbyGzaDLS57aMdrxwwsHxPKJ9HPWQHrIeF_hFEMm-gf1JP1Vuw5ywoTLvGntrGQ9DWkW/exec') !== -1) {
           reject(new Error('Apps Script Web App URL is missing. Paste it into SCRIPT_URL in this HTML file.'));
           return;
         }
