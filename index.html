@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tendering Dashboard</title>
   <style>
@@ -37,20 +36,26 @@
     .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
     .tabs button { width: auto; padding: 9px 13px; border-radius: 999px; }
     .topbar { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
-    .badge { background:#e2e8f0; padding:7px 10px; border-radius:999px; font-size:13px; }
+    .badge { background:#e2e8f0; padding:7px 10px; border-radius:999px; font-size:13px; display:inline-block; margin-top:6px; }
     .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
     .kpi { background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:14px; }
     .kpi strong { display:block; font-size:24px; margin-top:6px; }
+    .url-warning { background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; border-radius:12px; padding:12px; margin-bottom:15px; }
   </style>
 </head>
 
 <body>
   <header>
-    <h1>Tendering Dashboard — 2026/27 Performance</h1>
-    <p>Google Sheets connected dashboard for tenders, RFQs, awards, direct contracts and pipeline.</p>
+    <h1>Tendering Dashboard - 2026/27 Performance</h1>
+    <p>Standalone HTML connected to Google Sheets using a Google Apps Script Web App URL.</p>
   </header>
 
   <div class="wrap">
+    <div id="urlWarning" class="url-warning hidden">
+      Paste your deployed Apps Script Web App URL inside the HTML file at:
+      <strong>const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyGzaDLS57aMdrxwwsHxPKJ9HPWQHrIeF_hFEMm-gf1JP1Vuw5ywoTLvGntrGQ9DWkW/exec';</strong>
+    </div>
+
     <section id="auth" class="card">
       <h2>Login</h2>
       <div class="grid">
@@ -70,7 +75,7 @@
           <option>Editor</option>
           <option>Admin</option>
         </select>
-        <button class="secondary" onclick="register()">Register</button>
+        <button class="secondary" onclick="registerUser()">Register</button>
       </div>
       <p id="regMsg"></p>
     </section>
@@ -136,8 +141,60 @@
   </div>
 
   <script>
+    /*
+      IMPORTANT:
+      1. Deploy the Apps Script file as a Web App.
+      2. Copy the Web App URL.
+      3. Paste it below between the quotes.
+      Example:
+      const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxxxxxx/exec';
+    */
+    const SCRIPT_URL = 'PASTE_YOUR_DEPLOYED_APPS_SCRIPT_WEB_APP_URL_HERE';
+
     const months = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
     let currentUser = null;
+
+    window.onload = function() {
+      if (!SCRIPT_URL || SCRIPT_URL.indexOf('PASTE_YOUR_DEPLOYED') !== -1) {
+        document.getElementById('urlWarning').classList.remove('hidden');
+      }
+    };
+
+    function api(action, params) {
+      return new Promise(function(resolve, reject) {
+        if (!SCRIPT_URL || SCRIPT_URL.indexOf('PASTE_YOUR_DEPLOYED') !== -1) {
+          reject(new Error('Apps Script Web App URL is missing. Paste it into SCRIPT_URL in this HTML file.'));
+          return;
+        }
+
+        const callbackName = 'jsonpCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const query = new URLSearchParams(params || {});
+        query.set('action', action);
+        query.set('callback', callbackName);
+
+        const script = document.createElement('script');
+        script.src = SCRIPT_URL + '?' + query.toString();
+
+        window[callbackName] = function(response) {
+          delete window[callbackName];
+          document.body.removeChild(script);
+
+          if (response && response.success) {
+            resolve(response.data);
+          } else {
+            reject(new Error((response && response.error) ? response.error : 'Unknown API error'));
+          }
+        };
+
+        script.onerror = function() {
+          delete window[callbackName];
+          if (script.parentNode) document.body.removeChild(script);
+          reject(new Error('Could not connect to Apps Script. Check your Web App URL and deployment access.'));
+        };
+
+        document.body.appendChild(script);
+      });
+    }
 
     function blankZero(value) {
       return value === 0 || value === '0' ? '' : (value ?? '');
@@ -145,39 +202,37 @@
 
     function login() {
       document.getElementById('loginMsg').textContent = '';
-      google.script.run
-        .withSuccessHandler(user => {
-          currentUser = user;
-          document.getElementById('auth').classList.add('hidden');
-          document.getElementById('app').classList.remove('hidden');
-          document.getElementById('userLabel').textContent = `${user.name} — ${user.role}`;
-          loadDashboard();
-        })
-        .withFailureHandler(err => document.getElementById('loginMsg').textContent = err.message)
-        .loginUser({
-          email: document.getElementById('loginEmail').value,
-          password: document.getElementById('loginPassword').value
-        });
+
+      api('login', {
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value
+      }).then(function(user) {
+        currentUser = user;
+        document.getElementById('auth').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        document.getElementById('userLabel').textContent = user.name + ' - ' + user.role;
+        loadDashboard();
+      }).catch(function(err) {
+        document.getElementById('loginMsg').textContent = err.message;
+      });
     }
 
-    function register() {
+    function registerUser() {
       const msg = document.getElementById('regMsg');
       msg.textContent = '';
-      google.script.run
-        .withSuccessHandler(() => {
-          msg.className = 'success';
-          msg.textContent = 'User registered successfully. You can now login.';
-        })
-        .withFailureHandler(err => {
-          msg.className = 'error';
-          msg.textContent = err.message;
-        })
-        .registerUser({
-          name: document.getElementById('regName').value,
-          email: document.getElementById('regEmail').value,
-          password: document.getElementById('regPassword').value,
-          role: document.getElementById('regRole').value
-        });
+
+      api('register', {
+        name: document.getElementById('regName').value,
+        email: document.getElementById('regEmail').value,
+        password: document.getElementById('regPassword').value,
+        role: document.getElementById('regRole').value
+      }).then(function() {
+        msg.className = 'success';
+        msg.textContent = 'User registered successfully. You can now login.';
+      }).catch(function(err) {
+        msg.className = 'error';
+        msg.textContent = err.message;
+      });
     }
 
     function logout() {
@@ -187,31 +242,36 @@
     }
 
     function loadDashboard() {
-      google.script.run
-        .withSuccessHandler(renderDashboard)
-        .withFailureHandler(err => document.getElementById('dashboardTable').textContent = err.message)
-        .getDashboardData();
+      api('dashboard', {}).then(renderDashboard).catch(function(err) {
+        document.getElementById('dashboardTable').textContent = err.message;
+      });
     }
 
     function renderDashboard(data) {
-      const headers = ['Cost Centre','Metric',...data.months,'Total'];
+      const headers = ['Cost Centre','Metric'].concat(data.months).concat(['Total']);
       let totals = { TENDERS: 0, RFQS: 0, AWARDS: 0 };
 
-      let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+      let html = '<table><thead><tr>' + headers.map(function(h) {
+        return '<th>' + h + '</th>';
+      }).join('') + '</tr></thead><tbody>';
 
-      data.rows.forEach(row => {
-        if (totals[row.Metric] !== undefined) totals[row.Metric] += Number(row.Total || 0);
-        html += '<tr>' + headers.map(h => `<td>${blankZero(row[h])}</td>`).join('') + '</tr>';
+      data.rows.forEach(function(row) {
+        if (totals[row.Metric] !== undefined) {
+          totals[row.Metric] += Number(row.Total || 0);
+        }
+
+        html += '<tr>' + headers.map(function(h) {
+          return '<td>' + blankZero(row[h]) + '</td>';
+        }).join('') + '</tr>';
       });
 
       html += '</tbody></table>';
       document.getElementById('dashboardTable').innerHTML = html;
 
-      document.getElementById('kpiCards').innerHTML = `
-        <div class="kpi">Total Tenders<strong>${totals.TENDERS || ''}</strong></div>
-        <div class="kpi">Total RFQs<strong>${totals.RFQS || ''}</strong></div>
-        <div class="kpi">Total Awards<strong>${totals.AWARDS || ''}</strong></div>
-      `;
+      document.getElementById('kpiCards').innerHTML =
+        '<div class="kpi">Total Tenders<strong>' + blankZero(totals.TENDERS) + '</strong></div>' +
+        '<div class="kpi">Total RFQs<strong>' + blankZero(totals.RFQS) + '</strong></div>' +
+        '<div class="kpi">Total Awards<strong>' + blankZero(totals.AWARDS) + '</strong></div>';
     }
 
     function saveMonthly() {
@@ -220,41 +280,43 @@
         metric: document.getElementById('metric').value
       };
 
-      months.forEach(month => {
+      months.forEach(function(month) {
         rowData[month] = document.getElementById(month).value;
       });
 
-      google.script.run
-        .withSuccessHandler(() => {
-          document.getElementById('saveMsg').className = 'success';
-          document.getElementById('saveMsg').textContent = 'Saved successfully.';
-          loadDashboard();
-        })
-        .withFailureHandler(err => {
-          document.getElementById('saveMsg').className = 'error';
-          document.getElementById('saveMsg').textContent = err.message;
-        })
-        .saveMonthlySummaryRow(rowData);
+      api('saveMonthly', rowData).then(function() {
+        document.getElementById('saveMsg').className = 'success';
+        document.getElementById('saveMsg').textContent = 'Saved successfully.';
+        loadDashboard();
+      }).catch(function(err) {
+        document.getElementById('saveMsg').className = 'error';
+        document.getElementById('saveMsg').textContent = err.message;
+      });
     }
 
     function loadTab(tabName) {
-      google.script.run
-        .withSuccessHandler(data => renderGenericTable(data, tabName))
-        .withFailureHandler(err => document.getElementById('tabData').textContent = err.message)
-        .getTabData(tabName);
+      api('tabData', { tabName: tabName }).then(function(data) {
+        renderGenericTable(data, tabName);
+      }).catch(function(err) {
+        document.getElementById('tabData').textContent = err.message;
+      });
     }
 
     function renderGenericTable(data, tabName) {
       if (!data.rows || !data.rows.length) {
-        document.getElementById('tabData').innerHTML = `<p>No records found in <strong>${tabName}</strong>.</p>`;
+        document.getElementById('tabData').innerHTML = '<p>No records found in <strong>' + tabName + '</strong>.</p>';
         return;
       }
 
       const headers = data.headers;
-      let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+      let html = '<table><thead><tr>' + headers.map(function(h) {
+        return '<th>' + h + '</th>';
+      }).join('') + '</tr></thead><tbody>';
 
-      data.rows.forEach(row => {
-        html += '<tr>' + headers.map(h => `<td>${blankZero(row[h])}</td>`).join('') + '</tr>';
+      data.rows.forEach(function(row) {
+        html += '<tr>' + headers.map(function(h) {
+          return '<td>' + blankZero(row[h]) + '</td>';
+        }).join('') + '</tr>';
       });
 
       html += '</tbody></table>';
