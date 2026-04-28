@@ -1,1014 +1,265 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tendering Performance Dashboard</title>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tendering Dashboard</title>
   <style>
     :root {
+      --dark: #0f172a;
+      --muted: #64748b;
       --bg: #f1f5f9;
       --card: #ffffff;
-      --text: #0f172a;
-      --muted: #64748b;
       --line: #e2e8f0;
-      --primary: #0f766e;
-      --warn-bg: #fffbeb;
-      --warn-border: #fde68a;
-      --warn-text: #92400e;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
-      --radius: 22px;
+      --green: #166534;
+      --red: #b91c1c;
+      --blue: #2563eb;
     }
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
-    .container { max-width: 1400px; margin: 0 auto; padding: 24px; }
-    .hero { background: linear-gradient(135deg, #0f172a, #1e293b, #065f46); color: white; border-radius: 28px; padding: 28px; box-shadow: var(--shadow); display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-    .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
-    .badge { background: rgba(255,255,255,0.14); color: white; padding: 8px 12px; border-radius: 999px; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
-    .hero h1 { margin: 0 0 8px; font-size: 34px; }
-    .hero p { margin: 0; color: #dbeafe; max-width: 760px; }
-    .hero-mini { display: grid; grid-template-columns: repeat(2, minmax(180px, 1fr)); gap: 12px; min-width: 320px; }
-    .mini-card, .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); }
-    .mini-card { background: rgba(255,255,255,0.10); color: white; padding: 16px; backdrop-filter: blur(6px); }
-    .mini-card .label { font-size: 12px; text-transform: uppercase; color: #cbd5e1; margin-bottom: 6px; }
-    .alert { margin-top: 18px; padding: 16px 18px; border-radius: 20px; background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn-text); }
-    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
-    .card { padding: 18px; }
-    .kpi-title { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
-    .kpi-value { font-size: 30px; font-weight: 700; }
-    .kpi-sub { margin-top: 6px; color: var(--muted); font-size: 13px; }
-    .tabs { margin-top: 20px; background: white; border-radius: 22px; padding: 8px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 8px; box-shadow: var(--shadow); }
-    .tab-btn { border: 0; background: transparent; padding: 12px 10px; border-radius: 14px; cursor: pointer; font-weight: 600; color: var(--muted); }
-    .tab-btn.active { background: #ecfeff; color: var(--primary); }
-    .tab-panel { display: none; margin-top: 18px; }
-    .tab-panel.active { display: block; }
-    .grid-2, .grid-3 { display: grid; gap: 16px; }
-    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-3 { grid-template-columns: 2fr 1fr; }
-    .section-title { margin: 0 0 14px; font-size: 20px; }
-    .chart-wrap { width: 100%; overflow-x: auto; }
-    canvas { width: 100% !important; max-height: 360px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-    th { color: var(--muted); font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
-    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .field { display: flex; flex-direction: column; gap: 8px; }
-    .field.full { grid-column: 1 / -1; }
-    label { font-size: 13px; font-weight: 600; color: #334155; }
-    input, select, textarea { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; font: inherit; background: white; }
-    textarea { min-height: 90px; resize: vertical; }
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
-    .btn { border: 0; border-radius: 14px; padding: 12px 16px; font-weight: 700; cursor: pointer; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-outline { background: white; color: var(--primary); border: 1px solid #99f6e4; }
-    .btn-secondary { background: #e2e8f0; color: #0f172a; }
-    .small-note { background: #f8fafc; border-radius: 18px; padding: 14px; color: var(--muted); font-size: 13px; line-height: 1.5; }
-    .status-pill { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .status-connected { background: #dcfce7; color: #166534; }
-    .status-demo { background: #fef3c7; color: #92400e; }
-    .status-syncing { background: #dbeafe; color: #1e40af; }
-    .matrix-wrap { margin-top: 16px; display: grid; gap: 16px; }
-    .matrix-title { margin: 0 0 10px; font-size: 18px; }
-    .matrix-scroll { overflow-x: auto; }
-    .matrix-table th, .matrix-table td { white-space: nowrap; text-align: center; min-width: 68px; }
-    .matrix-table th:first-child, .matrix-table td:first-child { text-align: left; min-width: 120px; position: sticky; left: 0; background: white; }
-    .entity-card { padding: 0; overflow: hidden; }
-    .entity-head { padding: 18px 18px 0 18px; }
-    .entity-body { padding: 0 18px 18px 18px; }
-    .award-list { margin-top: 12px; display: grid; gap: 8px; }
-    .award-chip { padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: #f8fafc; font-size: 13px; }
-    .award-chip strong { color: var(--primary); }
-    @media (max-width: 1100px) {
-      .kpi-grid, .grid-2, .grid-3, .form-grid { grid-template-columns: 1fr 1fr; }
-      .tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .grid-3 { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 760px) {
-      .container { padding: 16px; }
-      .kpi-grid, .grid-2, .form-grid, .hero-mini, .tabs { grid-template-columns: 1fr; }
-      .hero h1 { font-size: 28px; }
-    }
+    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: #1e293b; }
+    header { background: var(--dark); color: white; padding: 20px 28px; }
+    header h1 { margin: 0; font-size: 24px; }
+    header p { margin: 5px 0 0; color: #cbd5e1; }
+    .wrap { padding: 24px; }
+    .card { background: var(--card); border-radius: 16px; padding: 18px; margin-bottom: 18px; box-shadow: 0 8px 24px rgba(15,23,42,.08); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+    input, select, button { width: 100%; box-sizing: border-box; padding: 11px; border-radius: 9px; border: 1px solid #cbd5e1; font-size: 14px; }
+    button { background: var(--dark); color: white; border: 0; cursor: pointer; font-weight: bold; }
+    button.secondary { background: var(--muted); }
+    button.blue { background: var(--blue); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; background: white; }
+    th, td { border: 1px solid var(--line); padding: 8px; text-align: center; white-space: nowrap; }
+    th { background: #e2e8f0; font-weight: bold; }
+    td:first-child, td:nth-child(2), th:first-child, th:nth-child(2) { text-align: left; }
+    .table-wrap { overflow-x: auto; }
+    .hidden { display: none; }
+    .success { color: var(--green); font-weight: bold; }
+    .error { color: var(--red); font-weight: bold; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .tabs button { width: auto; padding: 9px 13px; border-radius: 999px; }
+    .topbar { display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; }
+    .badge { background:#e2e8f0; padding:7px 10px; border-radius:999px; font-size:13px; }
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; }
+    .kpi { background:#f8fafc; border:1px solid var(--line); border-radius:14px; padding:14px; }
+    .kpi strong { display:block; font-size:24px; margin-top:6px; }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <section class="hero">
-      <div>
-        <div class="badge-row">
-          <span class="badge">2026/27 FY</span>
-          <span class="badge">Tendering Department</span>
-          <span class="badge">Live Dashboard</span>
-        </div>
-        <h1>Onpoint Group Tendering Performance Dashboard</h1>
-        <p>Dashboard connected to live data. Each section fetches from its matching tab and shows live connection when the API responds successfully.</p>
+  <header>
+    <h1>Tendering Dashboard — 2026/27 Performance</h1>
+    <p>Google Sheets connected dashboard for tenders, RFQs, awards, direct contracts and pipeline.</p>
+  </header>
+
+  <div class="wrap">
+    <section id="auth" class="card">
+      <h2>Login</h2>
+      <div class="grid">
+        <input id="loginEmail" type="email" placeholder="Email">
+        <input id="loginPassword" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
       </div>
-      <div class="hero-mini">
-        <div class="mini-card"><div class="label">Connection</div><div id="connectionLabel">Not connected</div></div>
-        <div class="mini-card"><div class="label">Main Sheet</div><div>Tendering</div></div>
-        <div class="mini-card"><div class="label">Sheet ID</div><div style="word-break: break-all;">1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg</div></div>
-        <div class="mini-card"><div class="label">Mode</div><div id="modeLabel">Demo data active</div></div>
+      <p id="loginMsg" class="error"></p>
+
+      <h3>Register New User</h3>
+      <div class="grid">
+        <input id="regName" placeholder="Name">
+        <input id="regEmail" type="email" placeholder="Email">
+        <input id="regPassword" type="password" placeholder="Password">
+        <select id="regRole">
+          <option>Viewer</option>
+          <option>Editor</option>
+          <option>Admin</option>
+        </select>
+        <button class="secondary" onclick="register()">Register</button>
       </div>
+      <p id="regMsg"></p>
     </section>
 
-    <div id="offlineAlert" class="alert">
-      <strong>Connecting...</strong> The dashboard is connecting automatically to Google Sheets live data.
-    </div>
-
-    <section class="kpi-grid" id="kpiGrid"></section>
-
-    <nav class="tabs">
-      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
-      <button class="tab-btn" data-tab="tender-summary">Tenders & RFQs</button>
-      <button class="tab-btn" data-tab="awards">Awards</button>
-      <button class="tab-btn" data-tab="direct-entity">Direct by Entity</button>
-      <button class="tab-btn" data-tab="direct-scope">Direct by Scope</button>
-      <button class="tab-btn" data-tab="direct-contracts">Direct Contracts</button>
-      <button class="tab-btn" data-tab="private-sector">Private Sector</button>
-      <button class="tab-btn" data-tab="pipeline">Pipeline</button>
-      <button class="tab-btn" data-tab="input">Data Input</button>
-    </nav>
-
-    <section id="dashboard" class="tab-panel active">
-      <div class="matrix-wrap" id="entityMatrixContainer"></div>
-
-      <div class="grid-3">
-        <div class="card"><h2 class="section-title">Awards to Date Against Target</h2><div class="chart-wrap"><canvas id="awardsChart"></canvas></div></div>
-        <div class="card"><h2 class="section-title">Direct Contract Mix by Scope</h2><div class="chart-wrap"><canvas id="scopePieChart"></canvas></div></div>
-      </div>
-      <div class="grid-2" style="margin-top: 16px;">
-        <div class="card"><h2 class="section-title">Value of Direct Contracts by Entity</h2><div class="chart-wrap"><canvas id="entityValueChart"></canvas></div></div>
-        <div class="card"><h2 class="section-title">Private Sector Awards</h2><div class="chart-wrap"><canvas id="privateSectorChart"></canvas></div></div>
-      </div>
-      <div class="card" style="margin-top: 16px;">
-        <h2 class="section-title">Executive Awards Detail</h2>
-        <div id="executiveAwardsTable"></div>
-      </div>
-    </section>
-
-    <section id="tender-summary" class="tab-panel"><div class="card"><h2 class="section-title">Summary of Tenders, RFQs and Awards by Entity</h2><div id="tenderSummaryTable"></div></div></section>
-    <section id="awards" class="tab-panel"><div class="card"><h2 class="section-title">Awards to Date by Entity</h2><div id="awardsTable"></div></div></section>
-    <section id="direct-entity" class="tab-panel"><div class="card"><h2 class="section-title">Value of Direct Contracts to Date by Entity</h2><div id="directEntityTable"></div></div></section>
-    <section id="direct-scope" class="tab-panel"><div class="card"><h2 class="section-title">Value of Direct Contracts by Scope</h2><div id="directScopeTable"></div></div></section>
-    <section id="direct-contracts" class="tab-panel"><div class="card"><h2 class="section-title">Direct Contracts</h2><div id="directContractsTable"></div></div></section>
-    <section id="private-sector" class="tab-panel"><div class="card"><h2 class="section-title">Private Sector Awards by Entity</h2><div id="privateSectorTable"></div></div></section>
-    <section id="pipeline" class="tab-panel"><div class="card"><h2 class="section-title">Pipeline</h2><div id="pipelineTable"></div></div></section>
-
-    <section id="input" class="tab-panel">
-      <div class="grid-3">
-        <div class="card">
-          <h2 class="section-title">Data Input Section</h2>
-          <div class="form-grid">
-            <div class="field">
-              <label for="entryType">Section</label>
-              <select id="entryType">
-                <option value="tenderSummary">Tender Summary</option>
-                <option value="awardsTargets">Awards Targets</option>
-                <option value="directContractsByEntity">Direct Contracts by Entity</option>
-                <option value="directContractsByScope">Direct Contracts by Scope</option>
-                <option value="privateSector">Private Sector Awards</option>
-                <option value="pipeline">Pipeline</option>
-              </select>
-            </div>
-            <div class="field"><label for="entity">Entity</label><select id="entity"></select></div>
-            <div class="field"><label for="month">Month</label><select id="month"></select></div>
-            <div class="field">
-              <label for="metric">Metric</label>
-              <select id="metric">
-                <option value="tenders">Tenders</option>
-                <option value="rfqs">RFQs</option>
-                <option value="awards">Awards</option>
-              </select>
-            </div>
-            <div class="field"><label for="scope">Scope</label><select id="scope"></select></div>
-            <div class="field">
-              <label for="stage">Stage</label>
-              <select id="stage">
-                <option value="Prospecting">Prospecting</option>
-                <option value="Bid Submitted">Bid Submitted</option>
-                <option value="Evaluation">Evaluation</option>
-                <option value="Negotiation">Negotiation</option>
-                <option value="Awarded">Awarded</option>
-              </select>
-            </div>
-            <div class="field"><label for="awardedCompany">Awarded By / Client Company</label><input id="awardedCompany" placeholder="Example: Coega" /></div>
-            <div class="field"><label for="tenderRef">Tender Reference</label><input id="tenderRef" placeholder="Tender / contract reference" /></div>
-            <div class="field full"><label for="opportunity">Opportunity / Description</label><textarea id="opportunity" placeholder="Enter awarded tender, pipeline opportunity, or entry note"></textarea></div>
-            <div class="field"><label for="expectedMonth">Expected Month</label><select id="expectedMonth"></select></div>
-            <div class="field"><label for="value">Value / Count</label><input id="value" type="number" placeholder="Enter amount or count" /></div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-primary" id="saveDemoBtn" type="button">Save Demo Data</button>
-            <button class="btn btn-outline" id="saveSheetsBtn" type="button">Save to Google Sheets</button>
-            <button class="btn btn-secondary" id="syncLiveBtn" type="button">Sync Live Data</button>
-          </div>
+    <section id="app" class="hidden">
+      <div class="card topbar">
+        <div>
+          <strong id="userLabel"></strong><br>
+          <span class="badge">Spreadsheet: Tendering</span>
+          <span class="badge">Financial year: Mar 2026 to Feb 2027</span>
         </div>
-
-        <div class="card">
-          <h2 class="section-title">Live Google Sheets Connection</h2>
-          <div class="small-note">
-            <div><strong>Sheet ID:</strong> 1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg</div>
-            <div><strong>Main Sheet:</strong> Tendering</div>
-            <div style="margin-top: 10px;"><strong>Apps Script URL:</strong> Stored once inside the HTML script.</div>
-            <div><strong>Status:</strong> <span id="statusPill" class="status-pill status-syncing">Connecting...</span></div>
-            <div id="lastActionNote" style="margin-top: 10px;">Waiting for automatic sync...</div>
-          </div>
-        </div>
+        <button class="secondary" style="width:auto;" onclick="logout()">Logout</button>
       </div>
-      <div class="card" style="margin-top: 16px;">
-        <h2 class="section-title">Recommended Google Sheets Tabs</h2>
-        <div id="sheetTabsTable"></div>
+
+      <div class="card">
+        <h2>Main Dashboard: Cost Centre Monthly Summary</h2>
+        <div id="kpiCards" class="kpis"></div>
+        <br>
+        <div id="dashboardTable" class="table-wrap">Loading...</div>
+      </div>
+
+      <div class="card">
+        <h2>Add / Update Monthly Data</h2>
+        <div class="grid">
+          <input id="costCentre" placeholder="Cost Centre">
+          <select id="metric">
+            <option>TENDERS</option>
+            <option>RFQS</option>
+            <option>AWARDS</option>
+          </select>
+          <input id="Mar" type="number" placeholder="Mar">
+          <input id="Apr" type="number" placeholder="Apr">
+          <input id="May" type="number" placeholder="May">
+          <input id="Jun" type="number" placeholder="Jun">
+          <input id="Jul" type="number" placeholder="Jul">
+          <input id="Aug" type="number" placeholder="Aug">
+          <input id="Sep" type="number" placeholder="Sep">
+          <input id="Oct" type="number" placeholder="Oct">
+          <input id="Nov" type="number" placeholder="Nov">
+          <input id="Dec" type="number" placeholder="Dec">
+          <input id="Jan" type="number" placeholder="Jan 2027">
+          <input id="Feb" type="number" placeholder="Feb 2027">
+          <button class="blue" onclick="saveMonthly()">Save Monthly Data</button>
+        </div>
+        <p id="saveMsg"></p>
+      </div>
+
+      <div class="card">
+        <h2>Other Dashboard Sections</h2>
+        <div class="tabs">
+          <button onclick="loadTab('award_targets')">Award Targets</button>
+          <button onclick="loadTab('direct_contracts')">Direct Contracts</button>
+          <button onclick="loadTab('direct_contracts_by_entity')">Contracts by Entity</button>
+          <button onclick="loadTab('direct_contracts_by_scope')">Contracts by Scope</button>
+          <button onclick="loadTab('private_sector_awards')">Private Sector Awards</button>
+          <button onclick="loadTab('scope_types')">Scope Types</button>
+          <button onclick="loadTab('pipeline')">Pipeline</button>
+          <button onclick="loadTab('settings')">Settings</button>
+        </div>
+        <div id="tabData" class="table-wrap"></div>
       </div>
     </section>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    var APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxU4-fJHI9XXcMjZmCk1kLqJpjGU33NwFZtuKkNQGX-Opn_s0GGH9IoiqfuzyebdUecpw/exec";
-    var SHEET_ID = "1eU2ktGearF47bLH0EKToOOTWpDkqcbqO1zWGIL9hbsg";
-    var MAIN_SHEET = "Tendering";
-    var MONTHS = ["MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC", "JAN", "FEB"];
-    var ENTITIES = ["On Point", "Nkanyezi", "Aqua Telecoms", "Distinct", "Aquatech", "Advantedge"];
-    var SCOPES = ["Civils", "Roads", "Building", "Electrical", "Telecoms", "Mechanical", "Plant Hire"];
-    var SHEET_TABS = [
-      { tab: "Tendering", headline: "Tendering Dashboard Overview & KPIs" },
-      { tab: "Tender_Summary", headline: "Summary of Tenders, RFQs and Awards by Entity" },
-      { tab: "Awards_Targets", headline: "Entity | MAR | APR | MAY | JUN | JUL | AUG | SEP | OCT | NOV | DEC | JAN | FEB | Awards to Date | Target | % Performance" },
-      { tab: "Direct_Contracts", headline: "Timestamp | Entity | Scope | Value | Target | Month | CostCenter | Notes | InputBy | AwardedCompany | TenderRef" },
-      { tab: "Direct_By_Entity", headline: "Value of Direct Contracts by Entity" },
-      { tab: "Direct_By_Scope", headline: "Value of Direct Contracts by Scope" },
-      { tab: "Private_Sector", headline: "Private Sector Awards by Entity" },
-      { tab: "Pipeline", headline: "Tendering Pipeline and Opportunity Tracker" },
-      { tab: "Settings", headline: "Google Apps Script Connection and Dashboard Settings" }
-    ];
+    const months = ['Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb'];
+    let currentUser = null;
 
-    var connected = false;
-    var charts = {};
-    var formEls = {};
-    var jsonpCounter = 0;
-
-    var data = {
-      tenderSummary: [
-        { entity: "On Point", tenders: { MAR: 11, APR: 17 }, rfqs: { MAR: 20, APR: 8 }, awards: { MAR: 2, APR: 2 } },
-        { entity: "Nkanyezi", tenders: { MAR: 8, APR: 12 }, rfqs: { MAR: 28, APR: 2 }, awards: { MAR: 1, APR: 1 } },
-        { entity: "Aqua Telecoms", tenders: { MAR: 5, APR: 11 }, rfqs: { MAR: 3, APR: 1 }, awards: { MAR: 0, APR: 0 } },
-        { entity: "Distinct", tenders: { MAR: 3, APR: 4 }, rfqs: { MAR: 2, APR: 1 }, awards: { MAR: 0, APR: 0 } },
-        { entity: "Aquatech", tenders: {}, rfqs: {}, awards: {} },
-        { entity: "Advantedge", tenders: {}, rfqs: {}, awards: {} }
-      ],
-      awardsTargets: [
-        { entity: "On Point", target: 50, actual: 4 },
-        { entity: "Nkanyezi", target: 30, actual: 2 },
-        { entity: "Aqua Telecoms", target: 24, actual: 0 },
-        { entity: "Distinct", target: 10, actual: 0 }
-      ],
-      directContractsByEntity: [
-        { entity: "On Point", actual: 135641627.97, target: 480000000 },
-        { entity: "Aqua Telecoms", actual: 0, target: 175000000 },
-        { entity: "Nkanyezi", actual: 0, target: 30000000 },
-        { entity: "Distinct", actual: 0, target: 18000000 }
-      ],
-      directContractsByScope: [
-        { scope: "Civils", actual: 0, target: 105000000 },
-        { scope: "Roads", actual: 107810713.23, target: 106000000 },
-        { scope: "Building", actual: 27830914.74, target: 105000000 },
-        { scope: "Electrical", actual: 0, target: 202000000 },
-        { scope: "Telecoms", actual: 0, target: 75000000 },
-        { scope: "Mechanical", actual: 0, target: 100000000 },
-        { scope: "Plant Hire", actual: 0, target: 10000000 }
-      ],
-      directContracts: [
-        { Timestamp: "", Entity: "On Point", Scope: "Roads", Value: 107810713.23, Target: 106000000, Month: "MAR", CostCenter: "", Notes: "", InputBy: "", AwardedCompany: "", TenderRef: "" },
-        { Timestamp: "", Entity: "On Point", Scope: "Building", Value: 27830914.74, Target: 105000000, Month: "APR", CostCenter: "", Notes: "", InputBy: "", AwardedCompany: "Coega", TenderRef: "" }
-      ],
-      privateSector: [
-        { entity: "On Point", actual: 0, target: 20000000 },
-        { entity: "Aqua Telecoms", actual: 0, target: 20000000 },
-        { entity: "Nkanyezi", actual: 0, target: 10000000 },
-        { entity: "Distinct", actual: 0, target: 0 }
-      ],
-      awardsDetail: [
-        { entity: "On Point", awardedCompany: "Coega", description: "Building / contract award", scope: "Building", month: "APR", value: 27830914.7, tenderRef: "" }
-      ],
-      pipeline: [
-        { id: 1, opportunity: "Sample opportunity 1", entity: "On Point", scope: "Roads", stage: "Prospecting", value: 25000000, expectedMonth: "JUN" },
-        { id: 2, opportunity: "Sample opportunity 2", entity: "Nkanyezi", scope: "Telecoms", stage: "Bid Submitted", value: 12000000, expectedMonth: "JUL" }
-      ]
-    };
-
-    function populateSelect(select, values) {
-      var html = "";
-      for (var i = 0; i < values.length; i++) html += '<option value="' + values[i] + '">' + values[i] + '</option>';
-      select.innerHTML = html;
+    function blankZero(value) {
+      return value === 0 || value === '0' ? '' : (value ?? '');
     }
 
-    function currency(n) {
-      return new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR', maximumFractionDigits: 2 }).format(Number(n || 0));
+    function login() {
+      document.getElementById('loginMsg').textContent = '';
+      google.script.run
+        .withSuccessHandler(user => {
+          currentUser = user;
+          document.getElementById('auth').classList.add('hidden');
+          document.getElementById('app').classList.remove('hidden');
+          document.getElementById('userLabel').textContent = `${user.name} — ${user.role}`;
+          loadDashboard();
+        })
+        .withFailureHandler(err => document.getElementById('loginMsg').textContent = err.message)
+        .loginUser({
+          email: document.getElementById('loginEmail').value,
+          password: document.getElementById('loginPassword').value
+        });
     }
 
-    function integer(n) {
-      return new Intl.NumberFormat('en-ZA').format(Number(n || 0));
+    function register() {
+      const msg = document.getElementById('regMsg');
+      msg.textContent = '';
+      google.script.run
+        .withSuccessHandler(() => {
+          msg.className = 'success';
+          msg.textContent = 'User registered successfully. You can now login.';
+        })
+        .withFailureHandler(err => {
+          msg.className = 'error';
+          msg.textContent = err.message;
+        })
+        .registerUser({
+          name: document.getElementById('regName').value,
+          email: document.getElementById('regEmail').value,
+          password: document.getElementById('regPassword').value,
+          role: document.getElementById('regRole').value
+        });
     }
 
-    function percent(actual, target) {
-      if (!target) return '0.00%';
-      return ((Number(actual || 0) / Number(target || 0)) * 100).toFixed(2) + '%';
+    function logout() {
+      currentUser = null;
+      document.getElementById('auth').classList.remove('hidden');
+      document.getElementById('app').classList.add('hidden');
     }
 
-    function totalRow(rows, actualKey, targetKey) {
-      var aKey = actualKey || 'actual';
-      var tKey = targetKey || 'target';
-      var total = { actual: 0, target: 0 };
-      for (var i = 0; i < rows.length; i++) {
-        total.actual += Number(rows[i][aKey] || 0);
-        total.target += Number(rows[i][tKey] || 0);
-      }
-      return total;
+    function loadDashboard() {
+      google.script.run
+        .withSuccessHandler(renderDashboard)
+        .withFailureHandler(err => document.getElementById('dashboardTable').textContent = err.message)
+        .getDashboardData();
     }
 
-    function renderTable(targetId, headers, rows, className) {
-      var html = '<table class="' + (className || '') + '"><thead><tr>';
-      for (var i = 0; i < headers.length; i++) html += '<th>' + headers[i] + '</th>';
-      html += '</tr></thead><tbody>';
-      for (var r = 0; r < rows.length; r++) {
-        html += '<tr>';
-        for (var c = 0; c < rows[r].length; c++) html += '<td>' + rows[r][c] + '</td>';
-        html += '</tr>';
-      }
+    function renderDashboard(data) {
+      const headers = ['Cost Centre','Metric',...data.months,'Total'];
+      let totals = { TENDERS: 0, RFQS: 0, AWARDS: 0 };
+
+      let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+
+      data.rows.forEach(row => {
+        if (totals[row.Metric] !== undefined) totals[row.Metric] += Number(row.Total || 0);
+        html += '<tr>' + headers.map(h => `<td>${blankZero(row[h])}</td>`).join('') + '</tr>';
+      });
+
       html += '</tbody></table>';
-      document.getElementById(targetId).innerHTML = html;
+      document.getElementById('dashboardTable').innerHTML = html;
+
+      document.getElementById('kpiCards').innerHTML = `
+        <div class="kpi">Total Tenders<strong>${totals.TENDERS || ''}</strong></div>
+        <div class="kpi">Total RFQs<strong>${totals.RFQS || ''}</strong></div>
+        <div class="kpi">Total Awards<strong>${totals.AWARDS || ''}</strong></div>
+      `;
     }
 
-
-
-    function normalizeEntityName(name) {
-      var cleaned = String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
-      if (cleaned === 'onpoint' || cleaned === 'on point') return 'On Point';
-      if (cleaned === 'nkanyezi') return 'Nkanyezi';
-      if (cleaned === 'aqua telecoms') return 'Aqua Telecoms';
-      if (cleaned === 'distinct') return 'Distinct';
-      if (cleaned === 'aquatech') return 'Aquatech';
-      if (cleaned === 'advantedge') return 'Advantedge';
-      return String(name || '').trim() || 'Unknown';
-    }
-
-    function normalizeMonthName(month) {
-      var raw = String(month || '').trim();
-      var cleaned = raw.toUpperCase().replace(/[^A-Z]/g, ' ');
-      var parts = cleaned.split(/\s+/).filter(Boolean);
-      var monthMap = {
-        MAR: 'MAR', MARCH: 'MAR',
-        APR: 'APR', APRIL: 'APR',
-        MAY: 'MAY',
-        JUN: 'JUN', JUNE: 'JUN',
-        JUL: 'JUL', JULY: 'JUL',
-        AUG: 'AUG', AUGUST: 'AUG',
-        SEP: 'SEP', SEPT: 'SEP', SEPTEMBER: 'SEP',
-        OCT: 'OCT', OCTOBER: 'OCT',
-        NOV: 'NOV', NOVEMBER: 'NOV',
-        DEC: 'DEC', DECEMBER: 'DEC',
-        JAN: 'JAN', JANUARY: 'JAN',
-        FEB: 'FEB', FEBRUARY: 'FEB'
+    function saveMonthly() {
+      const rowData = {
+        costCentre: document.getElementById('costCentre').value,
+        metric: document.getElementById('metric').value
       };
 
-      for (var i = 0; i < parts.length; i++) {
-        if (monthMap[parts[i]]) return monthMap[parts[i]];
-      }
-      return monthMap[cleaned] || cleaned;
-    }
-
-    function getCellValue(row, names) {
-      for (var i = 0; i < names.length; i++) {
-        if (row[names[i]] !== undefined && row[names[i]] !== null && row[names[i]] !== '') return row[names[i]];
-      }
-      return '';
-    }
-
-    function getAwardActual(award) {
-      var value = getCellValue(award, [
-        'actual', 'Actual', 'Actual Achieved', 'Actual_Achieved', 'ActualAchieved',
-        'achieved', 'Achieved', 'value', 'Value', 'count', 'Count', 'awards', 'Awards', 'award', 'Award', 'Awards to Date', 'Awards_To_Date', 'AwardsToDate', 'Actual Awards', 'Actual_Awards'
-      ]);
-      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
-    }
-
-    function getAwardTarget(award) {
-      var value = getCellValue(award, ['target', 'Target', 'Annual Target', 'Annual_Target', 'AnnualTarget', 'Annual Awards Target', 'Awards Target', 'Awards_Target']);
-      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
-    }
-
-    function getAwardEntity(award) {
-      return normalizeEntityName(getCellValue(award, ['entity', 'Entity', 'Cost Center', 'Cost_Center', 'CostCenter', 'Company', 'company']) || 'Unknown');
-    }
-
-    function getAwardMonth(award) {
-      // Awards_Targets column E is headed Month. It can contain values such as MAR, March, or Onpoint March.
-      return normalizeMonthName(getCellValue(award, ['month', 'Month', 'MONTH']));
-    }
-
-    function ensureMonthlyAwardsFromAwardTargets() {
-      var awardMonthMap = {};
-
-      for (var a = 0; a < data.awardsTargets.length; a++) {
-        var award = data.awardsTargets[a];
-        var entity = getAwardEntity(award);
-        var month = getAwardMonth(award);
-        var actual = getAwardActual(award);
-
-        if (!awardMonthMap[entity]) awardMonthMap[entity] = {};
-        if (MONTHS.indexOf(month) > -1) {
-          awardMonthMap[entity][month] = Number(awardMonthMap[entity][month] || 0) + actual;
-        }
-      }
-
-      for (var i = 0; i < data.tenderSummary.length; i++) {
-        var row = data.tenderSummary[i];
-        row.entity = normalizeEntityName(row.entity || row.Entity);
-        row.awards = {};
-
-        if (awardMonthMap[row.entity]) {
-          for (var m in awardMonthMap[row.entity]) {
-            row.awards[m] = awardMonthMap[row.entity][m];
-          }
-        }
-      }
-    }
-
-    function getAwardsTotalForEntity(entity) {
-      var total = 0;
-      var wanted = normalizeEntityName(entity);
-
-      for (var i = 0; i < data.awardsTargets.length; i++) {
-        var award = data.awardsTargets[i];
-        if (getAwardEntity(award) === wanted) {
-          total += getAwardActual(award);
-        }
-      }
-
-      return total;
-    }
-
-    function monthlyMetricTotal(row, key) {
-      var total = 0;
-      var values = row[key] || {};
-      for (var i = 0; i < MONTHS.length; i++) {
-        total += Number(values[MONTHS[i]] || 0);
-      }
-      return total;
-    }
-
-    function renderEntityMatrices() {
-      ensureMonthlyAwardsFromAwardTargets();
-      var container = document.getElementById('entityMatrixContainer');
-      var html = '';
-      for (var i = 0; i < data.tenderSummary.length; i++) {
-        var entityRow = data.tenderSummary[i];
-        html += '<div class="card entity-card">';
-        html += '<div class="entity-head"><h2 class="matrix-title">' + entityRow.entity + '</h2></div>';
-        html += '<div class="entity-body"><div class="matrix-scroll"><table class="matrix-table"><thead><tr><th>Metric</th>';
-        for (var m = 0; m < MONTHS.length; m++) html += '<th>' + MONTHS[m] + '</th>';
-        html += '<th>Total</th>';
-        html += '</tr></thead><tbody>';
-
-        var metrics = [
-          { label: 'Tenders', key: 'tenders' },
-          { label: 'RFQs', key: 'rfqs' },
-          { label: 'Awards', key: 'awards' }
-        ];
-
-        for (var x = 0; x < metrics.length; x++) {
-          html += '<tr><td><strong>' + metrics[x].label + '</strong></td>';
-          for (var mm = 0; mm < MONTHS.length; mm++) {
-            var month = MONTHS[mm];
-            var val = entityRow[metrics[x].key] && entityRow[metrics[x].key][month];
-            html += '<td>' + (val === 0 || val === null || typeof val === 'undefined' || val === '' ? '' : val) + '</td>';
-          }
-          var rowTotal = monthlyMetricTotal(entityRow, metrics[x].key);
-          html += '<td><strong>' + (rowTotal ? rowTotal : '') + '</strong></td>';
-          html += '</tr>';
-        }
-
-        html += '</tbody></table></div></div></div>';
-      }
-      container.innerHTML = html;
-    }
-
-    function renderKPIs() {
-      var awardsTotals = totalAwardsTargets();
-      var directTotals = totalRow(data.directContractsByEntity);
-      var privateTotals = totalRow(data.privateSector);
-      var cards = [
-        { title: 'Awards to Date', value: integer(awardsTotals.actual), sub: 'Target ' + integer(awardsTotals.target) },
-        { title: 'Awards Performance', value: percent(awardsTotals.actual, awardsTotals.target), sub: 'Group performance' },
-        { title: 'Direct Contracts Value', value: currency(directTotals.actual), sub: 'Target ' + currency(703000000) },
-        { title: 'Private Sector Awards', value: currency(privateTotals.actual), sub: 'Target ' + currency(privateTotals.target) }
-      ];
-      var html = '';
-      for (var i = 0; i < cards.length; i++) {
-        html += '<div class="card"><div class="kpi-title">' + cards[i].title + '</div><div class="kpi-value">' + cards[i].value + '</div><div class="kpi-sub">' + cards[i].sub + '</div></div>';
-      }
-      document.getElementById('kpiGrid').innerHTML = html;
-    }
-
-    function totalAwardsTargets() {
-      var total = { actual: 0, target: 0 };
-      var rows = aggregateAwardsByEntityMonth();
-      for (var i = 0; i < rows.length; i++) {
-        total.actual += Number(rows[i].total || 0);
-        total.target += Number(rows[i].target || 0);
-      }
-      return total;
-    }
-
-
-    function getAwardsTargetByEntity(entity) {
-      var wanted = normalizeEntityName(entity);
-      var maxTarget = 0;
-      for (var i = 0; i < data.awardsTargets.length; i++) {
-        var award = data.awardsTargets[i];
-        if (getAwardEntity(award) === wanted) maxTarget = Math.max(maxTarget, getAwardTarget(award));
-      }
-      return maxTarget;
-    }
-
-    function aggregateAwardsByEntityMonth() {
-      var map = {};
-      for (var i = 0; i < data.awardsTargets.length; i++) {
-        var award = data.awardsTargets[i];
-        var entity = getAwardEntity(award);
-        var month = getAwardMonth(award);
-        if (!map[entity]) {
-          map[entity] = { entity: entity, target: 0, total: 0, months: {} };
-          for (var m = 0; m < MONTHS.length; m++) map[entity].months[MONTHS[m]] = 0;
-        }
-        map[entity].target = Math.max(map[entity].target || 0, getAwardTarget(award));
-        if (MONTHS.indexOf(month) > -1) map[entity].months[month] += getAwardActual(award);
-      }
-      var rows = [];
-      var used = {};
-      for (var e = 0; e < ENTITIES.length; e++) {
-        var name = ENTITIES[e];
-        if (map[name]) { rows.push(map[name]); used[name] = true; }
-      }
-      for (var key in map) if (!used[key]) rows.push(map[key]);
-      for (var r = 0; r < rows.length; r++) {
-        var total = 0;
-        for (var x = 0; x < MONTHS.length; x++) total += Number(rows[r].months[MONTHS[x]] || 0);
-        rows[r].total = total;
-      }
-      return rows;
-    }
-
-    function getDirectContractValue(contract) {
-      var value = getCellValue(contract, ['Value', 'value', 'Actual', 'actual', 'Amount', 'amount']);
-      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
-    }
-
-    function getDirectContractTarget(contract) {
-      var value = getCellValue(contract, ['Target', 'target']);
-      return Number(String(value).replace(/[^0-9.-]/g, '') || 0);
-    }
-
-    function getDirectContractField(contract, names) {
-      return getCellValue(contract, names);
-    }
-
-    function renderTables() {
-      var rows = [];
-      for (var i = 0; i < data.tenderSummary.length; i++) {
-        var row = data.tenderSummary[i], tendersTotal = 0, rfqsTotal = 0, awardsTotal = 0;
-        for (var key in row.tenders) tendersTotal += Number(row.tenders[key] || 0);
-        for (var key2 in row.rfqs) rfqsTotal += Number(row.rfqs[key2] || 0);
-        awardsTotal = getAwardsTotalForEntity(row.entity);
-        rows.push([row.entity, integer(tendersTotal), integer(rfqsTotal), integer(awardsTotal)]);
-      }
-      renderTable('tenderSummaryTable', ['Entity', 'Tenders Total', 'RFQs Total', 'Awards Total'], rows);
-
-      var awardsRows = [];
-      var awardsMatrix = aggregateAwardsByEntityMonth();
-      var awardTargetTotal = 0, awardActualTotal = 0;
-      for (var a = 0; a < awardsMatrix.length; a++) {
-        var ar = awardsMatrix[a];
-        var rowOut = [ar.entity];
-        for (var am = 0; am < MONTHS.length; am++) rowOut.push(ar.months[MONTHS[am]] ? integer(ar.months[MONTHS[am]]) : '');
-        rowOut.push(integer(ar.total));
-        rowOut.push(integer(ar.target));
-        rowOut.push(percent(ar.total, ar.target));
-        awardActualTotal += Number(ar.total || 0);
-        awardTargetTotal += Number(ar.target || 0);
-        awardsRows.push(rowOut);
-      }
-      var totalAwardRow = ['<strong>TOTAL</strong>'];
-      for (var atm = 0; atm < MONTHS.length; atm++) {
-        var monthTotal = 0;
-        for (var ati = 0; ati < awardsMatrix.length; ati++) monthTotal += Number(awardsMatrix[ati].months[MONTHS[atm]] || 0);
-        totalAwardRow.push(monthTotal ? '<strong>' + integer(monthTotal) + '</strong>' : '');
-      }
-      totalAwardRow.push('<strong>' + integer(awardActualTotal) + '</strong>');
-      totalAwardRow.push('<strong>' + integer(awardTargetTotal) + '</strong>');
-      totalAwardRow.push('<strong>' + percent(awardActualTotal, awardTargetTotal) + '</strong>');
-      awardsRows.push(totalAwardRow);
-      renderTable('awardsTable', ['Entity'].concat(MONTHS).concat(['Awards to Date', 'Target', '% Performance']), awardsRows, 'matrix-table');
-
-
-      var deRows = [];
-      for (var d = 0; d < data.directContractsByEntity.length; d++) {
-        var der = data.directContractsByEntity[d];
-        deRows.push([der.entity, currency(der.actual), currency(der.target), percent(der.actual, der.target)]);
-      }
-      renderTable('directEntityTable', ['Entity', 'Actual', 'Target', '% Performance'], deRows);
-
-      var dsRows = [];
-      for (var s = 0; s < data.directContractsByScope.length; s++) {
-        var dsr = data.directContractsByScope[s];
-        dsRows.push([dsr.scope, currency(dsr.actual), currency(dsr.target), percent(dsr.actual, dsr.target)]);
-      }
-      renderTable('directScopeTable', ['Scope', 'Actual', 'Target', '% Performance'], dsRows);
-      var dcRows = [];
-      var contracts = data.directContracts || [];
-      for (var dc = 0; dc < contracts.length; dc++) {
-        var cr = contracts[dc];
-        dcRows.push([
-          getDirectContractField(cr, ['Timestamp', 'timestamp', 'Date', 'date']),
-          normalizeEntityName(getDirectContractField(cr, ['Entity', 'entity'])),
-          getDirectContractField(cr, ['Scope', 'scope']),
-          currency(getDirectContractValue(cr)),
-          currency(getDirectContractTarget(cr)),
-          normalizeMonthName(getDirectContractField(cr, ['Month', 'month'])),
-          getDirectContractField(cr, ['CostCenter', 'Cost Center', 'costCenter', 'costcenter']),
-          getDirectContractField(cr, ['Notes', 'notes']),
-          getDirectContractField(cr, ['InputBy', 'Input By', 'inputBy', 'inputby']),
-          getDirectContractField(cr, ['AwardedCompany', 'Awarded Company', 'awardedCompany', 'Client']),
-          getDirectContractField(cr, ['TenderRef', 'Tender Ref', 'tenderRef', 'Reference'])
-        ]);
-      }
-      if (document.getElementById('directContractsTable')) {
-        renderTable('directContractsTable', ['Timestamp', 'Entity', 'Scope', 'Value', 'Target', 'Month', 'CostCenter', 'Notes', 'InputBy', 'AwardedCompany', 'TenderRef'], dcRows);
-      }
-
-
-      var psRows = [];
-      for (var p = 0; p < data.privateSector.length; p++) {
-        var psr = data.privateSector[p];
-        psRows.push([psr.entity, currency(psr.actual), currency(psr.target), percent(psr.actual, psr.target)]);
-      }
-      renderTable('privateSectorTable', ['Entity', 'Actual', 'Target', '% Performance'], psRows);
-
-      var pipeRows = [];
-      for (var q = 0; q < data.pipeline.length; q++) {
-        var pr = data.pipeline[q];
-        pipeRows.push([pr.opportunity, pr.entity, pr.scope, pr.stage, pr.expectedMonth, currency(pr.value)]);
-      }
-      renderTable('pipelineTable', ['Opportunity', 'Entity', 'Scope', 'Stage', 'Expected Month', 'Estimated Value'], pipeRows);
-
-      var execRows = [];
-      var details = data.awardsDetail || [];
-      for (var ed = 0; ed < details.length; ed++) {
-        var item = details[ed];
-        execRows.push([
-          normalizeEntityName(item.entity || item.Entity),
-          item.awardedCompany || item.AwardedCompany || '',
-          item.description || '',
-          item.scope || '',
-          normalizeMonthName(item.month || item.Month),
-          currency(item.value || item.Actual || 0),
-          item.tenderRef || ''
-        ]);
-      }
-      if (document.getElementById('executiveAwardsTable')) {
-        renderTable('executiveAwardsTable', ['Entity', 'Awarded By / Client', 'Award / Description', 'Scope', 'Month', 'Value', 'Tender Ref'], execRows);
-      }
-
-      var sheetRows = [];
-      for (var t = 0; t < SHEET_TABS.length; t++) sheetRows.push([SHEET_TABS[t].tab, SHEET_TABS[t].headline]);
-      renderTable('sheetTabsTable', ['Sheet Tab Name', 'Headline'], sheetRows);
-    }
-
-    function destroyCharts() {
-      for (var key in charts) if (charts[key]) charts[key].destroy();
-      charts = {};
-    }
-
-    function renderCharts() {
-      if (typeof Chart === 'undefined') return;
-      destroyCharts();
-
-      var awardsChartRows = aggregateAwardsByEntityMonth();
-      charts.awards = new Chart(document.getElementById('awardsChart'), {
-        type: 'bar',
-        data: {
-          labels: awardsChartRows.map(function (x) { return x.entity; }),
-          datasets: [
-            { label: 'Target', data: awardsChartRows.map(function (x) { return x.target; }), backgroundColor: '#94a3b8' },
-            { label: 'Awards to Date', data: awardsChartRows.map(function (x) { return x.total; }), backgroundColor: '#0f766e' }
-          ]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
+      months.forEach(month => {
+        rowData[month] = document.getElementById(month).value;
       });
 
-      var scopeActuals = [];
-      for (var i = 0; i < data.directContractsByScope.length; i++) if (Number(data.directContractsByScope[i].actual) > 0) scopeActuals.push(data.directContractsByScope[i]);
+      google.script.run
+        .withSuccessHandler(() => {
+          document.getElementById('saveMsg').className = 'success';
+          document.getElementById('saveMsg').textContent = 'Saved successfully.';
+          loadDashboard();
+        })
+        .withFailureHandler(err => {
+          document.getElementById('saveMsg').className = 'error';
+          document.getElementById('saveMsg').textContent = err.message;
+        })
+        .saveMonthlySummaryRow(rowData);
+    }
 
-      charts.scopePie = new Chart(document.getElementById('scopePieChart'), {
-        type: 'pie',
-        data: {
-          labels: scopeActuals.map(function (x) { return x.scope; }),
-          datasets: [{ data: scopeActuals.map(function (x) { return x.actual; }), backgroundColor: ['#0f766e', '#14b8a6', '#2dd4bf', '#5eead4'] }]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    function loadTab(tabName) {
+      google.script.run
+        .withSuccessHandler(data => renderGenericTable(data, tabName))
+        .withFailureHandler(err => document.getElementById('tabData').textContent = err.message)
+        .getTabData(tabName);
+    }
+
+    function renderGenericTable(data, tabName) {
+      if (!data.rows || !data.rows.length) {
+        document.getElementById('tabData').innerHTML = `<p>No records found in <strong>${tabName}</strong>.</p>`;
+        return;
+      }
+
+      const headers = data.headers;
+      let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+
+      data.rows.forEach(row => {
+        html += '<tr>' + headers.map(h => `<td>${blankZero(row[h])}</td>`).join('') + '</tr>';
       });
 
-      charts.entityValue = new Chart(document.getElementById('entityValueChart'), {
-        type: 'bar',
-        data: {
-          labels: data.directContractsByEntity.map(function (x) { return x.entity; }),
-          datasets: [
-            { label: 'Target', data: data.directContractsByEntity.map(function (x) { return x.target; }), backgroundColor: '#cbd5e1' },
-            { label: 'Actual', data: data.directContractsByEntity.map(function (x) { return x.actual; }), backgroundColor: '#059669' }
-          ]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
-      });
-
-      charts.privateSector = new Chart(document.getElementById('privateSectorChart'), {
-        type: 'bar',
-        data: {
-          labels: data.privateSector.map(function (x) { return x.entity; }),
-          datasets: [
-            { label: 'Target', data: data.privateSector.map(function (x) { return x.target; }), backgroundColor: '#cbd5e1' },
-            { label: 'Actual', data: data.privateSector.map(function (x) { return x.actual; }), backgroundColor: '#0f766e' }
-          ]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' } } }
-      });
+      html += '</tbody></table>';
+      document.getElementById('tabData').innerHTML = html;
     }
-
-    function setStatus(message, state) {
-      var pill = document.getElementById('statusPill');
-      var note = document.getElementById('lastActionNote');
-      if (pill) {
-        pill.textContent = message;
-        pill.className = 'status-pill ' + (
-          state === 'connected' ? 'status-connected' :
-          state === 'syncing' ? 'status-syncing' :
-          'status-demo'
-        );
-      }
-      if (note) note.textContent = message;
-    }
-
-    function renderConnection() {
-      document.getElementById('connectionLabel').textContent = connected ? 'Connected to live data' : 'Connecting...';
-      document.getElementById('modeLabel').textContent = connected ? 'Live data active' : 'Connecting / demo fallback';
-      document.getElementById('offlineAlert').style.display = connected ? 'none' : 'block';
-
-      if (connected) {
-        setStatus('Connected to live data', 'connected');
-      } else {
-        setStatus('Connecting to Google Sheets...', 'syncing');
-      }
-    }
-
-    function getFormData() {
-      return {
-        entity: formEls.entity.value,
-        month: formEls.month.value,
-        metric: formEls.metric.value,
-        value: formEls.value.value,
-        scope: formEls.scope.value,
-        stage: formEls.stage.value,
-        opportunity: formEls.opportunity.value,
-        expectedMonth: formEls.expectedMonth.value,
-        awardedCompany: formEls.awardedCompany.value,
-        tenderRef: formEls.tenderRef.value
-      };
-    }
-
-    function buildQuery(params) {
-      var parts = [];
-      for (var key in params) {
-        parts.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key] == null ? '' : params[key]));
-      }
-      return parts.join('&');
-    }
-
-    function jsonpRequest(baseUrl, params, onSuccess, onError) {
-      var callbackName = '__tenderingJsonpCallback' + (++jsonpCounter);
-      params = params || {};
-      params.callback = callbackName;
-      var url = baseUrl + (baseUrl.indexOf('?') > -1 ? '&' : '?') + buildQuery(params);
-      var script = document.createElement('script');
-      var timeoutId = setTimeout(function() {
-        cleanup();
-        if (onError) onError(new Error('Request timed out'));
-      }, 15000);
-
-      function cleanup() {
-        clearTimeout(timeoutId);
-        if (script.parentNode) script.parentNode.removeChild(script);
-        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
-      }
-
-      window[callbackName] = function(result) {
-        cleanup();
-        if (onSuccess) onSuccess(result);
-      };
-
-      script.onerror = function() {
-        cleanup();
-        if (onError) onError(new Error('Failed to load Apps Script response'));
-      };
-
-      script.src = url;
-      document.body.appendChild(script);
-    }
-
-    function saveDemoData() {
-      setStatus('Save demo button clicked. Saving locally...', 'syncing');
-      var entryType = formEls.entryType.value;
-      var form = getFormData();
-      var value = Number(form.value || 0), i;
-
-      if (entryType === 'tenderSummary') {
-        for (i = 0; i < data.tenderSummary.length; i++) {
-          if (data.tenderSummary[i].entity === form.entity) {
-            if (!data.tenderSummary[i][form.metric]) data.tenderSummary[i][form.metric] = {};
-            data.tenderSummary[i][form.metric][form.month] = value;
-          }
-        }
-      }
-      if (entryType === 'awardsTargets') {
-        data.awardsTargets.push({
-          entity: form.entity,
-          target: 0,
-          actual: value,
-          month: form.month,
-          awardedCompany: form.awardedCompany || '',
-          description: form.opportunity || 'Awarded tender',
-          scope: form.scope || '',
-          tenderRef: form.tenderRef || ''
-        });
-        if (!data.awardsDetail) data.awardsDetail = [];
-        data.awardsDetail.push({
-          entity: form.entity,
-          awardedCompany: form.awardedCompany || '',
-          description: form.opportunity || 'Awarded tender',
-          scope: form.scope || '',
-          month: form.month,
-          value: value,
-          tenderRef: form.tenderRef || ''
-        });
-      }
-      if (entryType === 'directContractsByEntity') for (i = 0; i < data.directContractsByEntity.length; i++) if (data.directContractsByEntity[i].entity === form.entity) data.directContractsByEntity[i].actual = value;
-      if (entryType === 'directContractsByScope') for (i = 0; i < data.directContractsByScope.length; i++) if (data.directContractsByScope[i].scope === form.scope) data.directContractsByScope[i].actual = value;
-      if (entryType === 'privateSector') for (i = 0; i < data.privateSector.length; i++) if (data.privateSector[i].entity === form.entity) data.privateSector[i].actual = value;
-      if (entryType === 'pipeline') {
-        data.pipeline.push({
-          id: new Date().getTime(),
-          opportunity: form.opportunity || 'New opportunity',
-          entity: form.entity,
-          scope: form.scope,
-          stage: form.stage,
-          value: value,
-          expectedMonth: form.expectedMonth
-        });
-      }
-      renderAll();
-      localStorage.setItem('tenderingDashboardDemoData', JSON.stringify(data));
-      alert('Demo data saved locally.');
-    }
-
-    function saveToGoogleSheets() {
-      setStatus('Save button clicked. Synchronising with Google Sheets...', 'syncing');
-
-      var params = getFormData();
-      params.action = 'write';
-      params.section = formEls.entryType.value;
-
-      jsonpRequest(APP_SCRIPT_URL, params, function(result) {
-        if (!result || !result.ok) {
-          connected = false;
-          setStatus((result && (result.error || result.message)) || 'Failed to save data.', 'demo');
-          renderConnection();
-          alert((result && (result.error || result.message)) || 'Failed to save data.');
-          return;
-        }
-
-        connected = true;
-        setStatus('Saved. Synchronising live dashboard...', 'syncing');
-        syncLiveData(false);
-        alert('Saved to Google Sheets successfully.');
-      }, function(error) {
-        console.error(error);
-        connected = false;
-        setStatus('Connection failed while saving.', 'demo');
-        renderConnection();
-        alert('Connection failed. Please check the deployed Apps Script URL and Web App access.');
-      });
-    }
-
-    function applyLivePayload(result) {
-      if (!result || !result.data) return;
-      if (result.data.tenderSummary) data.tenderSummary = result.data.tenderSummary;
-      if (result.data.awardsTargets) data.awardsTargets = result.data.awardsTargets;
-      if (result.data.directContractsByEntity) data.directContractsByEntity = result.data.directContractsByEntity;
-      if (result.data.directContractsByScope) data.directContractsByScope = result.data.directContractsByScope;
-      if (result.data.directContracts) data.directContracts = result.data.directContracts;
-      if (result.data.Direct_Contracts) data.directContracts = result.data.Direct_Contracts;
-      if (result.data.privateSector) data.privateSector = result.data.privateSector;
-      if (result.data.pipeline) data.pipeline = result.data.pipeline;
-      if (result.data.awardsDetail) data.awardsDetail = result.data.awardsDetail;
-    }
-
-    function syncLiveData(showAlert) {
-      if (showAlert === undefined) showAlert = true;
-
-      setStatus(showAlert ? 'Sync button clicked. Synchronising...' : 'Synchronising live data...', 'syncing');
-
-      jsonpRequest(APP_SCRIPT_URL, { action: 'dashboardData' }, function(result) {
-        if (!result || !result.ok) {
-          connected = false;
-          setStatus((result && (result.error || result.message)) || 'Could not fetch live data.', 'demo');
-          renderConnection();
-          if (showAlert) alert((result && (result.error || result.message)) || 'Could not fetch live data.');
-          return;
-        }
-
-        connected = true;
-        applyLivePayload(result);
-        renderAll();
-        setStatus('Connected to live data', 'connected');
-
-        if (showAlert) alert('Live data synced successfully.');
-      }, function(error) {
-        console.error(error);
-        connected = false;
-        setStatus('Could not connect to Google Sheets live data.', 'demo');
-        renderConnection();
-        if (showAlert) alert('Could not fetch live data. Check Apps Script deployment access and URL.');
-      });
-    }
-
-    function renderAll() {
-      ensureMonthlyAwardsFromAwardTargets();
-      renderConnection();
-      renderKPIs();
-      renderEntityMatrices();
-      renderTables();
-      renderCharts();
-    }
-
-    function setupTabs() {
-      var buttons = document.querySelectorAll('.tab-btn');
-      for (var i = 0; i < buttons.length; i++) {
-        buttons[i].addEventListener('click', function () {
-          var allBtns = document.querySelectorAll('.tab-btn');
-          var panels = document.querySelectorAll('.tab-panel');
-          for (var b = 0; b < allBtns.length; b++) allBtns[b].classList.remove('active');
-          for (var p = 0; p < panels.length; p++) panels[p].classList.remove('active');
-          this.classList.add('active');
-          document.getElementById(this.getAttribute('data-tab')).classList.add('active');
-        });
-      }
-    }
-
-    function init() {
-      formEls = {
-        entryType: document.getElementById('entryType'),
-        entity: document.getElementById('entity'),
-        month: document.getElementById('month'),
-        metric: document.getElementById('metric'),
-        scope: document.getElementById('scope'),
-        stage: document.getElementById('stage'),
-        opportunity: document.getElementById('opportunity'),
-        expectedMonth: document.getElementById('expectedMonth'),
-        awardedCompany: document.getElementById('awardedCompany'),
-        tenderRef: document.getElementById('tenderRef'),
-        value: document.getElementById('value')
-      };
-
-      populateSelect(formEls.entity, ENTITIES);
-      populateSelect(formEls.month, MONTHS);
-      populateSelect(formEls.expectedMonth, MONTHS);
-      populateSelect(formEls.scope, SCOPES);
-
-      var saved = localStorage.getItem('tenderingDashboardDemoData');
-      if (saved) {
-        try { data = JSON.parse(saved); } catch (e) { console.error(e); }
-      }
-document.getElementById('saveDemoBtn').addEventListener('click', saveDemoData);
-      document.getElementById('saveSheetsBtn').addEventListener('click', saveToGoogleSheets);
-      document.getElementById('syncLiveBtn').addEventListener('click', function() { syncLiveData(true); });
-
-      setupTabs();
-      renderAll();
-
-      // Automatic live connection on page load.
-      syncLiveData(false);
-
-      // Auto-refresh live data every 2 minutes.
-      setInterval(function() { syncLiveData(false); }, 120000);
-    }
-
-    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
