@@ -267,6 +267,54 @@
       padding: 20px;
     }
 
+    .task-summary-dashboard {
+      margin-bottom: 18px;
+    }
+
+    .task-summary-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .task-summary-item {
+      border: 1px solid var(--border);
+      border-left: 7px solid var(--success);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: #fff;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .task-summary-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    }
+
+    .task-summary-item.green {
+      border-left-color: var(--success);
+    }
+
+    .task-summary-item.yellow {
+      border-left-color: var(--warning);
+    }
+
+    .task-summary-item.red {
+      border-left-color: var(--danger);
+    }
+
+    .task-summary-title {
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .task-summary-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
     .stat span { color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; }
     .stat strong { font-size: 28px; }
     .card h3 { margin: 0 0 16px; }
@@ -364,6 +412,30 @@
       text-decoration: underline;
     }
 
+    .task-updates {
+      margin-top: 14px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-update-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .task-update-head {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
     .share-actions {
       display: flex;
       flex-wrap: wrap;
@@ -383,136 +455,6 @@
       margin-bottom: 0;
       min-width: 240px;
       flex: 1;
-    }
-
-
-
-    .summary-card {
-      margin-bottom: 18px;
-    }
-
-    .summary-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .summary-legend {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      display: inline-block;
-      margin-right: 5px;
-      vertical-align: middle;
-    }
-
-    .legend-dot.red { background: var(--danger); }
-    .legend-dot.yellow { background: var(--warning); }
-    .legend-dot.green { background: var(--success); }
-
-    .task-summary-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .summary-row {
-      border: 1px solid var(--border);
-      border-left-width: 8px;
-      border-radius: 14px;
-      padding: 13px;
-      background: #fff;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-    }
-
-    .summary-row:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(15,23,42,0.08);
-      border-color: #cbd5e1;
-    }
-
-    .summary-row.overdue { border-left-color: var(--danger); }
-    .summary-row.almost-overdue { border-left-color: var(--warning); }
-    .summary-row.within-limit { border-left-color: var(--success); }
-
-    .summary-row-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .summary-title {
-      font-weight: 900;
-      color: var(--text);
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px 14px;
-      font-size: 13px;
-      color: #374151;
-    }
-
-    .summary-grid span {
-      color: var(--muted);
-      display: block;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 2px;
-    }
-
-    .health-pill {
-      color: #fff;
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 11px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .health-pill.overdue { background: var(--danger); }
-    .health-pill.almost-overdue { background: var(--warning); }
-    .health-pill.within-limit { background: var(--success); }
-
-    .comments-box {
-      grid-column: span 3;
-      background: #f8fafc;
-      border: 1px solid #eef2f7;
-      border-radius: 10px;
-      padding: 9px;
-      color: #374151;
-    }
-
-    .origin-link {
-      color: #1d4ed8;
-      font-weight: 900;
-      text-decoration: none;
-      font-size: 12px;
-    }
-
-    .origin-link:hover { text-decoration: underline; }
-
-    .file-input-help {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 5px;
     }
 
     @media print {
@@ -540,8 +482,7 @@
       .login-page { grid-template-columns: 1fr; }
       .brand-panel { padding: 34px; }
       .brand-content h1 { font-size: 34px; }
-      .feature-row, .stats, .form-grid, .summary-grid { grid-template-columns: 1fr; }
-      .comments-box { grid-column: span 1; }
+      .feature-row, .stats, .form-grid { grid-template-columns: 1fr; }
       .span-2 { grid-column: span 1; }
       .task-actions { grid-template-columns: 1fr; }
     }
@@ -609,17 +550,11 @@
     </header>
 
     <main class="main">
-
-      <div class="card summary-card" id="summaryCard">
-        <div class="summary-toolbar">
-          <h3 style="margin:0;">Main Dashboard Summary</h3>
-          <div class="summary-legend">
-            <span><i class="legend-dot red"></i>Overdue</span>
-            <span><i class="legend-dot yellow"></i>Almost overdue</span>
-            <span><i class="legend-dot green"></i>Within limit</span>
-          </div>
+      <div id="taskSummaryDashboard" class="card task-summary-dashboard">
+        <h3>Task Summary</h3>
+        <div id="taskSummaryList" class="task-summary-grid">
+          <p class="task-meta">No task summary available yet.</p>
         </div>
-        <div id="taskSummary" class="task-summary-list"></div>
       </div>
 
       <div class="stats">
@@ -685,7 +620,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbz9QM9AkkDb6C3GqCZNlShg9uXo81YZ3EMUSt25niBPdugcRWZDvZD78nnN-Prl7m8w/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYfMSslFFOzw4Zal7_DGYCi85yjzHN1AgA44jmVdf5edwvekfFMGfFdQHiFdSd7OXabw/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -877,8 +812,8 @@
       }
 
       window.visibleTasks = tasks;
+      renderTaskSummary(tasks);
       renderStats(tasks);
-      renderSummary(tasks);
       renderTasks(tasks);
     }
 
@@ -899,6 +834,7 @@
           <td>${escapeHtml(String(t.progress || 0))}%</td>
           <td>${escapeHtml(String(t.performance_score || 0))}%</td>
           <td>${escapeHtml(t.schedule_health || "")}</td>
+          <td>${escapeHtml(getLatestTaskComment(t))}</td>
         </tr>
       `).join("");
 
@@ -915,137 +851,7 @@
             table { width:100%; border-collapse: collapse; font-size: 12px; }
             th, td { border:1px solid #d1d5db; padding:8px; text-align:left; vertical-align:top; }
             th { background:#f3f4f6; }
-        
-
-    .summary-card {
-      margin-bottom: 18px;
-    }
-
-    .summary-toolbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .summary-legend {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      display: inline-block;
-      margin-right: 5px;
-      vertical-align: middle;
-    }
-
-    .legend-dot.red { background: var(--danger); }
-    .legend-dot.yellow { background: var(--warning); }
-    .legend-dot.green { background: var(--success); }
-
-    .task-summary-list {
-      display: grid;
-      gap: 10px;
-    }
-
-    .summary-row {
-      border: 1px solid var(--border);
-      border-left-width: 8px;
-      border-radius: 14px;
-      padding: 13px;
-      background: #fff;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
-    }
-
-    .summary-row:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(15,23,42,0.08);
-      border-color: #cbd5e1;
-    }
-
-    .summary-row.overdue { border-left-color: var(--danger); }
-    .summary-row.almost-overdue { border-left-color: var(--warning); }
-    .summary-row.within-limit { border-left-color: var(--success); }
-
-    .summary-row-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: flex-start;
-      margin-bottom: 8px;
-    }
-
-    .summary-title {
-      font-weight: 900;
-      color: var(--text);
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px 14px;
-      font-size: 13px;
-      color: #374151;
-    }
-
-    .summary-grid span {
-      color: var(--muted);
-      display: block;
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 2px;
-    }
-
-    .health-pill {
-      color: #fff;
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 11px;
-      font-weight: 900;
-      white-space: nowrap;
-    }
-
-    .health-pill.overdue { background: var(--danger); }
-    .health-pill.almost-overdue { background: var(--warning); }
-    .health-pill.within-limit { background: var(--success); }
-
-    .comments-box {
-      grid-column: span 3;
-      background: #f8fafc;
-      border: 1px solid #eef2f7;
-      border-radius: 10px;
-      padding: 9px;
-      color: #374151;
-    }
-
-    .origin-link {
-      color: #1d4ed8;
-      font-weight: 900;
-      text-decoration: none;
-      font-size: 12px;
-    }
-
-    .origin-link:hover { text-decoration: underline; }
-
-    .file-input-help {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 5px;
-    }
-
-    @media print { button { display:none; } }
+            @media print { button { display:none; } }
           </style>
         </head>
         <body>
@@ -1067,10 +873,11 @@
                 <th>Progress</th>
                 <th>Performance</th>
                 <th>Health</th>
+                <th>Latest Comment</th>
               </tr>
             </thead>
             <tbody>
-              ${rows || '<tr><td colspan="8">No tasks found.</td></tr>'}
+              ${rows || '<tr><td colspan="9">No tasks found.</td></tr>'}
             </tbody>
           </table>
         </body>
@@ -1081,109 +888,109 @@
       printWindow.print();
     }
 
+    function renderTaskSummary(tasks) {
+      const box = document.getElementById("taskSummaryList");
+
+      if (!box) return;
+
+      if (!tasks.length) {
+        box.innerHTML = '<p class="task-meta">No task summary available yet.</p>';
+        return;
+      }
+
+      box.innerHTML = tasks.map(t => {
+        const color = getTimelineColor(t);
+        const issuedDate = t.start_date || "Not set";
+        const fromName = t.created_by_name || "Executive";
+        const toName = t.assigned_to_name || "";
+        const latestComment = getLatestTaskComment(t);
+
+        return `
+          <div class="task-summary-item ${color}" onclick="openTaskFromSummary('${t.task_id}')">
+            <div class="task-summary-title">${escapeHtml(t.title || "Untitled Task")}</div>
+            <div class="task-summary-meta">
+              Date: ${escapeHtml(issuedDate)} • From: ${escapeHtml(fromName)} • To: ${escapeHtml(toName)}<br>
+              Deadline: ${escapeHtml(t.deadline || "")} • Progress: ${escapeHtml(String(t.progress || 0))}% • Status: ${escapeHtml(t.status || "")}<br>
+              Latest comment: ${escapeHtml(latestComment || "No comments yet")}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function getTimelineColor(task) {
+      if (String(task.status || "").toUpperCase() === "CLOSED") return "green";
+
+      const timeElapsed = Number(task.time_elapsed_percent || 0);
+      const progress = Number(task.progress || 0);
+
+      if (timeElapsed >= 100 && progress < 100) return "red";
+      if (timeElapsed >= 70 && progress < 100) return "yellow";
+      return "green";
+    }
+
+    function openTaskFromSummary(taskId) {
+      const target = document.getElementById("task_" + taskId);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        target.style.boxShadow = "0 0 0 4px rgba(37, 99, 235, 0.18)";
+        setTimeout(() => {
+          target.style.boxShadow = "";
+        }, 1800);
+      }
+    }
+
+    function getTaskUpdates(task) {
+      const updates = task.task_updates || task.comments || [];
+      return Array.isArray(updates) ? updates : [];
+    }
+
+    function getLatestTaskComment(task) {
+      const updates = getTaskUpdates(task);
+      if (updates.length) {
+        const latest = updates[updates.length - 1];
+        return latest.comment || "";
+      }
+      return task.latest_comment || "";
+    }
+
+    function renderTaskUpdatesHtml(task) {
+      const updates = getTaskUpdates(task);
+      if (!updates.length && !task.latest_comment) {
+        return `
+          <div class="task-updates">
+            <div class="task-meta"><strong>Task updates / comments:</strong></div>
+            <span class="task-meta">No comments yet.</span>
+          </div>
+        `;
+      }
+
+      const updateRows = updates.length ? updates.map(u => `
+        <div class="task-update-item">
+          <div class="task-update-head">
+            ${escapeHtml(u.user_name || u.role || "User")} • ${escapeHtml(u.created_at || "")} • Progress: ${escapeHtml(String(u.progress || 0))}%
+          </div>
+          <div>${escapeHtml(u.comment || "")}</div>
+        </div>
+      `).join("") : `
+        <div class="task-update-item">
+          <div>${escapeHtml(task.latest_comment || "")}</div>
+        </div>
+      `;
+
+      return `
+        <div class="task-updates">
+          <div class="task-meta"><strong>Task updates / comments:</strong></div>
+          ${updateRows}
+        </div>
+      `;
+    }
+
     function renderStats(tasks) {
       document.getElementById("statTotal").textContent = tasks.length;
       document.getElementById("statOpen").textContent = tasks.filter(t => t.status === "OPEN").length;
       document.getElementById("statProgress").textContent = tasks.filter(t => t.status === "IN_PROGRESS").length;
       document.getElementById("statClosed").textContent = tasks.filter(t => t.status === "CLOSED").length;
-    }
-
-
-    function parseDate(value) {
-      if (!value) return null;
-      const d = new Date(value);
-      return isNaN(d.getTime()) ? null : d;
-    }
-
-    function formatDate(value) {
-      const d = parseDate(value);
-      if (!d) return value || "-";
-      return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" });
-    }
-
-    function getDateIssued(task) {
-      return task.date_issued || task.issued_date || task.created_at || task.created || task.date_created || task.created_on || "";
-    }
-
-    function getTaskComments(task) {
-      const values = [
-        task.latest_comment,
-        task.comment,
-        task.comments,
-        task.progress_comment,
-        task.close_remark,
-        task.extension_reason
-      ].filter(Boolean);
-      return values.length ? values.join(" | ") : "No comments yet.";
-    }
-
-    function getTaskOriginLink(task) {
-      return task.origin_link || task.task_origin || task.source_link || task.share_link || (SCRIPT_URL + "?action=viewTask&taskId=" + encodeURIComponent(task.task_id || ""));
-    }
-
-    function getTaskHealthClass(task) {
-      if (String(task.status || "").toUpperCase() === "CLOSED") return "within-limit";
-      const issued = parseDate(getDateIssued(task));
-      const deadline = parseDate(task.date_expected || task.expected_date || task.deadline);
-      const now = new Date();
-      if (!deadline) return "within-limit";
-      if (now > deadline) return "overdue";
-      if (!issued || deadline <= issued) {
-        const hoursLeft = (deadline - now) / 36e5;
-        return hoursLeft <= 24 ? "almost-overdue" : "within-limit";
-      }
-      const total = deadline - issued;
-      const used = now - issued;
-      const usedPercent = (used / total) * 100;
-      return usedPercent >= 80 ? "almost-overdue" : "within-limit";
-    }
-
-    function getTaskHealthLabel(healthClass) {
-      if (healthClass === "overdue") return "OVERDUE";
-      if (healthClass === "almost-overdue") return "ALMOST OVERDUE";
-      return "WITHIN LIMIT";
-    }
-
-    function openTaskOrigin(taskId) {
-      const task = getTaskById(taskId);
-      if (!task) return;
-      window.open(getTaskOriginLink(task), "_blank", "noopener");
-    }
-
-    function renderSummary(tasks) {
-      const box = document.getElementById("taskSummary");
-      if (!box) return;
-
-      if (!tasks.length) {
-        box.innerHTML = "<p style='color:#6b7280;'>No tasks found.</p>";
-        return;
-      }
-
-      box.innerHTML = tasks.map(t => {
-        const healthClass = getTaskHealthClass(t);
-        const progress = Number(t.progress || t.response_percent || 0);
-        const origin = getTaskOriginLink(t);
-        return `
-          <div class="summary-row ${healthClass}" onclick="openTaskOrigin('${escapeHtml(t.task_id)}')" title="Open task origin">
-            <div class="summary-row-head">
-              <div>
-                <div class="summary-title">${escapeHtml(t.title || "Untitled task")}</div>
-                <a class="origin-link" href="${escapeHtml(origin)}" target="_blank" rel="noopener" onclick="event.stopPropagation();">Open Task Origin</a>
-              </div>
-              <span class="health-pill ${healthClass}">${getTaskHealthLabel(healthClass)}</span>
-            </div>
-            <div class="summary-grid">
-              <div><span>Date Issued</span>${escapeHtml(formatDate(getDateIssued(t)))}</div>
-              <div><span>Date Expected</span>${escapeHtml(formatDate(t.date_expected || t.expected_date || t.deadline))}</div>
-              <div><span>% Response</span>${escapeHtml(progress)}%</div>
-              <div><span>Task Issuer</span>${escapeHtml(t.created_by_name || t.issuer_name || t.task_issuer || t.created_by || "-")}</div>
-              <div><span>Assigned To</span>${escapeHtml(t.assigned_to_name || t.assigned_to || "-")}</div>
-              <div><span>Status</span>${escapeHtml(t.status || "-")}</div>
-              <div class="comments-box"><span>Comments</span>${escapeHtml(getTaskComments(t))}</div>
-            </div>
-          </div>
-        `;
-      }).join("");
     }
 
     function renderTasks(tasks) {
@@ -1199,7 +1006,7 @@
         const progress = Number(t.progress || 0);
 
         return `
-          <div class="task">
+          <div class="task" id="task_${t.task_id}">
             <div class="task-head">
               <div>
                 <div class="task-title">${escapeHtml(t.title)}</div>
@@ -1217,23 +1024,25 @@
               <div class="task-meta" style="margin-top:6px;">Progress: ${progress}%</div>
             </div>
 
+            ${renderTaskUpdatesHtml(t)}
+
             <div class="share-actions">
               <button class="btn-small" onclick="shareTaskWhatsApp('${t.task_id}')">Share WhatsApp</button>
               <button class="btn-small" onclick="shareTaskEmail('${t.task_id}')">Share Email</button>
             </div>
 
             <div class="proof-section">
-              <div class="task-meta"><strong>Proof documents / uploaded files:</strong></div>
+              <div class="task-meta"><strong>Proof documents / pictures:</strong></div>
               <div class="proof-links">
                 ${(t.proof_files || []).length ? (t.proof_files || []).map((f, index) => `
-                  <a href="${escapeHtml(f.url || f.file_url || '')}" target="_blank" rel="noopener">📎 ${escapeHtml(f.fileName || f.file_name || ('File ' + (index + 1)))}${f.comment ? ' — ' + escapeHtml(f.comment) : ''}</a>
+                  <a href="${escapeHtml(f.url)}" target="_blank" rel="noopener">Proof ${index + 1}: ${escapeHtml(f.comment || f.file_name || "View uploaded file")}</a>
                 `).join("") : `<span class="task-meta">No proof uploaded yet.</span>`}
               </div>
 
               ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
                 <div class="task-actions" style="grid-template-columns:1fr 1fr auto;">
-                  <input id="proof_${t.task_id}" type="file" multiple>
-                  <input id="proof_comment_${t.task_id}" placeholder="File note / comment">
+                  <input id="proof_${t.task_id}" type="file">
+                  <input id="proof_comment_${t.task_id}" placeholder="Proof note, e.g. signed document or completed photo">
                   <button class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
                 </div>
               ` : ""}
@@ -1309,41 +1118,41 @@
       const fileInput = document.getElementById("proof_" + taskId);
       const commentInput = document.getElementById("proof_comment_" + taskId);
 
-      if (!fileInput || !fileInput.files || !fileInput.files.length) {
-        alert("Please select one or more files to upload.");
+      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        alert("Please select a document, file, or picture to upload.");
         return;
       }
 
-      const files = Array.from(fileInput.files);
+      const file = fileInput.files[0];
       const comment = commentInput ? commentInput.value : "";
 
+      const base64 = await readFileAsBase64(file);
+
       try {
-        for (const file of files) {
-          const base64 = await readFileAsBase64(file);
-          const response = await fetch(SCRIPT_URL, {
-            method: "POST",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({
-              action: "uploadProof",
-              taskId: taskId,
-              userId: currentUser.id,
-              fileName: file.name,
-              mimeType: file.type || "application/octet-stream",
-              base64: base64,
-              comment: comment
-            })
-          });
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "uploadProof",
+            taskId: taskId,
+            userId: currentUser.id,
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            base64: base64,
+            comment: comment
+          })
+        });
 
-          const data = await response.json();
-          if (!data.success) throw new Error(data.message || "Could not upload " + file.name);
+        const data = await response.json();
+
+        if (data.success) {
+          alert("Proof uploaded successfully.");
+          await loadTasks();
+        } else {
+          alert(data.message || "Could not upload proof.");
         }
-
-        alert(files.length + " file(s) uploaded successfully.");
-        fileInput.value = "";
-        if (commentInput) commentInput.value = "";
-        await loadTasks();
       } catch (err) {
-        alert("Upload failed. Open the app from the deployed Apps Script URL and check deployment permissions. " + err.message);
+        alert("Upload failed. If this is blocked by the browser, open the app from the deployed Apps Script URL or check deployment permissions. " + err.message);
       }
     }
 
