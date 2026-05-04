@@ -267,88 +267,6 @@
       padding: 20px;
     }
 
-
-
-    .summary-dashboard {
-      margin-bottom: 18px;
-    }
-
-    .summary-dashboard h3 {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .summary-legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    .legend-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 5px;
-    }
-
-    .legend-green { background: var(--success); }
-    .legend-yellow { background: var(--warning); }
-    .legend-red { background: var(--danger); }
-
-    .summary-table-wrap {
-      overflow-x: auto;
-    }
-
-    .summary-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
-
-    .summary-table th,
-    .summary-table td {
-      border-bottom: 1px solid var(--border);
-      padding: 10px 9px;
-      text-align: left;
-      vertical-align: top;
-    }
-
-    .summary-table th {
-      color: #374151;
-      background: #f8fafc;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-
-    .summary-row-green { border-left: 5px solid var(--success); }
-    .summary-row-yellow { border-left: 5px solid var(--warning); background: #fffbeb; }
-    .summary-row-red { border-left: 5px solid var(--danger); background: #fef2f2; }
-    .summary-table tbody tr { cursor: pointer; }
-    .summary-table tbody tr:hover { outline: 2px solid rgba(37, 99, 235, 0.22); }
-    .task.task-highlight { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12); }
-
-    .timeline-pill {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 12px;
-      font-weight: 800;
-      white-space: nowrap;
-    }
-
-    .timeline-pill.green { background: #dcfce7; color: #166534; }
-    .timeline-pill.yellow { background: #fef3c7; color: #92400e; }
-    .timeline-pill.red { background: #fee2e2; color: #991b1b; }
-
     .stat span { color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; }
     .stat strong { font-size: 28px; }
     .card h3 { margin: 0 0 16px; }
@@ -467,6 +385,125 @@
       flex: 1;
     }
 
+
+
+    .deadline-summary-card {
+      margin-bottom: 18px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .deadline-summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .deadline-summary-header h3 { margin: 0; }
+
+    .summary-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+
+    .legend-red { background: var(--danger); }
+    .legend-yellow { background: var(--warning); }
+    .legend-green { background: var(--success); }
+
+    .deadline-summary-table-wrap { overflow-x: auto; }
+
+    .deadline-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .deadline-summary-table th,
+    .deadline-summary-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .deadline-summary-table th {
+      background: #f8fafc;
+      color: #374151;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .summary-row {
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+    }
+
+    .summary-row:hover {
+      background: #f8fafc;
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+
+    .summary-row.overdue { border-left: 7px solid var(--danger); }
+    .summary-row.almost { border-left: 7px solid var(--warning); }
+    .summary-row.within { border-left: 7px solid var(--success); }
+
+    .health-pill {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .health-pill.overdue { background: #fee2e2; color: #991b1b; }
+    .health-pill.almost { background: #fef3c7; color: #92400e; }
+    .health-pill.within { background: #dcfce7; color: #166534; }
+
+    .origin-link,
+    .file-link {
+      color: #1d4ed8;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .origin-link:hover,
+    .file-link:hover { text-decoration: underline; }
+
+    .comment-box {
+      margin-top: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      color: #374151;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .upload-hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
     @media print {
       body { background: #fff; }
       .topbar,
@@ -567,31 +604,31 @@
         <div class="stat"><span>Closed</span><strong id="statClosed">0</strong></div>
       </div>
 
-
-
-      <div id="summaryDashboard" class="card summary-dashboard">
-        <h3>
-          <span>Task Timeline Summary</span>
-          <span class="summary-legend">
-            <span><i class="legend-dot legend-green"></i>Within timeline</span>
-            <span><i class="legend-dot legend-yellow"></i>About to expire</span>
-            <span><i class="legend-dot legend-red"></i>Past timeline</span>
-          </span>
-        </h3>
-        <div class="summary-table-wrap">
-          <table class="summary-table">
+      <div id="deadlineSummaryCard" class="card deadline-summary-card">
+        <div class="deadline-summary-header">
+          <h3>Task Deadline Summary</h3>
+          <div class="summary-legend">
+            <span><i class="legend-dot legend-red"></i>Overdue</span>
+            <span><i class="legend-dot legend-yellow"></i>Almost overdue</span>
+            <span><i class="legend-dot legend-green"></i>Within limit</span>
+          </div>
+        </div>
+        <div class="deadline-summary-table-wrap">
+          <table class="deadline-summary-table">
             <thead>
               <tr>
-                <th>Date of Issue</th>
-                <th>Summary</th>
-                <th>Assigned To</th>
-                <th>By Who</th>
-                <th>Deadline</th>
-                <th>Days to Completion</th>
+                <th>Task</th>
+                <th>Date issued</th>
+                <th>Date expected</th>
+                <th>Task issuer</th>
+                <th>Assigned to</th>
+                <th>% response</th>
+                <th>Comments</th>
+                <th>Origin</th>
               </tr>
             </thead>
-            <tbody id="summaryRows">
-              <tr><td colspan="6" style="color:#6b7280;">No tasks found.</td></tr>
+            <tbody id="deadlineSummaryBody">
+              <tr><td colspan="8" style="color:#6b7280;">No tasks loaded yet.</td></tr>
             </tbody>
           </table>
         </div>
@@ -653,7 +690,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS5ZBTB1y5EJimJtBh40-cHPsS18SEvunX85JCvPW91NFyHk1E_7Pa23o2YXL6B6E3JA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxIMS_7LBh3JlbWGi40_rMFfhh4k-1a5snokrsJgEt6vULynuH7q5e5A2SW31UzmyD3dg/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -664,39 +701,6 @@
     }
 
     function api(action, params = {}) {
-      const query = new URLSearchParams({ action });
-
-      Object.keys(params).forEach(key => {
-        if (params[key] !== undefined && params[key] !== null) query.append(key, params[key]);
-      });
-
-      return fetchJsonApi(query)
-        .catch(() => jsonpApi(action, params))
-        .catch(err => {
-          throw new Error(
-            err && err.message
-              ? err.message
-              : "Could not connect to Apps Script. Make sure the Web App is deployed as 'Execute as: Me' and 'Who has access: Anyone'."
-          );
-        });
-    }
-
-    async function fetchJsonApi(query) {
-      const response = await fetch(SCRIPT_URL + "?" + query.toString(), {
-        method: "GET",
-        redirect: "follow",
-        cache: "no-store"
-      });
-
-      if (!response.ok) {
-        throw new Error("Apps Script returned HTTP " + response.status);
-      }
-
-      const text = await response.text();
-      return parseApiResponseText(text);
-    }
-
-    function jsonpApi(action, params = {}) {
       return new Promise((resolve, reject) => {
         const callbackName = "jsonp_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
         const query = new URLSearchParams({ action, callback: callbackName });
@@ -706,63 +710,30 @@
         });
 
         const script = document.createElement("script");
-        let finished = false;
-
-        function cleanup() {
-          delete window[callbackName];
-          if (script && script.parentNode) script.parentNode.removeChild(script);
-        }
 
         window[callbackName] = function(data) {
-          if (finished) return;
-          finished = true;
-          cleanup();
           resolve(data);
+          delete window[callbackName];
+          script.remove();
         };
 
         script.onerror = function() {
-          if (finished) return;
-          finished = true;
-          cleanup();
-          reject(new Error("Could not connect to Apps Script. Check the deployment URL and Web App access permissions."));
+          reject(new Error("Could not connect to Apps Script. Check Web App deployment and access permissions."));
+          delete window[callbackName];
+          script.remove();
         };
 
         script.src = SCRIPT_URL + "?" + query.toString();
         document.body.appendChild(script);
 
         setTimeout(() => {
-          if (!finished) {
-            finished = true;
-            cleanup();
-            reject(new Error("Connection timed out. Redeploy the Apps Script Web App and confirm the backend supports the callback parameter."));
+          if (window[callbackName]) {
+            reject(new Error("Connection timed out. Deploy the Apps Script as Web App with access set to Anyone."));
+            delete window[callbackName];
+            script.remove();
           }
         }, 20000);
       });
-    }
-
-    function parseApiResponseText(text) {
-      const raw = String(text || "").trim();
-
-      if (!raw) {
-        throw new Error("Apps Script returned an empty response.");
-      }
-
-      try {
-        return JSON.parse(raw);
-      } catch (jsonErr) {
-        const jsonpMatch = raw.match(/^[^(]+\(([\s\S]*)\);?$/);
-        if (jsonpMatch) {
-          try {
-            return JSON.parse(jsonpMatch[1]);
-          } catch (jsonpErr) {}
-        }
-
-        if (/<!doctype html|<html/i.test(raw)) {
-          throw new Error("Apps Script returned an HTML page instead of data. Redeploy the Web App URL ending in /exec, not the editor URL.");
-        }
-
-        throw new Error("Apps Script response was not valid JSON. Add the provided doGet/doPost patch and redeploy.");
-      }
     }
 
     async function login() {
@@ -803,9 +774,9 @@
       document.getElementById("app").style.display = "block";
       document.getElementById("userPill").textContent = currentUser.name + " • " + currentUser.role;
       document.getElementById("taskHeading").textContent =
-        isExecutiveUser() ? "All Issued Tasks" : "My Assigned Tasks";
+        currentUser.role === "EXECUTIVE" || currentUser.role === "ADMIN" ? "All Issued Tasks" : "My Assigned Tasks";
 
-      if (isExecutiveUser()) {
+      if (currentUser.role === "EXECUTIVE") {
         document.getElementById("executiveCreateCard").classList.remove("hidden");
         document.getElementById("taskFilters").classList.remove("hidden");
       } else {
@@ -823,7 +794,7 @@
     }
 
     async function loadInitialData() {
-      if (isExecutiveUser()) await loadManagers();
+      if (currentUser.role === "EXECUTIVE") await loadManagers();
       await loadTasks();
     }
 
@@ -897,7 +868,7 @@
         return;
       }
 
-      const tasks = restrictTasksForCurrentUser(data.tasks || []);
+      const tasks = data.tasks || [];
       window.latestTasks = tasks;
       applyTaskFilter();
     }
@@ -906,13 +877,13 @@
       const filter = document.getElementById("managerFilter");
       let tasks = window.latestTasks || [];
 
-      if (isExecutiveUser() && filter && filter.value) {
+      if (filter && filter.value) {
         tasks = tasks.filter(t => String(t.assigned_to) === String(filter.value));
       }
 
       window.visibleTasks = tasks;
       renderStats(tasks);
-      renderSummaryDashboard(tasks);
+      renderDeadlineSummary(tasks);
       renderTasks(tasks);
     }
 
@@ -949,7 +920,126 @@
             table { width:100%; border-collapse: collapse; font-size: 12px; }
             th, td { border:1px solid #d1d5db; padding:8px; text-align:left; vertical-align:top; }
             th { background:#f3f4f6; }
-            @media print { button { display:none; } }
+        
+
+    .deadline-summary-card {
+      margin-bottom: 18px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .deadline-summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .deadline-summary-header h3 { margin: 0; }
+
+    .summary-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      display: inline-block;
+      margin-right: 5px;
+      vertical-align: -1px;
+    }
+
+    .legend-red { background: var(--danger); }
+    .legend-yellow { background: var(--warning); }
+    .legend-green { background: var(--success); }
+
+    .deadline-summary-table-wrap { overflow-x: auto; }
+
+    .deadline-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .deadline-summary-table th,
+    .deadline-summary-table td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .deadline-summary-table th {
+      background: #f8fafc;
+      color: #374151;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .summary-row {
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+    }
+
+    .summary-row:hover {
+      background: #f8fafc;
+      box-shadow: inset 4px 0 0 var(--accent);
+    }
+
+    .summary-row.overdue { border-left: 7px solid var(--danger); }
+    .summary-row.almost { border-left: 7px solid var(--warning); }
+    .summary-row.within { border-left: 7px solid var(--success); }
+
+    .health-pill {
+      display: inline-flex;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .health-pill.overdue { background: #fee2e2; color: #991b1b; }
+    .health-pill.almost { background: #fef3c7; color: #92400e; }
+    .health-pill.within { background: #dcfce7; color: #166534; }
+
+    .origin-link,
+    .file-link {
+      color: #1d4ed8;
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .origin-link:hover,
+    .file-link:hover { text-decoration: underline; }
+
+    .comment-box {
+      margin-top: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      color: #374151;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .upload-hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    @media print { button { display:none; } }
           </style>
         </head>
         <body>
@@ -993,115 +1083,110 @@
     }
 
 
-
-    function isExecutiveUser() {
-      const role = String((currentUser && currentUser.role) || "").toUpperCase();
-      return role === "EXECUTIVE" || role === "ADMIN";
-    }
-
-    function restrictTasksForCurrentUser(tasks) {
-      if (isExecutiveUser()) return tasks;
-      const userId = String((currentUser && currentUser.id) || "");
-      const userEmail = String((currentUser && currentUser.email) || "").toLowerCase();
-
-      return tasks.filter(t => {
-        const assignedId = String(t.assigned_to || t.assigned_to_id || t.manager_id || "");
-        const assignedEmail = String(t.assigned_to_email || t.email || "").toLowerCase();
-        return (userId && assignedId === userId) || (userEmail && assignedEmail === userEmail);
-      });
-    }
-
-    function getDateOfIssue(task) {
-      return task.date_of_issue || task.issue_date || task.created_at || task.created_date || task.date || task.task_date || task.timestamp || "";
-    }
-
-    function scrollToTask(taskId) {
-      const el = document.getElementById("task_card_" + cssSafeId(taskId));
-      if (!el) return;
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-      el.classList.add("task-highlight");
-      setTimeout(() => el.classList.remove("task-highlight"), 2200);
-    }
-
-    function cssSafeId(value) {
-      return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "_");
-    }
-
-    function parseTaskDate(value) {
-      if (!value) return null;
-      if (value instanceof Date && !isNaN(value)) return value;
-
-      const text = String(value).trim();
-      let match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-
-      match = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
-      if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
-
-      const parsed = new Date(text);
-      return isNaN(parsed) ? null : new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
-    }
-
-    function getDaysToCompletion(deadline) {
-      const dueDate = parseTaskDate(deadline);
-      if (!dueDate) return null;
-
-      const today = new Date();
-      const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      return Math.ceil((dueDate - todayOnly) / (1000 * 60 * 60 * 24));
-    }
-
-    function getTimelineInfo(task) {
-      const status = String(task.status || "").toUpperCase();
-      const days = getDaysToCompletion(task.deadline);
-
-      if (status === "CLOSED") {
-        return { days, color: "green", label: "Within timeline" };
-      }
-
-      if (days === null) {
-        return { days, color: "green", label: "Within timeline" };
-      }
-
-      if (days < 0) return { days, color: "red", label: "Past timeline" };
-      if (days <= 2) return { days, color: "yellow", label: "About to expire" };
-      return { days, color: "green", label: "Within timeline" };
-    }
-
-    function formatDaysToCompletion(days) {
-      if (days === null || days === undefined) return "No deadline";
-      if (days < 0) return Math.abs(days) + " day" + (Math.abs(days) === 1 ? "" : "s") + " overdue";
-      if (days === 0) return "Due today";
-      return days + " day" + (days === 1 ? "" : "s") + " left";
-    }
-
-    function renderSummaryDashboard(tasks) {
-      const body = document.getElementById("summaryRows");
+    function renderDeadlineSummary(tasks) {
+      const body = document.getElementById("deadlineSummaryBody");
       if (!body) return;
 
-      if (!tasks.length) {
-        body.innerHTML = '<tr><td colspan="6" style="color:#6b7280;">No tasks found.</td></tr>';
+      const activeTasks = (tasks || []).filter(t => String(t.status || "").toUpperCase() !== "CLOSED");
+
+      if (!activeTasks.length) {
+        body.innerHTML = '<tr><td colspan="8" style="color:#6b7280;">No active tasks to summarise.</td></tr>';
         return;
       }
 
-      body.innerHTML = tasks.map(t => {
-        const timeline = getTimelineInfo(t);
-        const createdDate = getDateOfIssue(t);
-        const summary = t.summary || t.title || t.description || "";
-        const byWho = t.created_by_name || t.created_by || t.assigned_by_name || t.assigned_by || "";
-        const taskId = escapeHtml(t.task_id || "");
+      const sorted = [...activeTasks].sort((a, b) => {
+        const ra = deadlineRank(a);
+        const rb = deadlineRank(b);
+        if (ra !== rb) return ra - rb;
+        return new Date(normalizeDate(a.deadline || a.date_expected || "9999-12-31")) - new Date(normalizeDate(b.deadline || b.date_expected || "9999-12-31"));
+      });
+
+      body.innerHTML = sorted.map(t => {
+        const health = getDeadlineHealth(t);
+        const origin = getTaskOriginLink(t);
+        const comments = getTaskComments(t);
+        const issued = t.date_issued || t.created_at || t.created_date || t.issue_date || "";
+        const expected = t.date_expected || t.deadline || "";
+        const issuer = t.task_issuer_name || t.created_by_name || t.issuer_name || t.created_by || "";
+        const assigned = t.assigned_to_name || t.assigned_to || "";
+        const response = t.response_percent ?? t.progress ?? t.performance_score ?? 0;
 
         return `
-          <tr class="summary-row-${timeline.color}" onclick="scrollToTask('${taskId}')" title="Click to view task details">
-            <td>${escapeHtml(createdDate)}</td>
-            <td>${escapeHtml(summary)}</td>
-            <td>${escapeHtml(t.assigned_to_name || "")}</td>
-            <td>${escapeHtml(byWho)}</td>
-            <td>${escapeHtml(t.deadline || "")}</td>
-            <td><span class="timeline-pill ${timeline.color}">${escapeHtml(formatDaysToCompletion(timeline.days))}</span></td>
+          <tr class="summary-row ${health.key}" onclick="openTaskOrigin('${escapeJs(t.task_id)}')" title="Open task origin">
+            <td><strong>${escapeHtml(t.title || t.task_id || "Task")}</strong><br><span class="task-meta">${escapeHtml(t.task_id || "")}</span></td>
+            <td>${escapeHtml(formatDisplayDate(issued))}</td>
+            <td>${escapeHtml(formatDisplayDate(expected))}</td>
+            <td>${escapeHtml(issuer)}</td>
+            <td>${escapeHtml(assigned)}</td>
+            <td><strong>${escapeHtml(String(response || 0))}%</strong><br><span class="health-pill ${health.key}">${escapeHtml(health.label)}</span></td>
+            <td>${comments ? escapeHtml(comments) : '<span class="task-meta">No comments yet.</span>'}</td>
+            <td>${origin ? `<a class="origin-link" href="${escapeHtml(origin)}" target="_blank" onclick="event.stopPropagation()">Open origin</a>` : '<span class="task-meta">Task card</span>'}</td>
           </tr>
         `;
       }).join("");
+    }
+
+    function deadlineRank(task) {
+      const key = getDeadlineHealth(task).key;
+      return key === "overdue" ? 0 : key === "almost" ? 1 : 2;
+    }
+
+    function getDeadlineHealth(task) {
+      const expected = normalizeDate(task.date_expected || task.deadline);
+      if (!expected) return { key: "within", label: "Within limit" };
+
+      const today = startOfDay(new Date());
+      const due = startOfDay(new Date(expected));
+      const daysLeft = Math.ceil((due - today) / 86400000);
+      const progress = Number(task.progress || task.response_percent || 0);
+
+      if (daysLeft < 0 && progress < 100) return { key: "overdue", label: "Overdue" };
+      if (daysLeft <= 2 && progress < 100) return { key: "almost", label: "Almost overdue" };
+      return { key: "within", label: "Within limit" };
+    }
+
+    function normalizeDate(value) {
+      if (!value) return "";
+      const raw = String(value).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+      const d = new Date(raw);
+      if (isNaN(d.getTime())) return "";
+      return d.toISOString().slice(0, 10);
+    }
+
+    function formatDisplayDate(value) {
+      const normal = normalizeDate(value);
+      if (!normal) return value || "";
+      return normal;
+    }
+
+    function startOfDay(date) {
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function getTaskComments(task) {
+      const comments = [];
+      if (task.latest_comment) comments.push(task.latest_comment);
+      if (task.progress_comment) comments.push(task.progress_comment);
+      if (task.close_remark) comments.push("Executive: " + task.close_remark);
+      if (Array.isArray(task.comments)) {
+        task.comments.forEach(c => comments.push(typeof c === "string" ? c : [c.created_at, c.user_name, c.comment].filter(Boolean).join(" — ")));
+      }
+      return comments.filter(Boolean).join(" | ");
+    }
+
+    function getTaskOriginLink(task) {
+      return task.origin_url || task.task_origin_url || task.share_link || (SCRIPT_URL + "?action=viewTask&taskId=" + encodeURIComponent(task.task_id || ""));
+    }
+
+    function openTaskOrigin(taskId) {
+      const task = getTaskById(taskId);
+      const link = task ? getTaskOriginLink(task) : "";
+      if (link) window.open(link, "_blank");
+    }
+
+    function escapeJs(value) {
+      return String(value ?? "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\n/g, "\\n").replace(/\r/g, "");
     }
 
     function renderTasks(tasks) {
@@ -1117,12 +1202,11 @@
         const progress = Number(t.progress || 0);
 
         return `
-          <div class="task" id="task_card_${escapeHtml(cssSafeId(t.task_id))}">
+          <div class="task">
             <div class="task-head">
               <div>
                 <div class="task-title">${escapeHtml(t.title)}</div>
                 <div class="task-meta">
-                  Date of issue: ${escapeHtml(getDateOfIssue(t))}<br>
                   Assigned to: ${escapeHtml(t.assigned_to_name || "")}<br>
                   Deadline: ${escapeHtml(t.deadline || "")} • Priority: ${escapeHtml(t.priority || "NORMAL")}<br>
                   Time elapsed: ${t.time_elapsed_percent || 0}% • Performance score: ${t.performance_score || 0}% • ${escapeHtml(t.schedule_health || "")}
@@ -1145,20 +1229,20 @@
               <div class="task-meta"><strong>Proof documents / pictures:</strong></div>
               <div class="proof-links">
                 ${(t.proof_files || []).length ? (t.proof_files || []).map((f, index) => `
-                  <a href="${escapeHtml(f.url)}" target="_blank" download>Proof ${index + 1}: ${escapeHtml(f.comment || "Download / view file")}</a>
+                  <a class="file-link" href="${escapeHtml(f.url)}" target="_blank">File ${index + 1}: ${escapeHtml(f.fileName || f.name || f.comment || "View file")}</a>${f.comment ? `<span class="task-meta">${escapeHtml(f.comment)}</span>` : ""}
                 `).join("") : `<span class="task-meta">No proof uploaded yet.</span>`}
               </div>
 
-              ${String(currentUser.role || '').toUpperCase() === "MANAGER" && t.status !== "CLOSED" ? `
+              ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
                 <div class="task-actions" style="grid-template-columns:1fr 1fr auto;">
-                  <input id="proof_${t.task_id}" type="file">
+                  <input id="proof_${t.task_id}" type="file" multiple>
                   <input id="proof_comment_${t.task_id}" placeholder="Proof note, e.g. signed document or completed photo">
-                  <button id="proof_btn_${t.task_id}" class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
+                  <button class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Files</button>
                 </div>
               ` : ""}
             </div>
 
-            ${String(currentUser.role || '').toUpperCase() === "MANAGER" && t.status !== "CLOSED" ? `
+            ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
               <div class="task-actions">
                 <input id="progress_${t.task_id}" type="number" min="0" max="100" placeholder="%">
                 <input id="comment_${t.task_id}" placeholder="Progress comment">
@@ -1167,7 +1251,7 @@
               </div>
             ` : ""}
 
-            ${isExecutiveUser() && t.status !== "CLOSED" ? `
+            ${currentUser.role === "EXECUTIVE" && t.status !== "CLOSED" ? `
               <div class="task-actions" style="grid-template-columns:1fr auto;">
                 <input id="remark_${t.task_id}" placeholder="Closing remark">
                 <button class="btn-small btn-danger" onclick="closeTask('${t.task_id}')">Close Task</button>
@@ -1227,105 +1311,43 @@
     async function uploadProof(taskId) {
       const fileInput = document.getElementById("proof_" + taskId);
       const commentInput = document.getElementById("proof_comment_" + taskId);
-      const button = document.getElementById("proof_btn_" + taskId);
 
-      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        alert("Please select a document, file, or picture to upload.");
+      if (!fileInput || !fileInput.files || !fileInput.files.length) {
+        alert("Please select one or more files to upload.");
         return;
       }
 
-      const file = fileInput.files[0];
+      const files = Array.from(fileInput.files);
       const comment = commentInput ? commentInput.value : "";
 
-      if (button) {
-        button.disabled = true;
-        button.textContent = "Uploading...";
-      }
-
       try {
-        const base64 = await readFileAsBase64(file);
-        const payload = {
-          action: "uploadProof",
-          taskId: taskId,
-          task_id: taskId,
-          userId: currentUser.id,
-          user_id: currentUser.id,
-          fileName: file.name,
-          filename: file.name,
-          mimeType: file.type || "application/octet-stream",
-          base64: base64,
-          comment: comment
-        };
-
-        let data = null;
-
-        try {
+        for (const file of files) {
+          const base64 = await readFileAsBase64(file);
           const response = await fetch(SCRIPT_URL, {
             method: "POST",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({
+              action: "uploadProof",
+              taskId: taskId,
+              userId: currentUser.id,
+              fileName: file.name,
+              mimeType: file.type || "application/octet-stream",
+              base64: base64,
+              comment: comment
+            })
           });
-          data = await response.json();
-        } catch (fetchErr) {
-          await submitProofWithHiddenForm(payload);
-          alert("Proof upload submitted. The task list will refresh now.");
-          await loadTasks();
-          return;
+
+          const data = await response.json();
+          if (!data.success) throw new Error(data.message || "Could not upload " + file.name);
         }
 
-        if (data && data.success) {
-          alert("Proof uploaded successfully.");
-          await loadTasks();
-        } else {
-          alert((data && data.message) || "Could not upload proof.");
-        }
+        alert(files.length + " file(s) uploaded successfully.");
+        if (commentInput) commentInput.value = "";
+        fileInput.value = "";
+        await loadTasks();
       } catch (err) {
-        alert("Upload failed: " + err.message);
-      } finally {
-        if (button) {
-          button.disabled = false;
-          button.textContent = "Upload Proof";
-        }
+        alert("Upload failed. Open the app from the deployed Apps Script URL and check deployment permissions. " + err.message);
       }
-    }
-
-    function submitProofWithHiddenForm(payload) {
-      return new Promise(resolve => {
-        const iframeName = "proof_upload_iframe_" + Date.now();
-        const iframe = document.createElement("iframe");
-        iframe.name = iframeName;
-        iframe.style.display = "none";
-        document.body.appendChild(iframe);
-
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = SCRIPT_URL;
-        form.target = iframeName;
-        form.style.display = "none";
-
-        Object.keys(payload).forEach(key => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = key;
-          input.value = payload[key];
-          form.appendChild(input);
-        });
-
-        const payloadInput = document.createElement("input");
-        payloadInput.type = "hidden";
-        payloadInput.name = "payload";
-        payloadInput.value = JSON.stringify(payload);
-        form.appendChild(payloadInput);
-
-        document.body.appendChild(form);
-        form.submit();
-
-        setTimeout(() => {
-          form.remove();
-          iframe.remove();
-          resolve();
-        }, 3500);
-      });
     }
 
     function readFileAsBase64(file) {
