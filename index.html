@@ -596,7 +596,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz5yUyGQQbokhO6-XmcwMtyC2oKelPMHgfQVA6ZcpZMpnqXSN6skCT_eEFyW27rqLF0FA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeq7YeGKTDY2wif37P7tZPc6mHdaYDsi4nKRWyasEOEv40PxZai-zS0MJOF7LngOw5mA/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -973,21 +973,20 @@
             </div>
 
             <div class="proof-section">
-              <div class="task-meta"><strong>Task updates / comments:</strong></div>
+              <div class="task-meta"><strong>Comments:</strong></div>
               <div class="proof-links">
-                ${((t.updates || t.comments || t.task_updates || []).length) ? (t.updates || t.comments || t.task_updates || []).map((u, index) => `
-                  <div style="border:1px solid #e5e7eb; border-radius:12px; padding:10px; background:#f8fafc;">
-                    <div class="task-meta">
-                      <strong>${escapeHtml(u.user_name || u.user || u.role || "User")}</strong>
-                      ${u.created_at || u.date || u.timestamp ? ` • ${escapeHtml(u.created_at || u.date || u.timestamp)}` : ""}
-                      ${u.progress ? ` • Progress: ${escapeHtml(String(u.progress))}%` : ""}
+                ${(t.taskupdates || t.task_updates || t.updates || t.comments || []).length
+                  ? (t.taskupdates || t.task_updates || t.updates || t.comments || []).map(u => `
+                    <div style="border:1px solid #e5e7eb; border-radius:10px; padding:9px; background:#f9fafb;">
+                      <div class="task-meta">
+                        ${escapeHtml(u.created_at || u.timestamp || u.date || "")}
+                        ${u.user_name || u.user || u.created_by_name ? ` • ${escapeHtml(u.user_name || u.user || u.created_by_name)}` : ""}
+                      </div>
+                      <div style="margin-top:4px; font-size:14px; color:#111827;">${escapeHtml(u.comment || "")}</div>
                     </div>
-                    <div style="font-size:14px; margin-top:5px; color:#111827;">
-                      ${escapeHtml(u.comment || "")}
-                    </div>
-                    ${u.file_url || u.file ? `<a href="${escapeHtml(u.file_url || u.file)}" target="_blank">View uploaded file</a>` : ""}
-                  </div>
-                `).join("") : `<span class="task-meta">No comments yet.</span>`}
+                  `).join("")
+                  : (t.latest_comment ? `<div style="border:1px solid #e5e7eb; border-radius:10px; padding:9px; background:#f9fafb;">${escapeHtml(t.latest_comment)}</div>` : `<span class="task-meta">No comments yet.</span>`)
+                }
               </div>
             </div>
 
