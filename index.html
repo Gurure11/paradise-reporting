@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tasks | OnPoint Group HQ</title>
+  <title>task | OnPoint Group HQ</title>
   <style>
     :root {
       --primary: #0f172a;
@@ -267,54 +267,6 @@
       padding: 20px;
     }
 
-    .task-summary-dashboard {
-      margin-bottom: 18px;
-    }
-
-    .task-summary-grid {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .task-summary-item {
-      border: 1px solid var(--border);
-      border-left: 7px solid var(--success);
-      border-radius: 14px;
-      padding: 13px 14px;
-      background: #fff;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .task-summary-item:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-    }
-
-    .task-summary-item.green {
-      border-left-color: var(--success);
-    }
-
-    .task-summary-item.yellow {
-      border-left-color: var(--warning);
-    }
-
-    .task-summary-item.red {
-      border-left-color: var(--danger);
-    }
-
-    .task-summary-title {
-      font-weight: 800;
-      margin-bottom: 5px;
-    }
-
-    .task-summary-meta {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
     .stat span { color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; }
     .stat strong { font-size: 28px; }
     .card h3 { margin: 0 0 16px; }
@@ -389,119 +341,6 @@
     .span-2 { grid-column: span 2; }
     .hidden { display: none !important; }
 
-    .proof-section {
-      margin-top: 14px;
-      border-top: 1px dashed var(--border);
-      padding-top: 12px;
-    }
-
-    .proof-links {
-      margin-top: 8px;
-      display: grid;
-      gap: 6px;
-    }
-
-    .proof-links a {
-      color: #1d4ed8;
-      font-weight: 700;
-      text-decoration: none;
-      font-size: 13px;
-    }
-
-    .proof-links a:hover {
-      text-decoration: underline;
-    }
-
-    .share-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .filter-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: end;
-      margin-bottom: 14px;
-    }
-
-    .filter-actions .field {
-      margin-bottom: 0;
-      min-width: 240px;
-      flex: 1;
-    }
-
-
-    .updates-section {
-      margin-top: 14px;
-      border-top: 1px dashed var(--border);
-      padding-top: 12px;
-    }
-
-    .updates-list {
-      margin-top: 8px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .update-item {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      background: #f8fafc;
-    }
-
-    .update-top {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 5px;
-    }
-
-    .update-comment {
-      font-size: 14px;
-      line-height: 1.45;
-      white-space: pre-wrap;
-    }
-
-    .update-file-link {
-      display: inline-block;
-      margin-top: 6px;
-      color: #1d4ed8;
-      font-weight: 700;
-      text-decoration: none;
-      font-size: 13px;
-    }
-
-    .update-file-link:hover {
-      text-decoration: underline;
-    }
-
-    @media print {
-      body { background: #fff; }
-      .topbar,
-      .stats,
-      #executiveCreateCard,
-      #taskFilters,
-      .share-actions,
-      .task-actions,
-      .login-page,
-      button,
-      input,
-      textarea,
-      select {
-        display: none !important;
-      }
-      .app { display: block !important; }
-      .main { max-width: none; padding: 0; }
-      .card, .task { box-shadow: none; border: 1px solid #ddd; }
-      .task { page-break-inside: avoid; }
-    }
-
     @media (max-width: 860px) {
       .login-page { grid-template-columns: 1fr; }
       .brand-panel { padding: 34px; }
@@ -521,7 +360,7 @@
       </div>
 
       <div class="brand-content">
-        <h1>Tasks</h1>
+        <h1>task</h1>
         <p>
           Executive task control, manager dashboards, deadline tracking,
           extension requests, and final task closure remarks.
@@ -535,14 +374,14 @@
       </div>
 
       <div style="z-index:1; color:#94a3b8; font-size:13px;">
-        Connected to Google Sheet database: Tasks
+        Connected to Google Sheet database: task
       </div>
     </aside>
 
     <main class="login-panel">
       <div class="login-card">
         <h2>Welcome back</h2>
-        <p class="subtitle">Sign in to access the OnPoint Group HQ Tasks dashboard.</p>
+        <p class="subtitle">Sign in to access the OnPoint Group HQ task dashboard.</p>
 
         <div class="field">
           <label>Email address</label>
@@ -566,7 +405,7 @@
 
   <section id="app" class="app">
     <header class="topbar">
-      <strong>Tasks | OnPoint Group HQ</strong>
+      <strong>task | OnPoint Group HQ</strong>
       <div>
         <span id="userPill" class="user-pill"></span>
         <button class="btn-small" onclick="logout()" style="margin-left:10px;">Logout</button>
@@ -574,13 +413,6 @@
     </header>
 
     <main class="main">
-      <div id="taskSummaryDashboard" class="card task-summary-dashboard">
-        <h3>Task Summary</h3>
-        <div id="taskSummaryList" class="task-summary-grid">
-          <p class="task-meta">No task summary available yet.</p>
-        </div>
-      </div>
-
       <div class="stats">
         <div class="stat"><span>Total Tasks</span><strong id="statTotal">0</strong></div>
         <div class="stat"><span>Open</span><strong id="statOpen">0</strong></div>
@@ -596,7 +428,7 @@
             <input id="taskTitle" placeholder="Enter task title" />
           </div>
           <div>
-            <label>Assign to Manager / Executive</label>
+            <label>Assign to Manager</label>
             <select id="taskManager"></select>
           </div>
           <div>
@@ -623,20 +455,7 @@
         <div id="taskMessage" class="message"></div>
       </div>
 
-      <div id="taskFilters" class="card hidden" style="margin-bottom:18px;">
-        <h3>Task Filter & Reports</h3>
-        <div class="filter-actions">
-          <div class="field">
-            <label>Filter by Manager / Executive</label>
-            <select id="managerFilter" onchange="applyTaskFilter()">
-              <option value="">All Managers / Executives</option>
-            </select>
-          </div>
-          <button class="btn-small" onclick="downloadTasksPdf()">Download / Print PDF</button>
-        </div>
-      </div>
-
-      <div class="card" id="printArea">
+      <div class="card">
         <h3 id="taskHeading">My Tasks</h3>
         <div id="tasks" class="task-list"></div>
       </div>
@@ -644,7 +463,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzktbj_xOw1WBsMTUorQLt9Chx_2k4Tr3ZefZg4CYELyl8F4qiXoOmKBPCmAZprdPN7RQ/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfNwDqi7OOgLyYJafh7XfzDslZArnm2zy7AXellohU53Yce3_KcxpmGF3o4bk5L1A4uQ/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -709,7 +528,7 @@
 
         if (data && data.success && data.user) {
           currentUser = data.user;
-          sessionStorage.setItem("onpointTasksUser", JSON.stringify(currentUser));
+          sessionStorage.setItem("onpointTaskUser", JSON.stringify(currentUser));
           showApp();
           await loadInitialData();
         } else {
@@ -732,15 +551,13 @@
 
       if (currentUser.role === "EXECUTIVE") {
         document.getElementById("executiveCreateCard").classList.remove("hidden");
-        document.getElementById("taskFilters").classList.remove("hidden");
       } else {
         document.getElementById("executiveCreateCard").classList.add("hidden");
-        document.getElementById("taskFilters").classList.add("hidden");
       }
     }
 
     function logout() {
-      sessionStorage.removeItem("onpointTasksUser");
+      sessionStorage.removeItem("onpointTaskUser");
       currentUser = null;
       document.getElementById("app").style.display = "none";
       document.getElementById("loginPage").style.display = "grid";
@@ -753,31 +570,19 @@
     }
 
     async function loadManagers() {
-      const data = await api("getAssignees");
+      const data = await api("getManagers");
       const select = document.getElementById("taskManager");
-      const filter = document.getElementById("managerFilter");
       select.innerHTML = "";
 
-      if (filter) {
-        filter.innerHTML = '<option value="">All Managers / Executives</option>';
-      }
-
-      if (data.success && data.assignees.length) {
-        data.assignees.forEach(m => {
+      if (data.success && data.managers.length) {
+        data.managers.forEach(m => {
           const opt = document.createElement("option");
           opt.value = m.id;
-          opt.textContent = m.name + " — " + m.role + " — " + (m.department || "No department");
+          opt.textContent = m.name + " — " + (m.department || "No department");
           select.appendChild(opt);
-
-          if (filter) {
-            const fopt = document.createElement("option");
-            fopt.value = m.id;
-            fopt.textContent = m.name + " — " + m.role + " — " + (m.department || "No department");
-            filter.appendChild(fopt);
-          }
         });
       } else {
-        select.innerHTML = '<option value="">No Managers / Executives found</option>';
+        select.innerHTML = '<option value="">No managers found</option>';
       }
     }
 
@@ -801,7 +606,7 @@
       try {
         const data = await api("createTask", payload);
         if (data.success) {
-          showMessage("taskMessage", "Task created successfully. You can share it from the task card by WhatsApp or email.", "success");
+          showMessage("taskMessage", "Task created successfully.", "success");
           document.getElementById("taskTitle").value = "";
           document.getElementById("taskDescription").value = "";
           document.getElementById("taskDeadline").value = "";
@@ -823,141 +628,8 @@
       }
 
       const tasks = data.tasks || [];
-      window.latestTasks = tasks;
-      applyTaskFilter();
-    }
-
-    function applyTaskFilter() {
-      const filter = document.getElementById("managerFilter");
-      let tasks = window.latestTasks || [];
-
-      if (filter && filter.value) {
-        tasks = tasks.filter(t => String(t.assigned_to) === String(filter.value));
-      }
-
-      window.visibleTasks = tasks;
-      renderTaskSummary(tasks);
       renderStats(tasks);
       renderTasks(tasks);
-    }
-
-    function downloadTasksPdf() {
-      const tasks = window.visibleTasks || window.latestTasks || [];
-      const selectedFilter = document.getElementById("managerFilter");
-      const filterLabel = selectedFilter && selectedFilter.value
-        ? selectedFilter.options[selectedFilter.selectedIndex].text
-        : "All Managers / Executives";
-
-      const rows = tasks.map(t => `
-        <tr>
-          <td>${escapeHtml(t.task_id || "")}</td>
-          <td>${escapeHtml(t.title || "")}</td>
-          <td>${escapeHtml(t.assigned_to_name || "")}</td>
-          <td>${escapeHtml(t.deadline || "")}</td>
-          <td>${escapeHtml(t.status || "")}</td>
-          <td>${escapeHtml(String(t.progress || 0))}%</td>
-          <td>${escapeHtml(String(t.performance_score || 0))}%</td>
-          <td>${escapeHtml(t.schedule_health || "")}</td>
-        </tr>
-      `).join("");
-
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>OnPoint Group HQ Tasks Report</title>
-          <style>
-            body { font-family: Arial, Helvetica, sans-serif; color:#111827; padding:24px; }
-            h1 { margin-bottom: 4px; }
-            .meta { color:#6b7280; margin-bottom: 18px; }
-            table { width:100%; border-collapse: collapse; font-size: 12px; }
-            th, td { border:1px solid #d1d5db; padding:8px; text-align:left; vertical-align:top; }
-            th { background:#f3f4f6; }
-            @media print { button { display:none; } }
-          </style>
-        </head>
-        <body>
-          <button onclick="window.print()">Print / Save as PDF</button>
-          <h1>OnPoint Group HQ Tasks Report</h1>
-          <div class="meta">
-            Filter: ${escapeHtml(filterLabel)}<br>
-            Generated: ${new Date().toLocaleString()}<br>
-            Total Tasks: ${tasks.length}
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th>Task ID</th>
-                <th>Title</th>
-                <th>Assigned To</th>
-                <th>Deadline</th>
-                <th>Status</th>
-                <th>Progress</th>
-                <th>Performance</th>
-                <th>Health</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rows || '<tr><td colspan="8">No tasks found.</td></tr>'}
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      printWindow.print();
-    }
-
-    function renderTaskSummary(tasks) {
-      const box = document.getElementById("taskSummaryList");
-
-      if (!box) return;
-
-      if (!tasks.length) {
-        box.innerHTML = '<p class="task-meta">No task summary available yet.</p>';
-        return;
-      }
-
-      box.innerHTML = tasks.map(t => {
-        const color = getTimelineColor(t);
-        const issuedDate = t.start_date || "Not set";
-        const fromName = t.created_by_name || "Executive";
-        const toName = t.assigned_to_name || "";
-
-        return `
-          <div class="task-summary-item ${color}" onclick="openTaskFromSummary('${t.task_id}')">
-            <div class="task-summary-title">${escapeHtml(t.title || "Untitled Task")}</div>
-            <div class="task-summary-meta">
-              Date: ${escapeHtml(issuedDate)} • From: ${escapeHtml(fromName)} • To: ${escapeHtml(toName)}<br>
-              Deadline: ${escapeHtml(t.deadline || "")} • Progress: ${escapeHtml(String(t.progress || 0))}% • Status: ${escapeHtml(t.status || "")}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function getTimelineColor(task) {
-      if (String(task.status || "").toUpperCase() === "CLOSED") return "green";
-
-      const timeElapsed = Number(task.time_elapsed_percent || 0);
-      const progress = Number(task.progress || 0);
-
-      if (timeElapsed >= 100 && progress < 100) return "red";
-      if (timeElapsed >= 70 && progress < 100) return "yellow";
-      return "green";
-    }
-
-    function openTaskFromSummary(taskId) {
-      const target = document.getElementById("task_" + taskId);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-        target.style.boxShadow = "0 0 0 4px rgba(37, 99, 235, 0.18)";
-        setTimeout(() => {
-          target.style.boxShadow = "";
-        }, 1800);
-      }
     }
 
     function renderStats(tasks) {
@@ -980,7 +652,7 @@
         const progress = Number(t.progress || 0);
 
         return `
-          <div class="task" id="task_${t.task_id}">
+          <div class="task">
             <div class="task-head">
               <div>
                 <div class="task-title">${escapeHtml(t.title)}</div>
@@ -996,45 +668,6 @@
             <div class="progress-wrap">
               <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;"></div></div>
               <div class="task-meta" style="margin-top:6px;">Progress: ${progress}%</div>
-            </div>
-
-            <div class="share-actions">
-              <button class="btn-small" onclick="shareTaskWhatsApp('${t.task_id}')">Share WhatsApp</button>
-              <button class="btn-small" onclick="shareTaskEmail('${t.task_id}')">Share Email</button>
-            </div>
-
-            <div class="proof-section">
-              <div class="task-meta"><strong>Proof documents / pictures:</strong></div>
-              <div class="proof-links">
-                ${(t.proof_files || []).length ? (t.proof_files || []).map((f, index) => `
-                  <a href="${escapeHtml(f.url)}" target="_blank" download>Proof ${index + 1}: ${escapeHtml(f.comment || "Download / view file")}</a>
-                `).join("") : `<span class="task-meta">No proof uploaded yet.</span>`}
-              </div>
-
-              ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
-                <div class="task-actions" style="grid-template-columns:1fr 1fr auto;">
-                  <input id="proof_${t.task_id}" type="file">
-                  <input id="proof_comment_${t.task_id}" placeholder="Proof note, e.g. signed document or completed photo">
-                  <button class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
-                </div>
-              ` : ""}
-            </div>
-
-            <div class="updates-section">
-              <div class="task-meta"><strong>Updates / Comments:</strong></div>
-              <div class="updates-list">
-                ${(t.updates || t.task_updates || t.comments || []).length ? (t.updates || t.task_updates || t.comments || []).map(u => `
-                  <div class="update-item">
-                    <div class="update-top">
-                      <span><strong>${escapeHtml(u.user_name || u.user || u.role || "User")}</strong>${u.role ? ` • ${escapeHtml(u.role)}` : ""}</span>
-                      <span>${escapeHtml(u.created_at || u.date || u.timestamp || "")}</span>
-                    </div>
-                    ${u.comment ? `<div class="update-comment">${escapeHtml(u.comment)}</div>` : `<div class="task-meta">No comment text.</div>`}
-                    ${u.progress ? `<div class="task-meta" style="margin-top:5px; color:#2563eb;"><strong>Progress:</strong> ${escapeHtml(String(u.progress))}%</div>` : ""}
-                    ${u.file_url || u.file ? `<a class="update-file-link" href="${escapeHtml(u.file_url || u.file)}" target="_blank">View uploaded file${u.file_name ? `: ${escapeHtml(u.file_name)}` : ""}</a>` : ""}
-                  </div>
-                `).join("") : `<span class="task-meta">No updates or comments yet.</span>`}
-              </div>
             </div>
 
             ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
@@ -1067,109 +700,6 @@
       alert(data.message || (data.success ? "Updated" : "Failed"));
       await loadTasks();
     }
-
-
-    function getTaskById(taskId) {
-      return (window.latestTasks || []).find(t => String(t.task_id) === String(taskId));
-    }
-
-    function buildTaskShareText(taskId) {
-      const task = getTaskById(taskId);
-      if (!task) return "Task link: " + SCRIPT_URL + "?action=viewTask&taskId=" + encodeURIComponent(taskId);
-
-      const link = task.share_link || (SCRIPT_URL + "?action=viewTask&taskId=" + encodeURIComponent(taskId));
-
-      return [
-        "OnPoint Group HQ Task",
-        "Task: " + task.title,
-        "Task ID: " + task.task_id,
-        "Assigned to: " + (task.assigned_to_name || ""),
-        "Deadline: " + (task.deadline || ""),
-        "Status: " + (task.status || ""),
-        "Link: " + link
-      ].join("\\n");
-    }
-
-    function shareTaskWhatsApp(taskId) {
-      const text = buildTaskShareText(taskId);
-      const url = "https://wa.me/?text=" + encodeURIComponent(text);
-      window.open(url, "_blank");
-    }
-
-    function shareTaskEmail(taskId) {
-      const task = getTaskById(taskId);
-      const subject = task ? "Task: " + task.title : "OnPoint Group HQ Task";
-      const body = buildTaskShareText(taskId);
-      window.location.href = "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-    }
-
-    async function uploadProof(taskId) {
-      const fileInput = document.getElementById("proof_" + taskId);
-      const commentInput = document.getElementById("proof_comment_" + taskId);
-
-      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        alert("Please select a document, file, or picture to upload.");
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const comment = commentInput ? commentInput.value.trim() : "";
-      const maxSizeMb = 25;
-
-      if (file.size > maxSizeMb * 1024 * 1024) {
-        alert("The selected file is too large. Please upload a file smaller than " + maxSizeMb + " MB.");
-        return;
-      }
-
-      const base64 = await readFileAsBase64(file);
-
-      try {
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "uploadProof",
-            taskId: taskId,
-            userId: currentUser.id,
-            fileName: file.name,
-            mimeType: file.type || "application/octet-stream",
-            base64: base64,
-            comment: comment
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          alert("Proof uploaded successfully.");
-          fileInput.value = "";
-          if (commentInput) commentInput.value = "";
-          await loadTasks();
-        } else {
-          alert(data.message || "Could not upload proof.");
-        }
-      } catch (err) {
-        alert("Upload failed. Deploy the Apps Script as a Web App with access set to Anyone, then make sure SCRIPT_URL points to the latest /exec URL. " + err.message);
-      }
-    }
-
-    function readFileAsBase64(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = function() {
-          const result = String(reader.result || "");
-          resolve(result.split(",")[1] || "");
-        };
-
-        reader.onerror = function() {
-          reject(new Error("Could not read selected file."));
-        };
-
-        reader.readAsDataURL(file);
-      });
-    }
-
 
     async function requestMoreTime(taskId) {
       const newDate = prompt("Enter new deadline date as YYYY-MM-DD:");
@@ -1216,7 +746,7 @@
     });
 
     window.addEventListener("load", function() {
-      const saved = sessionStorage.getItem("onpointTasksUser");
+      const saved = sessionStorage.getItem("onpointTaskUser");
       if (saved) {
         currentUser = JSON.parse(saved);
         showApp();
