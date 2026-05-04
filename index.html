@@ -653,7 +653,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyacG-nyT3MO8JLqtU4aVyoJZY228fXXHtv6pHyglxDCYFalGrb6m56utsySFUt8zO06A/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzS5ZBTB1y5EJimJtBh40-cHPsS18SEvunX85JCvPW91NFyHk1E_7Pa23o2YXL6B6E3JA/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -664,6 +664,39 @@
     }
 
     function api(action, params = {}) {
+      const query = new URLSearchParams({ action });
+
+      Object.keys(params).forEach(key => {
+        if (params[key] !== undefined && params[key] !== null) query.append(key, params[key]);
+      });
+
+      return fetchJsonApi(query)
+        .catch(() => jsonpApi(action, params))
+        .catch(err => {
+          throw new Error(
+            err && err.message
+              ? err.message
+              : "Could not connect to Apps Script. Make sure the Web App is deployed as 'Execute as: Me' and 'Who has access: Anyone'."
+          );
+        });
+    }
+
+    async function fetchJsonApi(query) {
+      const response = await fetch(SCRIPT_URL + "?" + query.toString(), {
+        method: "GET",
+        redirect: "follow",
+        cache: "no-store"
+      });
+
+      if (!response.ok) {
+        throw new Error("Apps Script returned HTTP " + response.status);
+      }
+
+      const text = await response.text();
+      return parseApiResponseText(text);
+    }
+
+    function jsonpApi(action, params = {}) {
       return new Promise((resolve, reject) => {
         const callbackName = "jsonp_" + Date.now() + "_" + Math.floor(Math.random() * 100000);
         const query = new URLSearchParams({ action, callback: callbackName });
@@ -673,30 +706,63 @@
         });
 
         const script = document.createElement("script");
+        let finished = false;
+
+        function cleanup() {
+          delete window[callbackName];
+          if (script && script.parentNode) script.parentNode.removeChild(script);
+        }
 
         window[callbackName] = function(data) {
+          if (finished) return;
+          finished = true;
+          cleanup();
           resolve(data);
-          delete window[callbackName];
-          script.remove();
         };
 
         script.onerror = function() {
-          reject(new Error("Could not connect to Apps Script. Check Web App deployment and access permissions."));
-          delete window[callbackName];
-          script.remove();
+          if (finished) return;
+          finished = true;
+          cleanup();
+          reject(new Error("Could not connect to Apps Script. Check the deployment URL and Web App access permissions."));
         };
 
         script.src = SCRIPT_URL + "?" + query.toString();
         document.body.appendChild(script);
 
         setTimeout(() => {
-          if (window[callbackName]) {
-            reject(new Error("Connection timed out. Deploy the Apps Script as Web App with access set to Anyone."));
-            delete window[callbackName];
-            script.remove();
+          if (!finished) {
+            finished = true;
+            cleanup();
+            reject(new Error("Connection timed out. Redeploy the Apps Script Web App and confirm the backend supports the callback parameter."));
           }
         }, 20000);
       });
+    }
+
+    function parseApiResponseText(text) {
+      const raw = String(text || "").trim();
+
+      if (!raw) {
+        throw new Error("Apps Script returned an empty response.");
+      }
+
+      try {
+        return JSON.parse(raw);
+      } catch (jsonErr) {
+        const jsonpMatch = raw.match(/^[^(]+\(([\s\S]*)\);?$/);
+        if (jsonpMatch) {
+          try {
+            return JSON.parse(jsonpMatch[1]);
+          } catch (jsonpErr) {}
+        }
+
+        if (/<!doctype html|<html/i.test(raw)) {
+          throw new Error("Apps Script returned an HTML page instead of data. Redeploy the Web App URL ending in /exec, not the editor URL.");
+        }
+
+        throw new Error("Apps Script response was not valid JSON. Add the provided doGet/doPost patch and redeploy.");
+      }
     }
 
     async function login() {
