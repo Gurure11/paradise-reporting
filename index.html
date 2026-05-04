@@ -267,53 +267,87 @@
       padding: 20px;
     }
 
-    .task-summary-dashboard {
+
+
+    .summary-dashboard {
       margin-bottom: 18px;
     }
 
-    .task-summary-grid {
-      display: grid;
-      gap: 10px;
-      margin-top: 12px;
+    .summary-dashboard h3 {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
-    .task-summary-item {
-      border: 1px solid var(--border);
-      border-left: 7px solid var(--success);
-      border-radius: 14px;
-      padding: 13px 14px;
-      background: #fff;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .task-summary-item:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
-    }
-
-    .task-summary-item.green {
-      border-left-color: var(--success);
-    }
-
-    .task-summary-item.yellow {
-      border-left-color: var(--warning);
-    }
-
-    .task-summary-item.red {
-      border-left-color: var(--danger);
-    }
-
-    .task-summary-title {
-      font-weight: 800;
-      margin-bottom: 5px;
-    }
-
-    .task-summary-meta {
+    .summary-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
+      font-size: 12px;
+      font-weight: 700;
     }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 5px;
+    }
+
+    .legend-green { background: var(--success); }
+    .legend-yellow { background: var(--warning); }
+    .legend-red { background: var(--danger); }
+
+    .summary-table-wrap {
+      overflow-x: auto;
+    }
+
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .summary-table th,
+    .summary-table td {
+      border-bottom: 1px solid var(--border);
+      padding: 10px 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .summary-table th {
+      color: #374151;
+      background: #f8fafc;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .summary-row-green { border-left: 5px solid var(--success); }
+    .summary-row-yellow { border-left: 5px solid var(--warning); background: #fffbeb; }
+    .summary-row-red { border-left: 5px solid var(--danger); background: #fef2f2; }
+    .summary-table tbody tr { cursor: pointer; }
+    .summary-table tbody tr:hover { outline: 2px solid rgba(37, 99, 235, 0.22); }
+    .task.task-highlight { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12); }
+
+    .timeline-pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .timeline-pill.green { background: #dcfce7; color: #166534; }
+    .timeline-pill.yellow { background: #fef3c7; color: #92400e; }
+    .timeline-pill.red { background: #fee2e2; color: #991b1b; }
 
     .stat span { color: var(--muted); font-size: 13px; display: block; margin-bottom: 8px; }
     .stat strong { font-size: 28px; }
@@ -526,18 +560,41 @@
     </header>
 
     <main class="main">
-      <div id="taskSummaryDashboard" class="card task-summary-dashboard">
-        <h3>Task Summary</h3>
-        <div id="taskSummaryList" class="task-summary-grid">
-          <p class="task-meta">No task summary available yet.</p>
-        </div>
-      </div>
-
       <div class="stats">
         <div class="stat"><span>Total Tasks</span><strong id="statTotal">0</strong></div>
         <div class="stat"><span>Open</span><strong id="statOpen">0</strong></div>
         <div class="stat"><span>In Progress</span><strong id="statProgress">0</strong></div>
         <div class="stat"><span>Closed</span><strong id="statClosed">0</strong></div>
+      </div>
+
+
+
+      <div id="summaryDashboard" class="card summary-dashboard">
+        <h3>
+          <span>Task Timeline Summary</span>
+          <span class="summary-legend">
+            <span><i class="legend-dot legend-green"></i>Within timeline</span>
+            <span><i class="legend-dot legend-yellow"></i>About to expire</span>
+            <span><i class="legend-dot legend-red"></i>Past timeline</span>
+          </span>
+        </h3>
+        <div class="summary-table-wrap">
+          <table class="summary-table">
+            <thead>
+              <tr>
+                <th>Date of Issue</th>
+                <th>Summary</th>
+                <th>Assigned To</th>
+                <th>By Who</th>
+                <th>Deadline</th>
+                <th>Days to Completion</th>
+              </tr>
+            </thead>
+            <tbody id="summaryRows">
+              <tr><td colspan="6" style="color:#6b7280;">No tasks found.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div id="executiveCreateCard" class="card hidden" style="margin-bottom:18px;">
@@ -596,7 +653,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzsyu8i5CTsfL7DvUrhznIc8oln3bwo6cawm6WMDOdhPQYhNKc5vjZnhS38wMD2oSUiYw/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyacG-nyT3MO8JLqtU4aVyoJZY228fXXHtv6pHyglxDCYFalGrb6m56utsySFUt8zO06A/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -680,9 +737,9 @@
       document.getElementById("app").style.display = "block";
       document.getElementById("userPill").textContent = currentUser.name + " • " + currentUser.role;
       document.getElementById("taskHeading").textContent =
-        currentUser.role === "EXECUTIVE" || currentUser.role === "ADMIN" ? "All Issued Tasks" : "My Assigned Tasks";
+        isExecutiveUser() ? "All Issued Tasks" : "My Assigned Tasks";
 
-      if (currentUser.role === "EXECUTIVE") {
+      if (isExecutiveUser()) {
         document.getElementById("executiveCreateCard").classList.remove("hidden");
         document.getElementById("taskFilters").classList.remove("hidden");
       } else {
@@ -700,7 +757,7 @@
     }
 
     async function loadInitialData() {
-      if (currentUser.role === "EXECUTIVE") await loadManagers();
+      if (isExecutiveUser()) await loadManagers();
       await loadTasks();
     }
 
@@ -774,7 +831,7 @@
         return;
       }
 
-      const tasks = data.tasks || [];
+      const tasks = restrictTasksForCurrentUser(data.tasks || []);
       window.latestTasks = tasks;
       applyTaskFilter();
     }
@@ -783,13 +840,13 @@
       const filter = document.getElementById("managerFilter");
       let tasks = window.latestTasks || [];
 
-      if (filter && filter.value) {
+      if (isExecutiveUser() && filter && filter.value) {
         tasks = tasks.filter(t => String(t.assigned_to) === String(filter.value));
       }
 
       window.visibleTasks = tasks;
-      renderTaskSummary(tasks);
       renderStats(tasks);
+      renderSummaryDashboard(tasks);
       renderTasks(tasks);
     }
 
@@ -862,61 +919,123 @@
       printWindow.print();
     }
 
-    function renderTaskSummary(tasks) {
-      const box = document.getElementById("taskSummaryList");
-
-      if (!box) return;
-
-      if (!tasks.length) {
-        box.innerHTML = '<p class="task-meta">No task summary available yet.</p>';
-        return;
-      }
-
-      box.innerHTML = tasks.map(t => {
-        const color = getTimelineColor(t);
-        const issuedDate = t.start_date || "Not set";
-        const fromName = t.created_by_name || "Executive";
-        const toName = t.assigned_to_name || "";
-
-        return `
-          <div class="task-summary-item ${color}" onclick="openTaskFromSummary('${t.task_id}')">
-            <div class="task-summary-title">${escapeHtml(t.title || "Untitled Task")}</div>
-            <div class="task-summary-meta">
-              Date: ${escapeHtml(issuedDate)} • From: ${escapeHtml(fromName)} • To: ${escapeHtml(toName)}<br>
-              Deadline: ${escapeHtml(t.deadline || "")} • Progress: ${escapeHtml(String(t.progress || 0))}% • Status: ${escapeHtml(t.status || "")}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function getTimelineColor(task) {
-      if (String(task.status || "").toUpperCase() === "CLOSED") return "green";
-
-      const timeElapsed = Number(task.time_elapsed_percent || 0);
-      const progress = Number(task.progress || 0);
-
-      if (timeElapsed >= 100 && progress < 100) return "red";
-      if (timeElapsed >= 70 && progress < 100) return "yellow";
-      return "green";
-    }
-
-    function openTaskFromSummary(taskId) {
-      const target = document.getElementById("task_" + taskId);
-      if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
-        target.style.boxShadow = "0 0 0 4px rgba(37, 99, 235, 0.18)";
-        setTimeout(() => {
-          target.style.boxShadow = "";
-        }, 1800);
-      }
-    }
-
     function renderStats(tasks) {
       document.getElementById("statTotal").textContent = tasks.length;
       document.getElementById("statOpen").textContent = tasks.filter(t => t.status === "OPEN").length;
       document.getElementById("statProgress").textContent = tasks.filter(t => t.status === "IN_PROGRESS").length;
       document.getElementById("statClosed").textContent = tasks.filter(t => t.status === "CLOSED").length;
+    }
+
+
+
+    function isExecutiveUser() {
+      const role = String((currentUser && currentUser.role) || "").toUpperCase();
+      return role === "EXECUTIVE" || role === "ADMIN";
+    }
+
+    function restrictTasksForCurrentUser(tasks) {
+      if (isExecutiveUser()) return tasks;
+      const userId = String((currentUser && currentUser.id) || "");
+      const userEmail = String((currentUser && currentUser.email) || "").toLowerCase();
+
+      return tasks.filter(t => {
+        const assignedId = String(t.assigned_to || t.assigned_to_id || t.manager_id || "");
+        const assignedEmail = String(t.assigned_to_email || t.email || "").toLowerCase();
+        return (userId && assignedId === userId) || (userEmail && assignedEmail === userEmail);
+      });
+    }
+
+    function getDateOfIssue(task) {
+      return task.date_of_issue || task.issue_date || task.created_at || task.created_date || task.date || task.task_date || task.timestamp || "";
+    }
+
+    function scrollToTask(taskId) {
+      const el = document.getElementById("task_card_" + cssSafeId(taskId));
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      el.classList.add("task-highlight");
+      setTimeout(() => el.classList.remove("task-highlight"), 2200);
+    }
+
+    function cssSafeId(value) {
+      return String(value || "").replace(/[^a-zA-Z0-9_-]/g, "_");
+    }
+
+    function parseTaskDate(value) {
+      if (!value) return null;
+      if (value instanceof Date && !isNaN(value)) return value;
+
+      const text = String(value).trim();
+      let match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+
+      match = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+      if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+
+      const parsed = new Date(text);
+      return isNaN(parsed) ? null : new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+    }
+
+    function getDaysToCompletion(deadline) {
+      const dueDate = parseTaskDate(deadline);
+      if (!dueDate) return null;
+
+      const today = new Date();
+      const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      return Math.ceil((dueDate - todayOnly) / (1000 * 60 * 60 * 24));
+    }
+
+    function getTimelineInfo(task) {
+      const status = String(task.status || "").toUpperCase();
+      const days = getDaysToCompletion(task.deadline);
+
+      if (status === "CLOSED") {
+        return { days, color: "green", label: "Within timeline" };
+      }
+
+      if (days === null) {
+        return { days, color: "green", label: "Within timeline" };
+      }
+
+      if (days < 0) return { days, color: "red", label: "Past timeline" };
+      if (days <= 2) return { days, color: "yellow", label: "About to expire" };
+      return { days, color: "green", label: "Within timeline" };
+    }
+
+    function formatDaysToCompletion(days) {
+      if (days === null || days === undefined) return "No deadline";
+      if (days < 0) return Math.abs(days) + " day" + (Math.abs(days) === 1 ? "" : "s") + " overdue";
+      if (days === 0) return "Due today";
+      return days + " day" + (days === 1 ? "" : "s") + " left";
+    }
+
+    function renderSummaryDashboard(tasks) {
+      const body = document.getElementById("summaryRows");
+      if (!body) return;
+
+      if (!tasks.length) {
+        body.innerHTML = '<tr><td colspan="6" style="color:#6b7280;">No tasks found.</td></tr>';
+        return;
+      }
+
+      body.innerHTML = tasks.map(t => {
+        const timeline = getTimelineInfo(t);
+        const createdDate = getDateOfIssue(t);
+        const summary = t.summary || t.title || t.description || "";
+        const byWho = t.created_by_name || t.created_by || t.assigned_by_name || t.assigned_by || "";
+        const taskId = escapeHtml(t.task_id || "");
+
+        return `
+          <tr class="summary-row-${timeline.color}" onclick="scrollToTask('${taskId}')" title="Click to view task details">
+            <td>${escapeHtml(createdDate)}</td>
+            <td>${escapeHtml(summary)}</td>
+            <td>${escapeHtml(t.assigned_to_name || "")}</td>
+            <td>${escapeHtml(byWho)}</td>
+            <td>${escapeHtml(t.deadline || "")}</td>
+            <td><span class="timeline-pill ${timeline.color}">${escapeHtml(formatDaysToCompletion(timeline.days))}</span></td>
+          </tr>
+        `;
+      }).join("");
     }
 
     function renderTasks(tasks) {
@@ -932,11 +1051,12 @@
         const progress = Number(t.progress || 0);
 
         return `
-          <div class="task" id="task_${t.task_id}">
+          <div class="task" id="task_card_${escapeHtml(cssSafeId(t.task_id))}">
             <div class="task-head">
               <div>
                 <div class="task-title">${escapeHtml(t.title)}</div>
                 <div class="task-meta">
+                  Date of issue: ${escapeHtml(getDateOfIssue(t))}<br>
                   Assigned to: ${escapeHtml(t.assigned_to_name || "")}<br>
                   Deadline: ${escapeHtml(t.deadline || "")} • Priority: ${escapeHtml(t.priority || "NORMAL")}<br>
                   Time elapsed: ${t.time_elapsed_percent || 0}% • Performance score: ${t.performance_score || 0}% • ${escapeHtml(t.schedule_health || "")}
@@ -963,16 +1083,16 @@
                 `).join("") : `<span class="task-meta">No proof uploaded yet.</span>`}
               </div>
 
-              ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
+              ${String(currentUser.role || '').toUpperCase() === "MANAGER" && t.status !== "CLOSED" ? `
                 <div class="task-actions" style="grid-template-columns:1fr 1fr auto;">
                   <input id="proof_${t.task_id}" type="file">
                   <input id="proof_comment_${t.task_id}" placeholder="Proof note, e.g. signed document or completed photo">
-                  <button class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
+                  <button id="proof_btn_${t.task_id}" class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
                 </div>
               ` : ""}
             </div>
 
-            ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
+            ${String(currentUser.role || '').toUpperCase() === "MANAGER" && t.status !== "CLOSED" ? `
               <div class="task-actions">
                 <input id="progress_${t.task_id}" type="number" min="0" max="100" placeholder="%">
                 <input id="comment_${t.task_id}" placeholder="Progress comment">
@@ -981,7 +1101,7 @@
               </div>
             ` : ""}
 
-            ${currentUser.role === "EXECUTIVE" && t.status !== "CLOSED" ? `
+            ${isExecutiveUser() && t.status !== "CLOSED" ? `
               <div class="task-actions" style="grid-template-columns:1fr auto;">
                 <input id="remark_${t.task_id}" placeholder="Closing remark">
                 <button class="btn-small btn-danger" onclick="closeTask('${t.task_id}')">Close Task</button>
@@ -1041,6 +1161,7 @@
     async function uploadProof(taskId) {
       const fileInput = document.getElementById("proof_" + taskId);
       const commentInput = document.getElementById("proof_comment_" + taskId);
+      const button = document.getElementById("proof_btn_" + taskId);
 
       if (!fileInput || !fileInput.files || !fileInput.files[0]) {
         alert("Please select a document, file, or picture to upload.");
@@ -1050,42 +1171,95 @@
       const file = fileInput.files[0];
       const comment = commentInput ? commentInput.value : "";
 
-      const base64 = await readFileAsBase64(file);
+      if (button) {
+        button.disabled = true;
+        button.textContent = "Uploading...";
+      }
 
       try {
-        const payload = new URLSearchParams();
-        payload.append("action", "uploadProof");
-        payload.append("taskId", taskId);
-        payload.append("userId", currentUser.id);
-        payload.append("fileName", file.name);
-        payload.append("mimeType", file.type || "application/octet-stream");
-        payload.append("base64", base64);
-        payload.append("comment", comment);
+        const base64 = await readFileAsBase64(file);
+        const payload = {
+          action: "uploadProof",
+          taskId: taskId,
+          task_id: taskId,
+          userId: currentUser.id,
+          user_id: currentUser.id,
+          fileName: file.name,
+          filename: file.name,
+          mimeType: file.type || "application/octet-stream",
+          base64: base64,
+          comment: comment
+        };
 
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-          body: payload.toString()
-        });
-
-        const responseText = await response.text();
-        let data;
+        let data = null;
 
         try {
-          data = JSON.parse(responseText);
-        } catch (parseErr) {
-          throw new Error(responseText || "Invalid upload response from Apps Script.");
+          const response = await fetch(SCRIPT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+          });
+          data = await response.json();
+        } catch (fetchErr) {
+          await submitProofWithHiddenForm(payload);
+          alert("Proof upload submitted. The task list will refresh now.");
+          await loadTasks();
+          return;
         }
 
-        if (data.success) {
+        if (data && data.success) {
           alert("Proof uploaded successfully.");
           await loadTasks();
         } else {
-          alert(data.message || "Could not upload proof.");
+          alert((data && data.message) || "Could not upload proof.");
         }
       } catch (err) {
-        alert("Upload failed. If this is blocked by the browser, open the app from the deployed Apps Script URL or check deployment permissions. " + err.message);
+        alert("Upload failed: " + err.message);
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = "Upload Proof";
+        }
       }
+    }
+
+    function submitProofWithHiddenForm(payload) {
+      return new Promise(resolve => {
+        const iframeName = "proof_upload_iframe_" + Date.now();
+        const iframe = document.createElement("iframe");
+        iframe.name = iframeName;
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = SCRIPT_URL;
+        form.target = iframeName;
+        form.style.display = "none";
+
+        Object.keys(payload).forEach(key => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = payload[key];
+          form.appendChild(input);
+        });
+
+        const payloadInput = document.createElement("input");
+        payloadInput.type = "hidden";
+        payloadInput.name = "payload";
+        payloadInput.value = JSON.stringify(payload);
+        form.appendChild(payloadInput);
+
+        document.body.appendChild(form);
+        form.submit();
+
+        setTimeout(() => {
+          form.remove();
+          iframe.remove();
+          resolve();
+        }, 3500);
+      });
     }
 
     function readFileAsBase64(file) {
