@@ -412,30 +412,6 @@
       text-decoration: underline;
     }
 
-    .task-updates {
-      margin-top: 14px;
-      border-top: 1px dashed var(--border);
-      padding-top: 12px;
-      display: grid;
-      gap: 8px;
-    }
-
-    .task-update-item {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 12px;
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .task-update-head {
-      color: var(--muted);
-      font-size: 12px;
-      margin-bottom: 4px;
-      font-weight: 700;
-    }
-
     .share-actions {
       display: flex;
       flex-wrap: wrap;
@@ -455,6 +431,54 @@
       margin-bottom: 0;
       min-width: 240px;
       flex: 1;
+    }
+
+
+    .updates-section {
+      margin-top: 14px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+    }
+
+    .updates-list {
+      margin-top: 8px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .update-item {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #f8fafc;
+    }
+
+    .update-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .update-comment {
+      font-size: 14px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .update-file-link {
+      display: inline-block;
+      margin-top: 6px;
+      color: #1d4ed8;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .update-file-link:hover {
+      text-decoration: underline;
     }
 
     @media print {
@@ -620,7 +644,7 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxrg4u8r6OUMlIesbrgJr-xYNunycu05u1ZpIcRxnCvXcYtrWdRfEm8uldC5gyQkh_sBg/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz9g4eMe29rfT9o_SNcNZLYz1KCr0VDcbj8M4KgQXMzpcRuiV-Wf7YD42OjyVpQzceHrg/exec";
     let currentUser = null;
 
     function showMessage(id, text, type) {
@@ -834,7 +858,6 @@
           <td>${escapeHtml(String(t.progress || 0))}%</td>
           <td>${escapeHtml(String(t.performance_score || 0))}%</td>
           <td>${escapeHtml(t.schedule_health || "")}</td>
-          <td>${escapeHtml(getLatestTaskComment(t))}</td>
         </tr>
       `).join("");
 
@@ -873,11 +896,10 @@
                 <th>Progress</th>
                 <th>Performance</th>
                 <th>Health</th>
-                <th>Latest Comment</th>
               </tr>
             </thead>
             <tbody>
-              ${rows || '<tr><td colspan="9">No tasks found.</td></tr>'}
+              ${rows || '<tr><td colspan="8">No tasks found.</td></tr>'}
             </tbody>
           </table>
         </body>
@@ -903,15 +925,13 @@
         const issuedDate = t.start_date || "Not set";
         const fromName = t.created_by_name || "Executive";
         const toName = t.assigned_to_name || "";
-        const latestComment = getLatestTaskComment(t);
 
         return `
           <div class="task-summary-item ${color}" onclick="openTaskFromSummary('${t.task_id}')">
             <div class="task-summary-title">${escapeHtml(t.title || "Untitled Task")}</div>
             <div class="task-summary-meta">
               Date: ${escapeHtml(issuedDate)} • From: ${escapeHtml(fromName)} • To: ${escapeHtml(toName)}<br>
-              Deadline: ${escapeHtml(t.deadline || "")} • Progress: ${escapeHtml(String(t.progress || 0))}% • Status: ${escapeHtml(t.status || "")}<br>
-              Latest comment: ${escapeHtml(latestComment || "No comments yet")}
+              Deadline: ${escapeHtml(t.deadline || "")} • Progress: ${escapeHtml(String(t.progress || 0))}% • Status: ${escapeHtml(t.status || "")}
             </div>
           </div>
         `;
@@ -938,52 +958,6 @@
           target.style.boxShadow = "";
         }, 1800);
       }
-    }
-
-    function getTaskUpdates(task) {
-      const updates = task.task_updates || task.comments || [];
-      return Array.isArray(updates) ? updates : [];
-    }
-
-    function getLatestTaskComment(task) {
-      const updates = getTaskUpdates(task);
-      if (updates.length) {
-        const latest = updates[updates.length - 1];
-        return latest.comment || "";
-      }
-      return task.latest_comment || "";
-    }
-
-    function renderTaskUpdatesHtml(task) {
-      const updates = getTaskUpdates(task);
-      if (!updates.length && !task.latest_comment) {
-        return `
-          <div class="task-updates">
-            <div class="task-meta"><strong>Task updates / comments:</strong></div>
-            <span class="task-meta">No comments yet.</span>
-          </div>
-        `;
-      }
-
-      const updateRows = updates.length ? updates.map(u => `
-        <div class="task-update-item">
-          <div class="task-update-head">
-            ${escapeHtml(u.user_name || u.role || "User")} • ${escapeHtml(u.created_at || "")} • Progress: ${escapeHtml(String(u.progress || 0))}%
-          </div>
-          <div>${escapeHtml(u.comment || "")}</div>
-        </div>
-      `).join("") : `
-        <div class="task-update-item">
-          <div>${escapeHtml(task.latest_comment || "")}</div>
-        </div>
-      `;
-
-      return `
-        <div class="task-updates">
-          <div class="task-meta"><strong>Task updates / comments:</strong></div>
-          ${updateRows}
-        </div>
-      `;
     }
 
     function renderStats(tasks) {
@@ -1024,8 +998,6 @@
               <div class="task-meta" style="margin-top:6px;">Progress: ${progress}%</div>
             </div>
 
-            ${renderTaskUpdatesHtml(t)}
-
             <div class="share-actions">
               <button class="btn-small" onclick="shareTaskWhatsApp('${t.task_id}')">Share WhatsApp</button>
               <button class="btn-small" onclick="shareTaskEmail('${t.task_id}')">Share Email</button>
@@ -1035,7 +1007,7 @@
               <div class="task-meta"><strong>Proof documents / pictures:</strong></div>
               <div class="proof-links">
                 ${(t.proof_files || []).length ? (t.proof_files || []).map((f, index) => `
-                  <a href="${escapeHtml(f.url)}" target="_blank" rel="noopener">Proof ${index + 1}: ${escapeHtml(f.comment || f.file_name || "View uploaded file")}</a>
+                  <a href="${escapeHtml(f.url)}" target="_blank" download>Proof ${index + 1}: ${escapeHtml(f.comment || "Download / view file")}</a>
                 `).join("") : `<span class="task-meta">No proof uploaded yet.</span>`}
               </div>
 
@@ -1046,6 +1018,23 @@
                   <button class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
                 </div>
               ` : ""}
+            </div>
+
+            <div class="updates-section">
+              <div class="task-meta"><strong>Updates / Comments:</strong></div>
+              <div class="updates-list">
+                ${(t.updates || t.task_updates || t.comments || []).length ? (t.updates || t.task_updates || t.comments || []).map(u => `
+                  <div class="update-item">
+                    <div class="update-top">
+                      <span><strong>${escapeHtml(u.user_name || u.user || u.role || "User")}</strong>${u.role ? ` • ${escapeHtml(u.role)}` : ""}</span>
+                      <span>${escapeHtml(u.created_at || u.date || u.timestamp || "")}</span>
+                    </div>
+                    ${u.comment ? `<div class="update-comment">${escapeHtml(u.comment)}</div>` : `<div class="task-meta">No comment text.</div>`}
+                    ${u.progress ? `<div class="task-meta" style="margin-top:5px; color:#2563eb;"><strong>Progress:</strong> ${escapeHtml(String(u.progress))}%</div>` : ""}
+                    ${u.file_url || u.file ? `<a class="update-file-link" href="${escapeHtml(u.file_url || u.file)}" target="_blank">View uploaded file${u.file_name ? `: ${escapeHtml(u.file_name)}` : ""}</a>` : ""}
+                  </div>
+                `).join("") : `<span class="task-meta">No updates or comments yet.</span>`}
+              </div>
             </div>
 
             ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
@@ -1124,7 +1113,13 @@
       }
 
       const file = fileInput.files[0];
-      const comment = commentInput ? commentInput.value : "";
+      const comment = commentInput ? commentInput.value.trim() : "";
+      const maxSizeMb = 25;
+
+      if (file.size > maxSizeMb * 1024 * 1024) {
+        alert("The selected file is too large. Please upload a file smaller than " + maxSizeMb + " MB.");
+        return;
+      }
 
       const base64 = await readFileAsBase64(file);
 
@@ -1147,12 +1142,14 @@
 
         if (data.success) {
           alert("Proof uploaded successfully.");
+          fileInput.value = "";
+          if (commentInput) commentInput.value = "";
           await loadTasks();
         } else {
           alert(data.message || "Could not upload proof.");
         }
       } catch (err) {
-        alert("Upload failed. If this is blocked by the browser, open the app from the deployed Apps Script URL or check deployment permissions. " + err.message);
+        alert("Upload failed. Deploy the Apps Script as a Web App with access set to Anyone, then make sure SCRIPT_URL points to the latest /exec URL. " + err.message);
       }
     }
 
