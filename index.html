@@ -412,6 +412,39 @@
       text-decoration: underline;
     }
 
+    .comments-section {
+      margin-top: 14px;
+      border-top: 1px dashed var(--border);
+      padding-top: 12px;
+    }
+
+    .comment-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .comment-item {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .comment-meta {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .comment-text {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
     .share-actions {
       display: flex;
       flex-wrap: wrap;
@@ -431,6 +464,30 @@
       margin-bottom: 0;
       min-width: 240px;
       flex: 1;
+    }
+
+
+    .sync-status {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .sync-status.active {
+      display: block;
+      color: #1d4ed8;
+    }
+
+    .sync-status.error {
+      display: block;
+      color: var(--danger);
+    }
+
+    .sync-status.success {
+      display: block;
+      color: var(--success);
     }
 
     @media print {
@@ -569,7 +626,7 @@
             <textarea id="taskDescription" rows="3" placeholder="Explain the task"></textarea>
           </div>
           <div class="span-2">
-            <button class="btn-primary" onclick="createTask()">Create Task</button>
+            <button id="create_task_btn" class="btn-primary" onclick="createTask()">Create Task</button>
           </div>
         </div>
         <div id="taskMessage" class="message"></div>
@@ -596,14 +653,41 @@
   </section>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeq7YeGKTDY2wif37P7tZPc6mHdaYDsi4nKRWyasEOEv40PxZai-zS0MJOF7LngOw5mA/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqLKafRgWQEhpTBA3MWXMvjzp7dsBK0RNFKbiq1IGyPDwndgWGRR7pwSpLFQ6YAXVt/exec"; // Replace with your redeployed Apps Script Web App URL if it changes
+    const SHEET_ID = "1gcGeloqHr2rD30TGqfyOwPA08zXtU-o3gw5JzHhIKzY";
+    const TASK_UPDATES_TAB = "TaskUpdates";
     let currentUser = null;
+    window.taskUpdatesByTask = {};
 
     function showMessage(id, text, type) {
       const el = document.getElementById(id);
       el.textContent = text || "";
       el.className = "message " + (type || "error");
       if (!text) el.className = "message";
+    }
+
+
+    function setButtonBusy(buttonOrId, busyText) {
+      const btn = typeof buttonOrId === "string" ? document.getElementById(buttonOrId) : buttonOrId;
+      if (!btn) return null;
+      if (!btn.dataset.originalText) btn.dataset.originalText = btn.textContent;
+      btn.disabled = true;
+      btn.textContent = busyText || "Working...";
+      return btn;
+    }
+
+    function clearButtonBusy(buttonOrId) {
+      const btn = typeof buttonOrId === "string" ? document.getElementById(buttonOrId) : buttonOrId;
+      if (!btn) return;
+      btn.disabled = false;
+      btn.textContent = btn.dataset.originalText || btn.textContent;
+    }
+
+    function setSyncStatus(taskId, text, type) {
+      const el = document.getElementById("sync_" + taskId);
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = "sync-status" + (text ? " " + (type || "active") : "");
     }
 
     function api(action, params = {}) {
@@ -735,6 +819,7 @@
 
     async function createTask() {
       showMessage("taskMessage", "", "");
+      const btn = setButtonBusy("create_task_btn", "Creating task...");
 
       const payload = {
         title: document.getElementById("taskTitle").value.trim(),
@@ -747,6 +832,7 @@
 
       if (!payload.title || !payload.assigned_to || !payload.deadline) {
         showMessage("taskMessage", "Please complete task title, assigned manager, and deadline.", "error");
+        clearButtonBusy(btn);
         return;
       }
 
@@ -763,6 +849,8 @@
         }
       } catch (err) {
         showMessage("taskMessage", err.message, "error");
+      } finally {
+        clearButtonBusy(btn);
       }
     }
 
@@ -776,7 +864,38 @@
 
       const tasks = data.tasks || [];
       window.latestTasks = tasks;
+      await loadTaskUpdates();
       applyTaskFilter();
+    }
+
+    async function loadTaskUpdates() {
+      const tasks = window.latestTasks || [];
+      const taskIds = tasks.map(t => t.task_id).filter(Boolean).join(",");
+
+      window.taskUpdatesByTask = {};
+      if (!taskIds) return;
+
+      try {
+        const data = await api("getTaskUpdates", {
+          sheetId: SHEET_ID,
+          tab: TASK_UPDATES_TAB,
+          taskIds,
+          userId: currentUser.id,
+          role: currentUser.role
+        });
+
+        if (data && data.success) {
+          const updates = data.updates || data.comments || [];
+          updates.forEach(u => {
+            const id = String(u.task_id || u.taskId || "");
+            if (!id) return;
+            if (!window.taskUpdatesByTask[id]) window.taskUpdatesByTask[id] = [];
+            window.taskUpdatesByTask[id].push(u);
+          });
+        }
+      } catch (err) {
+        console.warn("TaskUpdates comments could not be loaded", err);
+      }
     }
 
     function applyTaskFilter() {
@@ -965,46 +1084,34 @@
 
               ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
                 <div class="task-actions" style="grid-template-columns:1fr 1fr auto;">
-                  <input id="proof_${t.task_id}" type="file">
+                  <input id="proof_${t.task_id}" type="file" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt">
                   <input id="proof_comment_${t.task_id}" placeholder="Proof note, e.g. signed document or completed photo">
-                  <button class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
+                  <button id="upload_btn_${t.task_id}" class="btn-small" onclick="uploadProof('${t.task_id}')">Upload Proof</button>
                 </div>
+                <div id="sync_${t.task_id}" class="sync-status"></div>
               ` : ""}
-            </div>
-
-            <div class="proof-section">
-              <div class="task-meta"><strong>Comments:</strong></div>
-              <div class="proof-links">
-                ${(t.taskupdates || t.task_updates || t.updates || t.comments || []).length
-                  ? (t.taskupdates || t.task_updates || t.updates || t.comments || []).map(u => `
-                    <div style="border:1px solid #e5e7eb; border-radius:10px; padding:9px; background:#f9fafb;">
-                      <div class="task-meta">
-                        ${escapeHtml(u.created_at || u.timestamp || u.date || "")}
-                        ${u.user_name || u.user || u.created_by_name ? ` • ${escapeHtml(u.user_name || u.user || u.created_by_name)}` : ""}
-                      </div>
-                      <div style="margin-top:4px; font-size:14px; color:#111827;">${escapeHtml(u.comment || "")}</div>
-                    </div>
-                  `).join("")
-                  : (t.latest_comment ? `<div style="border:1px solid #e5e7eb; border-radius:10px; padding:9px; background:#f9fafb;">${escapeHtml(t.latest_comment)}</div>` : `<span class="task-meta">No comments yet.</span>`)
-                }
-              </div>
             </div>
 
             ${currentUser.role === "MANAGER" && t.status !== "CLOSED" ? `
               <div class="task-actions">
                 <input id="progress_${t.task_id}" type="number" min="0" max="100" placeholder="%">
                 <input id="comment_${t.task_id}" placeholder="Progress comment">
-                <button class="btn-small" onclick="updateProgress('${t.task_id}')">Update</button>
-                <button class="btn-small" onclick="requestMoreTime('${t.task_id}')">More Time</button>
+                <button id="update_btn_${t.task_id}" class="btn-small" onclick="updateProgress('${t.task_id}')">Update</button>
+                <button id="moretime_btn_${t.task_id}" class="btn-small" onclick="requestMoreTime('${t.task_id}')">More Time</button>
               </div>
             ` : ""}
 
             ${currentUser.role === "EXECUTIVE" && t.status !== "CLOSED" ? `
               <div class="task-actions" style="grid-template-columns:1fr auto;">
                 <input id="remark_${t.task_id}" placeholder="Closing remark">
-                <button class="btn-small btn-danger" onclick="closeTask('${t.task_id}')">Close Task</button>
+                <button id="close_btn_${t.task_id}" class="btn-small btn-danger" onclick="closeTask('${t.task_id}')">Close Task</button>
               </div>
             ` : ""}
+
+            <div class="comments-section">
+              <div class="task-meta"><strong>Comments / task updates:</strong></div>
+              <div class="comment-list">${renderTaskComments(t.task_id)}</div>
+            </div>
 
             ${t.close_remark ? `<div class="task-meta" style="margin-top:10px;"><strong>Executive remark:</strong> ${escapeHtml(t.close_remark)}</div>` : ""}
           </div>
@@ -1012,13 +1119,59 @@
       }).join("");
     }
 
+    function renderTaskComments(taskId) {
+      const comments = window.taskUpdatesByTask[String(taskId)] || [];
+
+      if (!comments.length) {
+        return '<span class="task-meta">No comments uploaded yet.</span>';
+      }
+
+      return comments.map(c => {
+        const author = c.user_name || c.userName || c.created_by_name || c.createdByName || c.name || "User";
+        const role = c.role || c.user_role || c.userRole || "";
+        const date = c.created_at || c.createdAt || c.timestamp || c.date || "";
+        const text = c.comment || c.update || c.message || c.note || "";
+
+        return `
+          <div class="comment-item">
+            <div class="comment-meta">${escapeHtml(author)}${role ? " • " + escapeHtml(role) : ""}${date ? " • " + escapeHtml(date) : ""}</div>
+            <div class="comment-text">${escapeHtml(text)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
     async function updateProgress(taskId) {
       const progress = document.getElementById("progress_" + taskId).value;
-      const comment = document.getElementById("comment_" + taskId).value;
+      const comment = document.getElementById("comment_" + taskId).value.trim();
+      const btn = setButtonBusy("update_btn_" + taskId, "Updating...");
+      setSyncStatus(taskId, "Syncing progress update...", "active");
 
-      const data = await api("updateProgress", { taskId, progress, comment, userId: currentUser.id });
-      alert(data.message || (data.success ? "Updated" : "Failed"));
-      await loadTasks();
+      try {
+        if (progress === "" && !comment) {
+          alert("Please enter a progress percentage or comment.");
+          setSyncStatus(taskId, "Please enter a progress percentage or comment.", "error");
+          return;
+        }
+
+        const data = await api("updateProgress", {
+          taskId,
+          progress,
+          comment,
+          userId: currentUser.id,
+          userName: currentUser.name,
+          role: currentUser.role,
+          sheetId: SHEET_ID,
+          tab: TASK_UPDATES_TAB
+        });
+
+
+        setSyncStatus(taskId, data.success ? "Progress synced. Refreshing task list..." : (data.message || "Update failed."), data.success ? "success" : "error");
+        alert(data.message || (data.success ? "Updated" : "Failed"));
+        await loadTasks();
+      } finally {
+        clearButtonBusy(btn);
+      }
     }
 
 
@@ -1059,42 +1212,96 @@
     async function uploadProof(taskId) {
       const fileInput = document.getElementById("proof_" + taskId);
       const commentInput = document.getElementById("proof_comment_" + taskId);
-
-      if (!fileInput || !fileInput.files || !fileInput.files[0]) {
-        alert("Please select a document, file, or picture to upload.");
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const comment = commentInput ? commentInput.value : "";
-
-      const base64 = await readFileAsBase64(file);
+      const btn = setButtonBusy("upload_btn_" + taskId, "Uploading...");
+      setSyncStatus(taskId, "Reading selected file...", "active");
 
       try {
-        const response = await fetch(SCRIPT_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({
-            action: "uploadProof",
-            taskId: taskId,
-            userId: currentUser.id,
-            fileName: file.name,
-            mimeType: file.type || "application/octet-stream",
-            base64: base64,
-            comment: comment
-          })
-        });
+        if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+          alert("Please select a document, file, or picture to upload.");
+          setSyncStatus(taskId, "Please select a file first.", "error");
+          return;
+        }
 
-        const data = await response.json();
+        const file = fileInput.files[0];
+        const comment = commentInput ? commentInput.value.trim() : "";
 
-        if (data.success) {
-          alert("Proof uploaded successfully.");
+        if (file.size > 10 * 1024 * 1024) {
+          alert("Please upload a file smaller than 10 MB.");
+          setSyncStatus(taskId, "File is too large. Maximum allowed size is 10 MB.", "error");
+          return;
+        }
+
+        const base64 = await readFileAsBase64(file);
+        setSyncStatus(taskId, "Uploading proof file...", "active");
+
+        const payload = {
+          taskId: taskId,
+          task_id: taskId,
+          userId: currentUser.id,
+          user_id: currentUser.id,
+          userName: currentUser.name,
+          user_name: currentUser.name,
+          role: currentUser.role,
+          fileName: file.name,
+          filename: file.name,
+          mimeType: file.type || "application/octet-stream",
+          mime_type: file.type || "application/octet-stream",
+          base64: base64,
+          fileData: base64,
+          comment: comment,
+          sheetId: SHEET_ID,
+          sheet_id: SHEET_ID,
+          tab: TASK_UPDATES_TAB
+        };
+
+        const uploadActions = ["uploadProof", "uploadTaskProof", "uploadFile", "saveProof", "addProofFile"];
+        let data = null;
+
+        for (let i = 0; i < uploadActions.length; i++) {
+          const action = uploadActions[i];
+          setSyncStatus(taskId, "Trying upload action: " + action + "...", "active");
+          data = await postToAppsScript({ ...payload, action });
+
+          if (data && data.success) break;
+
+          const msg = String((data && data.message) || "").toLowerCase();
+          if (!msg.includes("invalid action")) break;
+        }
+
+        if (data && data.success) {
+          setSyncStatus(taskId, "Upload synced successfully. Refreshing task list...", "success");
+          alert(data.message || "Proof uploaded successfully.");
+          if (fileInput) fileInput.value = "";
+          if (commentInput) commentInput.value = "";
           await loadTasks();
         } else {
-          alert(data.message || "Could not upload proof.");
+          const message = (data && data.message) || "Could not upload proof.";
+          const friendly = String(message).toLowerCase().includes("invalid action")
+            ? "The Apps Script backend does not currently support proof upload. Please add one of these actions in doPost: uploadProof, uploadTaskProof, uploadFile, saveProof, or addProofFile."
+            : message;
+          setSyncStatus(taskId, friendly, "error");
+          alert(friendly);
         }
       } catch (err) {
+        setSyncStatus(taskId, "Upload failed: " + err.message, "error");
         alert("Upload failed. If this is blocked by the browser, open the app from the deployed Apps Script URL or check deployment permissions. " + err.message);
+      } finally {
+        clearButtonBusy(btn);
+      }
+    }
+
+    async function postToAppsScript(payload) {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+
+      const text = await response.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        return { success: false, message: text || "Upload did not return valid JSON." };
       }
     }
 
@@ -1123,28 +1330,44 @@
       const reason = prompt("Reason for requesting more time:");
       if (!reason) return;
 
-      const data = await api("requestExtension", {
-        task_id: taskId,
-        requested_by: currentUser.id,
-        new_deadline: newDate,
-        reason
-      });
+      const btn = setButtonBusy("moretime_btn_" + taskId, "Sending...");
+      setSyncStatus(taskId, "Sending extension request...", "active");
 
-      alert(data.message || (data.success ? "Request submitted" : "Failed"));
+      try {
+        const data = await api("requestExtension", {
+          task_id: taskId,
+          requested_by: currentUser.id,
+          new_deadline: newDate,
+          reason
+        });
+
+        setSyncStatus(taskId, data.success ? "Extension request sent." : (data.message || "Request failed."), data.success ? "success" : "error");
+        alert(data.message || (data.success ? "Request submitted" : "Failed"));
+      } finally {
+        clearButtonBusy(btn);
+      }
     }
 
     async function closeTask(taskId) {
       const remarkEl = document.getElementById("remark_" + taskId);
       const remark = remarkEl ? remarkEl.value.trim() : "";
+      const btn = setButtonBusy("close_btn_" + taskId, "Closing...");
+      setSyncStatus(taskId, "Closing task...", "active");
 
-      if (!remark) {
-        alert("Please enter a closing remark.");
-        return;
+      try {
+        if (!remark) {
+          alert("Please enter a closing remark.");
+          setSyncStatus(taskId, "Please enter a closing remark.", "error");
+          return;
+        }
+
+        const data = await api("closeTask", { taskId, executiveId: currentUser.id, remark });
+        setSyncStatus(taskId, data.success ? "Task closed. Refreshing task list..." : (data.message || "Close failed."), data.success ? "success" : "error");
+        alert(data.message || (data.success ? "Closed" : "Failed"));
+        await loadTasks();
+      } finally {
+        clearButtonBusy(btn);
       }
-
-      const data = await api("closeTask", { taskId, executiveId: currentUser.id, remark });
-      alert(data.message || (data.success ? "Closed" : "Failed"));
-      await loadTasks();
     }
 
     function escapeHtml(value) {
