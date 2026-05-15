@@ -292,7 +292,7 @@ button.synced{background:var(--green)!important;color:white!important}
   2. Copy the Web App URL.
   3. Paste it below in API_URL.
 */
-const API_URL = "https://script.google.com/macros/s/AKfycbxu6DCqRudfxGBaozDdRkyR3nWH4MtJwlZOhixRD_R0MgWWKtYUK2TjeLndyizFJYNb/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbzHtbBca-21NFTb5gCxt00fga__lDNgi4OiAJaN9_h16l6Z3t5vhfwVkgRDtI_x93an/exec";
 
 let currentUser = JSON.parse(localStorage.getItem("onpointUser") || "null");
 let systemPeople = [];
@@ -593,7 +593,10 @@ async function saveGenericRecord(sheet,button){
     if(result.status==="success"){
       let extraMessage = "";
       if(sheet==="Tasks" || sheet==="ProjectTasks"){
-        extraMessage = await notifyTaskAssignee(sheet,payload);
+        if(result.email && result.email.message){
+          extraMessage += " " + result.email.message;
+        }
+        extraMessage += buildTaskWhatsappMessage(sheet,payload);
       }
       showMessage(`${id}_message`,`${sheet} record saved successfully.${extraMessage}`,"success");
       clearGenericForm(sheet,true);
@@ -661,6 +664,24 @@ function buildWhatsappLink(message,number){
   const cleanNumber = (number || "").replace(/[^0-9]/g,"");
   return cleanNumber ? `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}` : "";
 }
+
+function buildTaskWhatsappMessage(sheet,payload){
+  const id=cleanId(sheet);
+  const message = taskMessage(sheet,payload);
+  let output = "";
+  const sendWhatsapp = document.getElementById(`${id}_SendWhatsapp`);
+  const whatsappNumber = document.getElementById(`${id}_WhatsappNumber`);
+  if(sendWhatsapp && sendWhatsapp.checked){
+    const link = buildWhatsappLink(message, whatsappNumber ? whatsappNumber.value : "");
+    if(link){
+      output += ` <a class="whatsapp-link" target="_blank" href="${link}">Send WhatsApp</a>`;
+    }else{
+      output += " Enter a WhatsApp number to show the WhatsApp send link.";
+    }
+  }
+  return output;
+}
+
 async function notifyTaskAssignee(sheet,payload){
   const id=cleanId(sheet);
   const assignedTo = (payload.AssignedTo || "").trim();
