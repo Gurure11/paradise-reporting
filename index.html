@@ -1,708 +1,525 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OnPoint Group School</title>
-  <style>
-    :root{
-      --primary:#0f172a;--primary2:#1e293b;--accent:#2563eb;--success:#16a34a;
-      --danger:#dc2626;--warning:#f59e0b;--bg:#f4f7fb;--card:#ffffff;
-      --text:#111827;--muted:#6b7280;--border:#e5e7eb;--radius:18px;
-      --shadow:0 18px 45px rgba(15,23,42,.12)
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(135deg,#f8fafc,#e2e8f0);color:var(--text)}
-    .hidden{display:none!important}
-    .topbar{background:linear-gradient(135deg,var(--primary),var(--primary2));color:white;padding:18px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px;position:sticky;top:0;z-index:10}
-    .logo{display:flex;align-items:center;gap:12px;font-weight:900;font-size:20px}
-    .logo img{width:48px;height:48px;border-radius:12px;background:white;object-fit:contain}
-    .pill{background:rgba(255,255,255,.14);padding:9px 13px;border-radius:999px;font-size:13px}
-    .login-page{min-height:calc(100vh - 84px);display:grid;grid-template-columns:1.1fr .9fr}
-    .hero{padding:60px;background:radial-gradient(circle at top left,rgba(37,99,235,.18),transparent 38%);display:flex;flex-direction:column;justify-content:center}
-    .hero h1{font-size:52px;line-height:1.05;margin:0 0 18px}
-    .hero p{font-size:18px;color:var(--muted);line-height:1.6;max-width:700px}
-    .feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
-    .feature,.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
-    .feature strong{display:block;margin-bottom:8px}
-    .login-wrap{display:grid;place-items:center;padding:34px}
-    .login-card{width:100%;max-width:430px;background:white;border:1px solid var(--border);border-radius:22px;padding:34px;box-shadow:var(--shadow)}
-    h2,h3{margin-top:0}
-    label{font-weight:800;font-size:13px;color:#374151;display:block;margin-bottom:7px}
-    input,textarea,select{width:100%;border:1px solid var(--border);border-radius:12px;padding:13px;font-size:15px;margin-bottom:14px;background:white}
-    textarea{min-height:95px}
-    button{border:0;border-radius:12px;padding:12px 15px;font-weight:900;cursor:pointer;background:var(--accent);color:white}
-    button.secondary{background:#e0ecff;color:#1d4ed8}
-    button.success{background:var(--success)}
-    button.danger{background:var(--danger)}
-    button.dark{background:var(--primary)}
-    button.syncing{opacity:.75;pointer-events:none;position:relative}
-    button.syncing:after{content:"";display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;margin-left:8px;vertical-align:-2px;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .course-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .course-thumb.loading{font-size:13px;color:#64748b;background:#f1f5f9}
-    .app{display:none}
-    .main{max-width:1360px;margin:0 auto;padding:26px}
-    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-    .tab{background:#e5e7eb;color:#111827}
-    .tab.active{background:var(--accent);color:white}
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px}
-    .stat{background:white;border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 10px 28px rgba(15,23,42,.06)}
-    .stat span{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
-    .stat strong{font-size:30px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:18px}
-    .course-card{overflow:hidden;padding:0}
-    .course-thumb{height:170px;background:#dbeafe;display:grid;place-items:center;color:#1d4ed8;font-weight:900;position:relative;cursor:pointer;overflow:hidden}
-    .course-thumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,.42));pointer-events:none}
-    .course-play{position:absolute;z-index:2;display:grid;place-items:center;width:58px;height:58px;border-radius:999px;background:rgba(15,23,42,.84);color:white;font-size:21px;box-shadow:0 12px 25px rgba(0,0,0,.28)}
-    .course-start-label{position:absolute;z-index:2;left:12px;bottom:12px;background:rgba(15,23,42,.84);color:white;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
-    .course-body{padding:20px}
-    .badge{display:inline-flex;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900;background:#dcfce7;color:#166534}
-    .badge.paid{background:#fef3c7;color:#92400e}
-    .progress{height:12px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin:10px 0}
-    .progress-fill{height:100%;background:var(--success);width:0}
-    .lesson{border-left:6px solid var(--accent);margin-bottom:12px}
-    iframe{width:100%;height:360px;border:0;border-radius:16px;background:#111827}
-    .lesson-thumb{height:260px;border-radius:16px;background:#dbeafe;display:grid;place-items:center;overflow:hidden;color:#1d4ed8;font-weight:900;margin:12px 0;position:relative;cursor:pointer}
-    .lesson-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .video-card-thumb{height:260px;border-radius:16px;background:#dbeafe;display:grid;place-items:center;overflow:hidden;color:#1d4ed8;font-weight:900;margin:12px 0;position:relative;cursor:pointer}
-    .video-card-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .video-card-thumb:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,23,42,0),rgba(15,23,42,.55));pointer-events:none}
-    .video-play-btn{position:absolute;z-index:2;display:grid;place-items:center;width:76px;height:76px;border-radius:999px;background:rgba(15,23,42,.86);color:white;font-size:28px;box-shadow:0 14px 30px rgba(0,0,0,.30)}
-    .video-start-label{position:absolute;z-index:2;left:14px;bottom:14px;background:rgba(15,23,42,.86);color:white;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:900}
-    .lesson-play{position:absolute;display:grid;place-items:center;width:72px;height:72px;border-radius:999px;background:rgba(15,23,42,.82);color:white;font-size:26px;box-shadow:0 10px 25px rgba(0,0,0,.25)}
-    .quiz-option{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px;margin:8px 0;cursor:pointer}
-    .quiz-option:hover{border-color:var(--accent)}
-    .table-wrap{overflow:auto}
-    table{width:100%;border-collapse:collapse;font-size:13px;background:white}
-    th,td{border:1px solid #d1d5db;padding:9px;text-align:left;vertical-align:top}
-    th{background:#f3f4f6}
-    .message{padding:11px;border-radius:12px;margin-top:12px;font-size:14px;display:none}
-    .message.error{display:block;background:#fee2e2;color:#991b1b}
-    .message.success{display:block;background:#dcfce7;color:#166534}
-    .muted{color:var(--muted)}
-    .enrollment-card{border-left:6px solid var(--accent);margin-bottom:12px}
-    .student-row{display:grid;grid-template-columns:1.3fr 1fr auto;gap:12px;align-items:center;border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:10px;background:#fff}
-    .role-note{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:14px;padding:12px;color:#475569;margin-bottom:14px}
-    .link-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:10px;word-break:break-all;color:#1d4ed8;font-weight:700;margin-bottom:12px}
-    .upload-status{background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:12px;margin-bottom:12px;color:#475569}
-    .lesson-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
-    .lesson-meta span{background:#eef2ff;color:#3730a3;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900}
-    @media(max-width:900px){.login-page{grid-template-columns:1fr}.hero{padding:34px}.hero h1{font-size:34px}.feature-grid,.stats{grid-template-columns:1fr}.main{padding:18px}iframe{height:240px}}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OnPoint Group</title>
+
+<style>
+:root{
+  --bg:#f4f6f9;
+  --panel:#ffffff;
+  --dark:#111827;
+  --dark2:#1f2937;
+  --blue:#2563eb;
+  --green:#16a34a;
+  --red:#dc2626;
+  --text:#111827;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+  --shadow:0 8px 30px rgba(15,23,42,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.app-shell{min-height:100vh;display:flex}
+.sidebar{width:270px;min-height:100vh;background:var(--dark);color:white;padding:20px;position:fixed;left:0;top:0;bottom:0;z-index:20;transition:transform .25s ease;overflow-y:auto}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:24px}
+.brand h2{margin:0;font-size:22px}
+.close-menu{display:none;background:transparent;color:white;font-size:24px;padding:4px 8px}
+.nav-link{display:block;color:white;text-decoration:none;padding:12px 14px;margin:6px 0;border-radius:10px;cursor:pointer}
+.nav-link:hover,.nav-link.active{background:var(--dark2)}
+.sidebar-footer{margin-top:28px;color:#cbd5e1;font-size:13px}
+.main{margin-left:270px;padding:24px;width:calc(100% - 270px)}
+.topbar{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:24px;position:sticky;top:10px;z-index:10}
+.menu-btn{display:none;background:var(--dark)}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:13px;background:#fee2e2;color:#991b1b}
+.status-pill.connected{background:#dcfce7;color:#166534}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+.auth-screen{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#111827,#2563eb)}
+.auth-card{width:min(980px,100%);background:white;border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.25);overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.auth-hero{background:#111827;color:white;padding:42px}
+.auth-hero h1{font-size:38px;margin:0 0 15px}
+.auth-hero p{color:#cbd5e1;line-height:1.6}
+.auth-form{padding:42px}
+.tabs{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.tab-btn{flex:1;background:#e5e7eb;color:#111827}
+.tab-btn.active{background:var(--blue);color:white}
+input,select,textarea{width:100%;padding:12px;margin-bottom:12px;border:1px solid #d1d5db;border-radius:10px;font-size:14px;background:white}
+textarea{min-height:90px;resize:vertical}
+button{background:var(--blue);color:white;border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:600}
+button.secondary{background:#e5e7eb;color:#111827}
+button.danger{background:var(--red)}
+button.full{width:100%}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:24px}
+.card,.section{background:white;border-radius:18px;box-shadow:var(--shadow)}
+.card{padding:24px}
+.card h3{margin:0 0 10px;color:var(--muted);font-size:14px;text-transform:uppercase;letter-spacing:.05em}
+.card p{margin:0;font-size:28px;font-weight:700}
+.section{padding:22px;margin-bottom:24px}
+.section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;flex-wrap:wrap}
+.section h2,.section h3{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{border-bottom:1px solid var(--border);padding:12px;text-align:left;vertical-align:top}
+th{background:#f9fafb;color:#374151}
+.page{display:none}
+.page.active{display:block}
+.notice,.error,.success{padding:12px 14px;border-radius:10px;margin-bottom:14px}
+.notice{background:#eff6ff;color:#1e40af}
+.error{background:#fee2e2;color:#991b1b}
+.success{background:#dcfce7;color:#166534}
+.hidden{display:none!important}
+.module-group{border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px;background:#fff}
+.small-text{font-size:13px;color:var(--muted)}
+.form-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700}
+@media(max-width:850px){.auth-card{grid-template-columns:1fr}.auth-hero{padding:28px}}
+@media(max-width:760px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .close-menu{display:block}
+  .main{margin-left:0;width:100%;padding:14px}
+  .menu-btn{display:inline-block}
+  .topbar{border-radius:14px;align-items:flex-start;flex-direction:column}
+  .grid{grid-template-columns:1fr}
+}
+</style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="logo"><img src="logo.png" alt="OnPoint Group Logo"><span>OnPoint Group School</span></div>
-    <div><span id="userPill" class="pill hidden"></span> <button id="logoutBtn" class="secondary hidden" onclick="logout()">Logout</button></div>
-  </header>
 
-  <section id="loginPage" class="login-page">
-    <div class="hero">
-      <h1>Professional Learning Platform for OnPoint Group</h1>
-      <p>Manage courses, lessons, YouTube video training, quizzes, assignments, attendance, payments, live Zoom classes, teacher dashboards and student progress from one online system.</p>
-      <div class="feature-grid">
-        <div class="feature"><strong>Students</strong><span class="muted">Track courses, lessons, quizzes and progress.</span></div>
-        <div class="feature"><strong>Teachers</strong><span class="muted">Upload courses, assignments and live classes.</span></div>
-        <div class="feature"><strong>Admins</strong><span class="muted">Manage users, payments, reports and settings.</span></div>
-      </div>
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-hero">
+      <h1>OnPoint Group</h1>
+      <p>Login to your Quickbase-style business platform connected to Google Sheets.</p>
+      <p><strong>Sheet ID:</strong><br>1Y9gmsu_LQU_8lHxcTpPj1N1zgxdSVbmKmD-ulCBtEXM</p>
+      <div id="authConnectionStatus" class="status-pill"><span class="dot"></span><span>Not connected</span></div>
     </div>
-
-    <div class="login-wrap">
-      <div class="login-card">
-        <h2>Login</h2>
-        <p class="muted">Use email or username.</p>
-        <label>Email or Username</label>
-        <input id="loginName" placeholder="student@onpointgroup.co.za or username">
-        <label>Password</label>
-        <input id="loginPassword" type="password" placeholder="Password">
-        <button onclick="login()">Login</button>
-        <div id="loginMessage" class="message"></div>
-        <p class="muted">Default example: admin / 1234, teacher / 1234, student / 1234</p>
-      </div>
-    </div>
-  </section>
-
-  <section id="app" class="app">
-    <main class="main">
+    <div class="auth-form">
       <div class="tabs">
-        <button class="tab active" onclick="showTab('dashboardView',this)">Dashboard</button>
-        <button class="tab" onclick="showTab('coursesView',this)">Courses</button>
-        <button class="tab" onclick="showTab('teacherView',this)">Teacher Dashboard</button>
-        <button class="tab" onclick="showTab('adminView',this)">Admin Panel</button>
-        <button class="tab" onclick="showTab('paymentsView',this)">Payments</button>
-        <button class="tab" onclick="showTab('liveView',this)">Live Classes</button>
+        <button class="tab-btn active" onclick="showAuthTabManual('login')">Login</button>
+        <button class="tab-btn" onclick="showAuthTabManual('register')">Register</button>
       </div>
+      <div id="authMessage"></div>
+      <div id="loginForm">
+        <input id="loginEmail" type="email" placeholder="Email address">
+        <input id="loginPassword" type="password" placeholder="Password">
+        <button class="full" onclick="loginUser()">Login</button>
+      </div>
+      <div id="registerForm" class="hidden">
+        <input id="regFullName" type="text" placeholder="Full name">
+        <input id="regEmail" type="email" placeholder="Email address">
+        <input id="regPassword" type="password" placeholder="Password">
+        <select id="regRole">
+          <option value="Admin">Admin</option>
+          <option value="Manager">Manager</option>
+          <option value="Employee">Employee</option>
+        </select>
+        <button class="full" onclick="registerUser()">Create Account</button>
+      </div>
+      <p class="small-text" style="margin-top:18px">Deploy Apps Script as a Web App, then paste the Web App URL into <strong>API_URL</strong> in this HTML file.</p>
+    </div>
+  </div>
+</div>
 
-      <section id="dashboardView">
-        <div class="stats">
-          <div class="stat"><span>Total Courses</span><strong id="statCourses">0</strong></div>
-          <div class="stat"><span>Completed Lessons</span><strong id="statLessons">0</strong></div>
-          <div class="stat"><span>Quiz Score</span><strong id="statScore">0%</strong></div>
-          <div class="stat"><span>Attendance</span><strong id="statAttendance">0%</strong></div>
-        </div>
-        <div class="card">
-          <h2>Student Progress</h2>
-          <p class="muted">Overall progress across enrolled courses.</p>
-          <div class="progress"><div id="overallProgress" class="progress-fill" style="width:0%"></div></div>
-          <strong id="overallProgressText">0%</strong>
-        </div>
-        <div class="card">
-          <h2>Courses Covered</h2>
-          <div id="coveredCourses" class="grid"></div>
-        </div>
-      </section>
+<div id="appShell" class="app-shell hidden">
+  <aside id="sidebar" class="sidebar">
+    <div class="brand"><h2>OnPoint Group</h2><button class="close-menu" onclick="toggleSidebar()">×</button></div>
+    <a class="nav-link active" onclick="showPage('dashboard', this)">Dashboard</a>
+    <a class="nav-link" onclick="showPage('crm', this)">CRM</a>
+    <a class="nav-link" onclick="showPage('tasks', this)">Tasks</a>
+    <a class="nav-link" onclick="showPage('hr', this)">HR</a>
+    <a class="nav-link" onclick="showPage('projects', this)">Projects</a>
+    <a class="nav-link" onclick="showPage('inventory', this)">Inventory</a>
+    <a class="nav-link" onclick="showPage('finance', this)">Finance</a>
+    <a class="nav-link" onclick="showPage('logistics', this)">Logistics</a>
+    <a class="nav-link" onclick="showPage('settings', this)">Settings</a>
+    <div class="sidebar-footer">
+      <div id="userLabel">Logged in</div><br>
+      <button class="danger full" onclick="logoutUser()">Logout</button>
+    </div>
+  </aside>
 
-      <section id="coursesView" class="hidden">
-        <div class="card">
-          <h2>Available Courses</h2>
-          <div id="coursesList" class="grid"></div>
-        </div>
-        <div id="lessonArea"></div>
-      </section>
+  <main class="main">
+    <div class="topbar">
+      <div><button class="menu-btn" onclick="toggleSidebar()">☰ Menu</button> <strong id="pageTitle">Dashboard</strong></div>
+      <div id="connectionStatus" class="status-pill"><span class="dot"></span><span>Checking connection...</span></div>
+    </div>
 
-      <section id="teacherView" class="hidden">
-        <div class="grid">
-          <div class="card">
-            <h2>Course Uploads</h2>
-            <label>Course Name</label><input id="newCourseName">
-            <label>Description</label><textarea id="newCourseDescription"></textarea>
-            <label>Category</label><input id="newCourseCategory">
-            <label>Course Access</label><select id="newCourseAccess"><option value="FREE">FREE</option><option value="PAID">PAID</option></select>
-            <label>Price</label><input id="newCoursePrice" type="number" value="0">
-            <button class="secondary" onclick="setCourseFreePaid()">Set Free / Paid</button>
-            <label>Thumbnail URL</label><input id="newCourseThumbnail">
-            <button onclick="createCourse()">Save Course</button>
-            <div id="courseMessage" class="message"></div>
-          </div>
-          <div class="card">
-            <h2>Lesson Upload</h2>
-            <div class="role-note">Only ADMIN and TEACHER users can upload lessons.</div>
-            <label>Course ID</label><input id="lessonCourseId">
-            <label>Lesson Title</label><input id="lessonTitle">
-            <label>Lesson Type</label><select id="lessonType"><option>TEXT</option><option>VIDEO</option></select>
-            <label>Text Content</label><textarea id="lessonContent"></textarea>
-            <label>Video Link / YouTube Link</label><input id="lessonVideo" placeholder="Paste YouTube link or video URL">
-            <label>Or Upload Video to Google Drive</label><input id="lessonVideoFile" type="file" accept="video/*">
-            <button class="secondary" onclick="uploadLessonVideoToDrive()">Upload Video & Create Link</button>
-            <div id="lessonUploadStatus" class="upload-status hidden"></div>
-            <div id="lessonVideoLinkPreview" class="link-box hidden"></div>
-            <button onclick="createLesson()">Save Lesson</button>
-            <div id="lessonMessage" class="message"></div>
-          </div>
-          <div class="card">
-            <h2>Assignment Uploads</h2>
-            <label>Course ID</label><input id="assignmentCourseId">
-            <label>Assignment Title</label><input id="assignmentTitle">
-            <label>Instructions</label><textarea id="assignmentInstructions"></textarea>
-            <button onclick="createAssignment()">Create Assignment</button>
-          </div>
-        </div>
-      </section>
+    <section id="dashboard" class="page active">
+      <div class="cards">
+        <div class="card"><h3>Total Leads</h3><p id="leadCount">0</p></div>
+        <div class="card"><h3>Users</h3><p id="userCount">0</p></div>
+        <div class="card"><h3>Projects</h3><p id="projectCount">0</p></div>
+        <div class="card"><h3>Products</h3><p id="productCount">0</p></div>
+        <div class="card"><h3>Tasks</h3><p id="taskCount">0</p></div>
+        <div class="card"><h3>Expenses</h3><p id="expenseCount">0</p></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h2>Dashboard Data Input</h2><button onclick="refreshAll()">Refresh Data</button></div>
+        <div id="sheetInfo" class="notice">Connect your Apps Script Web App URL to show sheet tabs and counts.</div>
+        <div id="dashboardForms"></div>
+      </div>
+    </section>
 
-      <section id="adminView" class="hidden">
-        <div class="grid">
-          <div class="card">
-            <h2>Admin Panel</h2>
-            <button onclick="loadUsers()">Load Users</button>
-            <div class="table-wrap"><table><thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Status</th></tr></thead><tbody id="usersBody"><tr><td colspan="5">No users loaded.</td></tr></tbody></table></div>
-          </div>
-          <div class="card">
-            <h2>Add User</h2>
-            <label>Full Name</label><input id="userFullName">
-            <label>Username</label><input id="userUsername">
-            <label>Email</label><input id="userEmail">
-            <label>Password</label><input id="userPassword">
-            <label>Role</label><select id="userRole"><option>STUDENT</option><option>TEACHER</option><option>ADMIN</option></select>
-            <button onclick="createUser()">Create User</button>
-          </div>
-          <div class="card">
-            <h2>WhatsApp Notifications</h2>
-            <label>Phone Number</label><input id="waPhone" placeholder="+27...">
-            <label>Message</label><textarea id="waMessage"></textarea>
-            <button onclick="saveWhatsAppNotification()">Save Notification</button>
-            <p class="muted">This logs messages. Connect Twilio/WhatsApp Cloud API keys in Apps Script to send automatically.</p>
-          </div>
-          <div class="card" id="adminEnrollmentCard">
-            <h2>Student Enrollment Approvals</h2>
-            <button onclick="loadEnrollmentRequests()">Load Pending Approvals</button>
-            <div id="enrollmentRequests" style="margin-top:12px"><p class="muted">No approvals loaded.</p></div>
-          </div>
-          <div class="card" id="adminStudentProgressCard">
-            <h2>All Enrolled Students</h2>
-            <button onclick="loadAdminStudents()">Load Students</button>
-            <div id="adminStudentsList" style="margin-top:12px"><p class="muted">No students loaded.</p></div>
-            <div id="adminStudentDetail" style="margin-top:18px"></div>
-          </div>
-        </div>
-      </section>
+    <section id="crm" class="page">
+      <div class="section"><div class="section-header"><h2>CRM</h2><button onclick="loadPageData('crm')">Reload CRM</button></div><div id="crmForms"></div></div>
+    </section>
 
-      <section id="paymentsView" class="hidden">
-        <div class="card">
-          <h2>Payment Gateway</h2>
-          <p>Courses are free by default. Set a price greater than 0 in COURSES to mark a course as paid.</p>
-          <label>Course ID</label><input id="payCourseId">
-          <label>Amount</label><input id="payAmount" type="number">
-          <label>Payment Method</label><select id="payMethod"><option>PAYFAST</option><option>STRIPE</option><option>PAYPAL</option><option>CASH</option><option>EFT</option></select>
-          <button onclick="recordPayment()">Record Payment</button>
-        </div>
-      </section>
+    <section id="tasks" class="page">
+      <div class="section"><div class="section-header"><h2>Tasks</h2><button onclick="loadPageData('tasks')">Reload Tasks</button></div><div id="tasksForms"></div></div>
+    </section>
 
-      <section id="liveView" class="hidden">
-        <div class="grid">
-          <div class="card">
-            <h2>Live Classes / Zoom Integration</h2>
-            <label>Class Title</label><input id="liveTitle">
-            <label>Course ID</label><input id="liveCourseId">
-            <label>Zoom Meeting Link</label><input id="liveZoom">
-            <label>Date & Time</label><input id="liveDate" type="datetime-local">
-            <button onclick="createLiveClass()">Save Live Class</button>
-          </div>
-          <div class="card">
-            <h2>Attendance Tracking</h2>
-            <label>Course ID</label><input id="attCourseId">
-            <label>Status</label><select id="attStatus"><option>PRESENT</option><option>ABSENT</option><option>LATE</option></select>
-            <button onclick="saveAttendance()">Save Attendance</button>
-          </div>
+    <section id="hr" class="page">
+      <div class="section"><div class="section-header"><h2>HR</h2><button onclick="loadPageData('hr')">Reload HR</button></div><div id="hrForms"></div></div>
+    </section>
+
+    <section id="projects" class="page">
+      <div class="section"><div class="section-header"><h2>Projects</h2><button onclick="loadPageData('projects')">Reload Projects</button></div><div id="projectsForms"></div></div>
+    </section>
+
+    <section id="inventory" class="page">
+      <div class="section"><div class="section-header"><h2>Inventory</h2><button onclick="loadPageData('inventory')">Reload Inventory</button></div><div id="inventoryForms"></div></div>
+    </section>
+
+    <section id="finance" class="page">
+      <div class="section"><div class="section-header"><h2>Finance</h2><button onclick="loadPageData('finance')">Reload Finance</button></div><div id="financeForms"></div></div>
+    </section>
+
+    <section id="logistics" class="page">
+      <div class="section"><div class="section-header"><h2>Logistics</h2><button onclick="loadPageData('logistics')">Reload Logistics</button></div><div id="logisticsForms"></div></div>
+    </section>
+
+    <section id="settings" class="page">
+      <div class="section">
+        <h2>Required Google Sheet Tabs</h2>
+        <p>Create these tabs or run <strong>setupQuickbaseTabs()</strong> in Apps Script.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Module</th><th>Tabs</th></tr></thead>
+            <tbody>
+              <tr><td>Core</td><td>Users, Roles, Companies, Settings, AuditLogs, Notifications, Sessions, Permissions</td></tr>
+              <tr><td>CRM</td><td>Leads, Contacts, Clients, Deals, Invoices, Quotations, Tasks, FollowUps</td></tr>
+              <tr><td>HR</td><td>Employees, Departments, Attendance, LeaveRequests, Payroll, PerformanceReviews, Recruitment</td></tr>
+              <tr><td>Projects</td><td>Projects, ProjectTasks, Milestones, Timesheets, Kanban</td></tr>
+              <tr><td>Inventory</td><td>Products, Stock, Warehouses, Suppliers, PurchaseOrders, Assets</td></tr>
+              <tr><td>Logistics</td><td>Vehicles, Drivers, Deliveries, Routes, FuelLogs, Maintenance</td></tr>
+              <tr><td>Finance</td><td>Expenses, Income, Budgets, AccountsPayable, AccountsReceivable, Transactions</td></tr>
+              <tr><td>Workflow</td><td>Workflows, Approvals, AutomationLogs, WorkflowRules</td></tr>
+              <tr><td>Dashboard</td><td>KPIs, Reports, Analytics</td></tr>
+            </tbody>
+          </table>
         </div>
-      </section>
-    </main>
-  </section>
+      </div>
+    </section>
+  </main>
+</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzYjPYEjvR44yXamSq0jIvBFuqDJnjZXnEOvOn-P55gO716KGZugLEyPBfXiSqQ8xZX/exec";
-let currentUser = null;
-let latestCourses = [];
+/*
+  IMPORTANT:
+  1. Deploy Code_full_sections.gs as a Google Apps Script Web App.
+  2. Copy the Web App URL.
+  3. Paste it below in API_URL.
+*/
+const API_URL = "https://script.google.com/macros/s/AKfycbziXC6NbqnXYvUPVxy4KoiqZfDh-oR9vCEO1RRxv0SPHghCoa0JghfldQC0C3gqQH25/exec";
 
-function api(action, params={}){
-  if(!isScriptUrlReady()){
-    return Promise.reject(new Error("SCRIPT_URL is not set. Paste your deployed Apps Script Web App /exec URL into the HTML."));
-  }
+let currentUser = JSON.parse(localStorage.getItem("onpointUser") || "null");
 
-  return new Promise((resolve,reject)=>{
-    const callbackName = "jsonp_" + Date.now() + "_" + Math.floor(Math.random()*100000);
-    const q = new URLSearchParams({action, callback:callbackName, ...params, _ts:Date.now()});
-    const script = document.createElement("script");
+const SHEET_FIELDS = {
+  KPIs:["KPIID","KPIName","Value","Period","DateUpdated"],
+  Reports:["ReportID","ReportName","Module","CreatedBy","DateCreated"],
+  Analytics:["AnalyticsID","Metric","Value","DateCreated"],
 
-    window[callbackName] = function(data){
-      try{
-        delete window[callbackName];
-        script.remove();
-      }catch(e){}
-      if(data && data.success === false){
-        reject(new Error(data.message || "Apps Script returned an error"));
-      }else{
-        resolve(data);
-      }
-    };
+  Leads:["Name","Email","Phone","Status","AssignedTo","DateCreated"],
+  Contacts:["ContactID","FullName","Email","Phone","Company","Status"],
+  Clients:["ClientID","ClientName","Email","Phone","Status"],
+  Deals:["DealID","DealName","Client","Value","Stage","CloseDate"],
+  Invoices:["InvoiceID","Client","Amount","Status","DateCreated"],
+  Quotations:["QuoteID","Client","Amount","Status","DateCreated"],
+  Tasks:["TaskID","Title","AssignedTo","Status","DueDate"],
+  FollowUps:["FollowUpID","LeadEmail","Notes","NextDate","Status"],
 
-    script.onerror = function(){
-      try{
-        delete window[callbackName];
-        script.remove();
-      }catch(e){}
-      reject(new Error("Could not connect to Apps Script. Check deployment access is set to Anyone and use the /exec URL."));
-    };
+  Employees:["EmployeeID","FullName","Department","Position","Salary","Status"],
+  Departments:["DepartmentID","DepartmentName","Manager","Status"],
+  Attendance:["AttendanceID","EmployeeID","Date","ClockIn","ClockOut","Status"],
+  LeaveRequests:["LeaveID","EmployeeID","LeaveType","StartDate","EndDate","Status"],
+  Payroll:["PayrollID","EmployeeID","Month","Salary","Deductions","NetPay","Status"],
+  PerformanceReviews:["ReviewID","EmployeeID","Score","Comments","ReviewDate"],
+  Recruitment:["CandidateID","FullName","Position","Email","Stage","Status"],
 
-    script.src = SCRIPT_URL + "?" + q.toString();
-    document.body.appendChild(script);
+  Projects:["ProjectID","ProjectName","Manager","Status","Budget","Deadline"],
+  ProjectTasks:["TaskID","ProjectID","TaskName","AssignedTo","Status","DueDate"],
+  Milestones:["MilestoneID","ProjectID","Title","DueDate","Status"],
+  Timesheets:["TimesheetID","EmployeeID","ProjectID","Hours","Date"],
+  Kanban:["CardID","ProjectID","Title","Column","AssignedTo"],
 
-    setTimeout(()=>{
-      if(window[callbackName]){
-        try{
-          delete window[callbackName];
-          script.remove();
-        }catch(e){}
-        reject(new Error("Apps Script connection timed out. Re-deploy as Web App and use the latest /exec URL."));
-      }
-    },30000);
+  Products:["ProductID","ProductName","Category","Quantity","Price"],
+  Stock:["StockID","ProductID","Warehouse","Quantity","LastUpdated"],
+  Warehouses:["WarehouseID","WarehouseName","Location","Manager"],
+  Suppliers:["SupplierID","SupplierName","Email","Phone","Status"],
+  PurchaseOrders:["POID","Supplier","Amount","Status","DateCreated"],
+  Assets:["AssetID","AssetName","Category","AssignedTo","Status"],
+
+  Expenses:["ExpenseID","Description","Amount","Department","Date"],
+  Income:["IncomeID","Description","Amount","Source","Date"],
+  Budgets:["BudgetID","Department","Amount","Period","Status"],
+  AccountsPayable:["APID","Supplier","Amount","DueDate","Status"],
+  AccountsReceivable:["ARID","Client","Amount","DueDate","Status"],
+  Transactions:["TransactionID","Type","Description","Amount","Date"],
+
+  Vehicles:["VehicleID","Registration","Make","Model","Status"],
+  Drivers:["DriverID","FullName","Phone","LicenseNo","Status"],
+  Deliveries:["DeliveryID","Client","Driver","Vehicle","Status","DateCreated"],
+  Routes:["RouteID","RouteName","StartLocation","EndLocation","Status"],
+  FuelLogs:["FuelLogID","VehicleID","Litres","Amount","Date"],
+  Maintenance:["MaintenanceID","VehicleID","Description","Cost","Date"]
+};
+
+const PAGE_SHEETS = {
+  dashboard:["KPIs","Reports","Analytics"],
+  crm:["Leads","Contacts","Clients","Deals","Invoices","Quotations","FollowUps"],
+  tasks:["Tasks","ProjectTasks"],
+  hr:["Employees","Departments","Attendance","LeaveRequests","Payroll","PerformanceReviews","Recruitment"],
+  projects:["Projects","ProjectTasks","Milestones","Timesheets","Kanban"],
+  inventory:["Products","Stock","Warehouses","Suppliers","PurchaseOrders","Assets"],
+  finance:["Expenses","Income","Budgets","AccountsPayable","AccountsReceivable","Transactions"],
+  logistics:["Vehicles","Drivers","Deliveries","Routes","FuelLogs","Maintenance"]
+};
+
+function isConfigured(){return API_URL && !API_URL.includes("PASTE_YOUR")}
+function cleanId(text){return text.replace(/[^a-zA-Z0-9]/g,"")}
+function nowIso(){return new Date().toISOString()}
+function showMessage(elementId, message, type="notice"){
+  const el=document.getElementById(elementId); if(!el)return;
+  el.innerHTML=`<div class="${type}">${message}</div>`;
+}
+function setConnectionStatus(connected,text){
+  ["connectionStatus","authConnectionStatus"].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    el.className=connected?"status-pill connected":"status-pill";
+    el.innerHTML=`<span class="dot"></span><span>${text}</span>`;
   });
 }
-function showMsg(id,text,type="success"){const el=document.getElementById(id); if(!el)return; el.textContent=text; el.className="message "+type;}
-function showTab(id,btn){
-  ["dashboardView","coursesView","teacherView","adminView","paymentsView","liveView"].forEach(viewId=>{
-    const view=document.getElementById(viewId);
-    if(view)view.classList.add("hidden");
-  });
-  const target=document.getElementById(id);
-  if(target)target.classList.remove("hidden");
-  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
-  if(btn)btn.classList.add("active");
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open")}
+function showPage(pageId,link){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+  document.querySelectorAll(".nav-link").forEach(a=>a.classList.remove("active"));
+  if(link) link.classList.add("active");
+  document.getElementById("pageTitle").innerText=link?link.innerText:"Dashboard";
+  if(window.innerWidth<=760) document.getElementById("sidebar").classList.remove("open");
+  loadPageData(pageId);
 }
-function logout(){localStorage.removeItem("op_school_user");location.reload();}
-function beginSync(btn,text){
-  if(!btn)return null;
-  const old=btn.textContent;
-  btn.dataset.oldText=old;
-  btn.textContent=text||"Synchronising";
-  btn.disabled=true;
-  btn.classList.add("syncing");
-  return old;
+function showAuthTabManual(tab){
+  document.getElementById("loginForm").classList.toggle("hidden",tab!=="login");
+  document.getElementById("registerForm").classList.toggle("hidden",tab!=="register");
+  const buttons=document.querySelectorAll(".tab-btn");
+  buttons[0].classList.toggle("active",tab==="login");
+  buttons[1].classList.toggle("active",tab==="register");
+  document.getElementById("authMessage").innerHTML="";
 }
-function endSync(btn){
-  if(!btn)return;
-  btn.textContent=btn.dataset.oldText||btn.textContent;
-  btn.disabled=false;
-  btn.classList.remove("syncing");
+async function apiGet(params){
+  if(!isConfigured()) throw new Error("Paste your deployed Google Apps Script Web App URL into API_URL first.");
+  const url=`${API_URL}?${new URLSearchParams(params).toString()}`;
+  const response=await fetch(url);
+  return await response.json();
 }
-function buttonFromEvent(){return (typeof event!=="undefined" && event && event.currentTarget) ? event.currentTarget : null;}
-function getCourseId(c){return c.courseId||c.id||c.COURSE_ID||c.course_id||"";}
-function getCourseName(c){return c.courseName||c.title||c.COURSE_NAME||c.course_name||"Untitled Course";}
-function getCourseThumbnail(c){return c.thumbnail||c.THUMBNAIL||c.thumbnailUrl||c.image||"";}
-function normaliseThumbnailUrl(url){
-  url=String(url||"").trim();
-  if(!url)return "";
-  const youtube=extractYouTubeId(url);
-  if(youtube)return "https://img.youtube.com/vi/"+youtube+"/hqdefault.jpg";
-  const driveMatch=url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if(driveMatch)return "https://drive.google.com/uc?export=view&id="+driveMatch[1];
-  const openMatch=url.match(/[?&]id=([^&]+)/);
-  if(url.includes("drive.google.com")&&openMatch)return "https://drive.google.com/uc?export=view&id="+openMatch[1];
-  return url;
+async function apiPost(body){
+  if(!isConfigured()) throw new Error("Paste your deployed Google Apps Script Web App URL into API_URL first.");
+  const response=await fetch(API_URL,{method:"POST",body:JSON.stringify(body)});
+  return await response.json();
 }
-function extractYouTubeId(url){
-  url=String(url||"").trim();
-  if(!url)return "";
-  let m=url.match(/[?&]v=([^&]+)/);
-  if(m)return m[1];
-  m=url.match(/youtu\.be\/([^?&/]+)/);
-  if(m)return m[1];
-  m=url.match(/youtube\.com\/embed\/([^?&/]+)/);
-  if(m)return m[1];
-  m=url.match(/youtube\.com\/shorts\/([^?&/]+)/);
-  if(m)return m[1];
-  m=url.match(/youtube\.com\/live\/([^?&/]+)/);
-  if(m)return m[1];
-  m=url.match(/[?&]vi=([^&]+)/);
-  if(m)return m[1];
+async function fetchSheetData(sheet){return await apiGet({action:"fetch",sheet})}
+async function insertSheetData(sheet,payload){return await apiPost({action:"insert",sheet,payload})}
+
+function inputType(field){
+  const f=field.toLowerCase();
+  if(f.includes("email")) return "email";
+  if(f.includes("date") || f.includes("deadline") || f.includes("duedate") || f.includes("nextdate") || f.includes("reviewdate")) return "date";
+  if(f.includes("amount") || f.includes("salary") || f.includes("budget") || f.includes("quantity") || f.includes("price") || f.includes("value") || f.includes("hours") || f.includes("score") || f.includes("deductions") || f.includes("netpay") || f.includes("cost") || f.includes("litres")) return "number";
+  if(f.includes("phone")) return "tel";
+  return "text";
+}
+function defaultValue(sheet,field){
+  if(field.endsWith("ID") || field==="TaskID" || field==="KPIID" || field==="POID" || field==="APID" || field==="ARID") return sheet.substring(0,3).toUpperCase()+"-"+Date.now();
+  if(["DateCreated","DateUpdated","LastUpdated"].includes(field)) return nowIso();
+  if(field==="AssignedTo" && currentUser) return currentUser.Email || "";
+  if(field==="CreatedBy" && currentUser) return currentUser.Email || "";
+  if(field==="Status") return "New";
   return "";
 }
-function thumbnailHtml(c){
-  const url=normaliseThumbnailUrl(getCourseThumbnail(c));
-  if(!url)return `<span data-thumb-placeholder="1">ONPOINT</span>`;
-  return `<img src="${url}" alt="${getCourseName(c)}" onerror="this.parentNode.innerHTML='ONPOINT'">`;
-}
-function isScriptUrlReady(){
-  return SCRIPT_URL && !SCRIPT_URL.includes("PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE");
-}
-const courseVideoCache = {};
-function firstVideoLesson(lessons){
-  return (lessons||[]).map(normaliseLesson).find(l=>extractYouTubeId(l.videoLink||l.rawVideoLink||l.youtubeLink||l.link));
-}
-function courseThumbWithPlay(url,name){
-  if(!url)return `<span data-thumb-placeholder="1">ONPOINT</span>`;
-  return `<img src="${url}" alt="${name}" loading="lazy" onerror="this.parentNode.innerHTML='ONPOINT'"><span class="course-play">▶</span><span class="course-start-label">Start Now</span>`;
-}
-
-async function login(){
-  const btn=buttonFromEvent();
-  beginSync(btn,"Synchronising");
-  const username=document.getElementById("loginName").value.trim();
-  const password=document.getElementById("loginPassword").value;
-  if(!username||!password){showMsg("loginMessage","Enter username/email and password.","error");endSync(btn);return;}
-  try{
-    const data=await api("login",{username,password});
-    if(data.success){currentUser=data.user;localStorage.setItem("op_school_user",JSON.stringify(currentUser));showApp();loadDashboard();}
-    else showMsg("loginMessage",data.message||"Invalid login.","error");
-  }catch(e){showMsg("loginMessage","Could not connect to Apps Script. Paste your deployed Web App URL into SCRIPT_URL.","error");}
-  finally{endSync(btn);}
-}
-function showApp(){
-  document.getElementById("loginPage").style.display="none";
-  document.getElementById("app").style.display="block";
-  document.getElementById("userPill").classList.remove("hidden");
-  document.getElementById("logoutBtn").classList.remove("hidden");
-  document.getElementById("userPill").textContent=(currentUser.name||currentUser.username)+" • "+(currentUser.role||"STUDENT");
-  applyRolePermissions();
-}
-function userRole(){return String(currentUser&&currentUser.role||"STUDENT").toUpperCase();}
-function isAdmin(){return userRole()==="ADMIN";}
-function isTeacher(){return userRole()==="TEACHER";}
-function canUploadLessons(){return isAdmin()||isTeacher();}
-function applyRolePermissions(){
-  const role=userRole();
-  const teacherTab=document.querySelector("button[onclick*=\"teacherView\"]");
-  const adminTab=document.querySelector("button[onclick*=\"adminView\"]");
-  const paymentsTab=document.querySelector("button[onclick*=\"paymentsView\"]");
-  const liveTab=document.querySelector("button[onclick*=\"liveView\"]");
-  if(teacherTab)teacherTab.classList.toggle("hidden",!canUploadLessons());
-  if(adminTab)adminTab.classList.toggle("hidden",!isAdmin());
-  if(paymentsTab)paymentsTab.classList.toggle("hidden",!isAdmin());
-  if(liveTab)liveTab.classList.toggle("hidden",!canUploadLessons());
-}
-async function loadDashboard(){await loadCourses();loadProgress();}
-async function loadCourses(){
-  let data;
-  try{
-    if(userRole()==="STUDENT"){
-      data=await api("getStudentCourses",{userId:currentUser.userId});
-    }else{
-      data=await api("getCourses");
+function renderSheetModule(sheet, containerId){
+  const fields=SHEET_FIELDS[sheet] || [];
+  const id=cleanId(sheet);
+  const formFields=fields.map(field=>{
+    const type=inputType(field);
+    const readonly = ["DateCreated","DateUpdated","LastUpdated"].includes(field) ? "readonly" : "";
+    const value = defaultValue(sheet,field);
+    if(field==="Status"){
+      return `<select id="${id}_${field}"><option>New</option><option>Active</option><option>Pending</option><option>In Progress</option><option>Completed</option><option>Closed</option><option>Inactive</option></select>`;
     }
-  }catch(e){data={success:true,courses:demoCourses()};}
-  latestCourses=data.courses||demoCourses();
-  document.getElementById("statCourses").textContent=latestCourses.length;
-  renderCourses("coursesList",latestCourses);
-  renderCourses("coveredCourses",latestCourses.slice(0,4));
-}
-function demoCourses(){return[{courseId:"C001",courseName:"Safety Training",description:"Workplace safety and compliance.",category:"Safety",price:0,thumbnail:""},{courseId:"C002",courseName:"Leadership Basics",description:"Professional management training.",category:"Management",price:0,thumbnail:""}];}
-function renderCourses(target,courses){
-  const el=document.getElementById(target); if(!el)return;
-  el.innerHTML=courses.map(c=>{
-    const courseId=getCourseId(c);
-    const name=getCourseName(c);
-    const description=c.description||c.DESCRIPTION||"";
-    const price=Number(c.price||c.PRICE||0);
-    const thumbUrl=normaliseThumbnailUrl(getCourseThumbnail(c));
-    const status=String(c.enrollmentStatus||c.status||"").toUpperCase();
-    const canStart=userRole()!=="STUDENT" || status==="APPROVED";
-    const action=canStart?`<button onclick="openCourse('${courseId}',this)">Start Now</button>`:`<button onclick="requestEnrollment('${courseId}',this)">Request Admin Approval</button>`;
-    const adminActions=isAdmin()?`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="secondary" onclick="setCourseAccess('${courseId}','FREE',this)">Free</button><button class="secondary" onclick="setCourseAccess('${courseId}','PAID',this)">Paid</button></div>`:"";
-    return `<div class="card course-card"><div class="course-thumb" id="thumb_${target}_${courseId}" onclick="${canStart?`openCourse('${courseId}',this)`:`requestEnrollment('${courseId}',this)`}">${courseThumbWithPlay(thumbUrl,name)}</div><div class="course-body"><h3>${name}</h3><p>${description}</p><span class="badge ${price>0?"paid":""}">${price>0?"PAID R"+price:"FREE"}</span>${status&&userRole()==="STUDENT"?` <span class="badge ${status==="APPROVED"?"":"paid"}">${status}</span>`:""}<div class="progress"><div class="progress-fill" style="width:${c.progress||0}%"></div></div>${action}${adminActions}</div></div>`;
+    return `<input id="${id}_${field}" type="${type}" placeholder="${field}" value="${value}" ${readonly}>`;
   }).join("");
-  hydrateYouTubeThumbnails(target,courses);
-}
-async function hydrateYouTubeThumbnails(target,courses){
-  if(!isScriptUrlReady())return;
-  await Promise.all((courses||[]).map(async c=>{
-    const courseId=getCourseId(c);
-    const thumb=document.getElementById("thumb_"+target+"_"+courseId);
-    if(!thumb)return;
-    try{
-      const data=await api("getLessons",{courseId});
-      const lesson=firstVideoLesson(data.lessons||[]);
-      if(lesson){
-        courseVideoCache[courseId]=lesson;
-        const id=extractYouTubeId(lesson.videoLink);
-        if(id)thumb.innerHTML=`<img src="https://img.youtube.com/vi/${id}/hqdefault.jpg" alt="${getCourseName(c)}" loading="lazy" onerror="this.parentNode.innerHTML='ONPOINT'"><span class="course-play">▶</span><span class="course-start-label">Start Now</span>`;
-      }
-    }catch(e){}
-  }));
-}
-async function openCourse(courseId,btn){
-  beginSync(btn,"Synchronising");
-  if(userRole()==="STUDENT"){
-    const course=(latestCourses||[]).find(c=>String(getCourseId(c))===String(courseId));
-    if(course && String(course.enrollmentStatus||"").toUpperCase()!=="APPROVED"){
-      alert("This lesson needs Admin approval before you can start.");
-      endSync(btn);
-      return;
-    }
-  }
-  showTab("coursesView",document.querySelectorAll(".tab")[1]);
-  const lessonArea=document.getElementById("lessonArea");
-  if(!courseId){
-    if(lessonArea)lessonArea.innerHTML='<div class="card"><h2>Course could not open</h2><p class="muted">This course has no COURSE_ID. Please check the COURSES sheet.</p></div>';
-    endSync(btn);
-    return;
-  }
-  if(lessonArea)lessonArea.innerHTML='<div class="card"><h2>Synchronising course...</h2><p class="muted">Loading lessons and quiz.</p></div>';
-  if(!isScriptUrlReady()){
-    if(lessonArea)lessonArea.innerHTML='<div class="card"><h2>Course connection not ready</h2><p class="muted">Paste your deployed Apps Script Web App URL into SCRIPT_URL before courses can load lessons and quizzes.</p></div>';
-    endSync(btn);
-    return;
-  }
-  let lessonsData, quizData;
-  try{lessonsData=await api("getLessons",{courseId});}catch(e){lessonsData={lessons:[],message:e.message};}
-  try{quizData=await api("getQuiz",{courseId});}catch(e){quizData={quiz:[]};}
-  const lessons=(lessonsData.lessons||[]).map(normaliseLesson);
-  const quiz=(quizData.quiz||[]).map(normaliseQuiz);
-  const firstVideo=courseVideoCache[courseId]||firstVideoLesson(lessons);
-  if(firstVideo)courseVideoCache[courseId]=firstVideo;
-  if(lessonArea)lessonArea.innerHTML=`<div class="card"><h2>Lessons</h2>${lessons.length?lessons.map(l=>lessonHtml(l)).join(""):"<p>No lessons found for this course yet. Check that LESSONS COURSE_ID matches this course: "+courseId+(lessonsData.message?"<br><br>Error: "+lessonsData.message:"")+"</p>"}</div><div class="card"><h2>Quiz</h2>${quiz.length?quiz.map(q=>quizHtml(q)).join(""):"<p>No quiz yet.</p>"}</div>`;
-  endSync(btn);
-}
-function normaliseLesson(l){
-  return {
-    lessonId:l.lessonId||l.LESSON_ID||"",
-    courseId:l.courseId||l.COURSE_ID||"",
-    title:l.title||l.lessonTitle||l.LESSON_TITLE||"Untitled Lesson",
-    lessonType:l.lessonType||l.LESSON_TYPE||"TEXT",
-    content:l.content||l.CONTENT||"",
-    videoLink:l.videoLink||l.VIDEO_LINK||l.youtubeLink||l.YOUTUBE_LINK||l.link||l.LINK||l.url||l.URL||l.rawVideoLink||""
-  };
-}
-function normaliseQuiz(q){
-  return {
-    quizId:q.quizId||q.QUIZ_ID||"",
-    question:q.question||q.QUESTION||"",
-    optionA:q.optionA||q.OPTION_A||"",
-    optionB:q.optionB||q.OPTION_B||"",
-    optionC:q.optionC||q.OPTION_C||"",
-    optionD:q.optionD||q.OPTION_D||"",
-    answer:q.answer||q.ANSWER||""
-  };
-}
-function lessonHtml(l){
-  const courseId = l.courseId || "";
-  const title = l.title || "Untitled Lesson";
-  const videoUrl = l.videoLink || "";
-  const youtubeId = extractYouTubeId(videoUrl);
-  const isVideo = String(l.lessonType || "").toUpperCase() === "VIDEO" || !!videoUrl;
-
-  if(isVideo){
-    const thumb = youtubeId ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg` : "";
-    const embed = youtubeId ? `https://www.youtube.com/embed/${youtubeId}` : normaliseDriveVideoUrl(videoUrl);
-    const playerId = "player_" + String(l.lessonId || Math.random()).replace(/[^a-zA-Z0-9_]/g,"_");
-    const thumbHtml = thumb
-      ? `<img src="${thumb}" alt="${title}" loading="lazy" onerror="this.parentNode.innerHTML='VIDEO LESSON'"><span class="video-play-btn">▶</span><span class="video-start-label">Start Lesson</span>`
-      : `<span>VIDEO LESSON</span><span class="video-play-btn">▶</span><span class="video-start-label">Start Lesson</span>`;
-
-    return `<div class="card lesson">
-      <h3>${title}</h3>
-      <div class="lesson-meta"><span>Course ID: ${courseId}</span><span>Lesson Title: ${title}</span></div>
-      <p>${l.content || ""}</p>
-      <div class="link-box">${videoUrl || "No VIDEO_LINK found"}</div>
-      <div id="${playerId}" class="video-card-thumb" onclick="startLessonVideo('${playerId}','${embed}')">${thumbHtml}</div>
-      <button onclick="startLessonVideo('${playerId}','${embed}')">Start Lesson</button>
-      <button class="success" onclick="markLesson('${courseId}','${l.lessonId}')">Mark Complete</button>
+  return `
+    <div class="module-group">
+      <div class="section-header">
+        <div>
+          <h3>${sheet} <span class="badge">${fields.length} fields</span></h3>
+          <div class="small-text">Posts to and fetches from Google Sheet tab: <strong>${sheet}</strong></div>
+        </div>
+        <button class="secondary" onclick="loadSheetTable('${sheet}')">Reload ${sheet}</button>
+      </div>
+      <div id="${id}_message"></div>
+      <div class="grid">${formFields}</div>
+      <div class="form-actions">
+        <button onclick="saveGenericRecord('${sheet}')">Save ${sheet}</button>
+        <button class="secondary" onclick="clearGenericForm('${sheet}')">Clear</button>
+      </div>
+      <br>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>${fields.map(f=>`<th>${f}</th>`).join("")}</tr></thead>
+          <tbody id="${id}_table"><tr><td colspan="${fields.length}">Loading ${sheet}...</td></tr></tbody>
+        </table>
+      </div>
     </div>`;
-  }
-
-  return `<div class="card lesson">
-    <h3>${title}</h3>
-    <div class="lesson-meta"><span>Course ID: ${courseId}</span><span>Lesson Title: ${title}</span></div>
-    <p>${l.content||""}</p>
-    <button class="success" onclick="markLesson('${courseId}','${l.lessonId}')">Mark Complete</button>
-  </div>`;
 }
-
-function normaliseDriveVideoUrl(url){
-  url=String(url||"").trim();
-  if(!url)return "";
-  const driveMatch=url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if(driveMatch)return "https://drive.google.com/file/d/"+driveMatch[1]+"/preview";
-  const openMatch=url.match(/[?&]id=([^&]+)/);
-  if(url.includes("drive.google.com")&&openMatch)return "https://drive.google.com/file/d/"+openMatch[1]+"/preview";
-  return url;
-}
-
-function startLessonVideo(playerId,embedUrl){
-  const box=document.getElementById(playerId);
-  if(!box)return;
-  if(!embedUrl){
-    box.innerHTML='<p class="muted">No video link found in the LESSONS sheet VIDEO_LINK column.</p>';
-    return;
-  }
-  box.className="lesson-video";
-  const joiner = embedUrl.includes("?") ? "&" : "?";
-  box.innerHTML=`<iframe src="${embedUrl}${joiner}autoplay=1&rel=0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-}
-function quizHtml(q){return `<div class="lesson"><h3>${q.question}</h3><div class="quiz-option" onclick="answerQuiz('${q.quizId}','A','${q.answer}')">A. ${q.optionA}</div><div class="quiz-option" onclick="answerQuiz('${q.quizId}','B','${q.answer}')">B. ${q.optionB}</div><div class="quiz-option" onclick="answerQuiz('${q.quizId}','C','${q.answer}')">C. ${q.optionC}</div><div class="quiz-option" onclick="answerQuiz('${q.quizId}','D','${q.answer}')">D. ${q.optionD}</div></div>`;}
-function youtubeEmbed(url){
-  const id=extractYouTubeId(url);
-  if(id)return "https://www.youtube.com/embed/"+id;
-  return url||"";
-}
-async function markLesson(courseId,lessonId){await api("saveProgress",{userId:currentUser.userId,courseId,lessonId,status:"COMPLETED",score:0});alert("Lesson marked complete.");loadProgress();}
-function answerQuiz(id,selected,answer){alert(selected===answer?"Correct answer!":"Incorrect answer. Correct answer is "+answer);}
-function loadProgress(){document.getElementById("statLessons").textContent="0";document.getElementById("statScore").textContent="0%";document.getElementById("statAttendance").textContent="0%";document.getElementById("overallProgress").style.width="0%";document.getElementById("overallProgressText").textContent="0%";}
-async function createCourse(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{if(!canUploadLessons()){alert("Only Admin and Teachers can upload courses.");return;}const access=val("newCourseAccess");const price=access==="FREE"?0:val("newCoursePrice");const data=await api("createCourse",{courseName:val("newCourseName"),description:val("newCourseDescription"),category:val("newCourseCategory"),price:price,access:access,thumbnail:val("newCourseThumbnail"),createdBy:currentUser.userId});showMsg("courseMessage",data.message||"Course saved.");loadCourses();}finally{endSync(btn);}}
-async function createLesson(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{if(!canUploadLessons()){alert("Only Admin and Teachers can upload lessons.");return;}const video=val("lessonVideo");const data=await api("createLesson",{courseId:val("lessonCourseId"),title:val("lessonTitle"),lessonType:val("lessonType"),content:val("lessonContent"),videoLink:video,createdBy:currentUser.userId});showMsg("lessonMessage",data.message||"Lesson saved.");const preview=document.getElementById("lessonVideoLinkPreview");if(preview&&video){preview.textContent=video;preview.classList.remove("hidden");}}finally{endSync(btn);}}
-async function createAssignment(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{await api("createAssignment",{courseId:val("assignmentCourseId"),title:val("assignmentTitle"),instructions:val("assignmentInstructions")});alert("Assignment created.");}finally{endSync(btn);}}
-async function loadUsers(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{const data=await api("getUsers");const users=data.users||[];document.getElementById("usersBody").innerHTML=users.length?users.map(u=>`<tr><td>${u.fullName}</td><td>${u.username}</td><td>${u.email}</td><td>${u.role}</td><td>${u.status}</td></tr>`).join(""):`<tr><td colspan="5">No users found.</td></tr>`;}finally{endSync(btn);}}
-async function createUser(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{await api("createUser",{fullName:val("userFullName"),username:val("userUsername"),email:val("userEmail"),password:val("userPassword"),role:val("userRole")});alert("User created.");}finally{endSync(btn);}}
-async function saveWhatsAppNotification(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{await api("saveWhatsAppNotification",{phone:val("waPhone"),message:val("waMessage")});alert("WhatsApp notification logged.");}finally{endSync(btn);}}
-async function recordPayment(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{await api("recordPayment",{userId:currentUser.userId,courseId:val("payCourseId"),amount:val("payAmount"),method:val("payMethod")});alert("Payment recorded.");}finally{endSync(btn);}}
-async function createLiveClass(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{await api("createLiveClass",{title:val("liveTitle"),courseId:val("liveCourseId"),zoomLink:val("liveZoom"),dateTime:val("liveDate")});alert("Live class saved.");}finally{endSync(btn);}}
-async function saveAttendance(){const btn=buttonFromEvent();beginSync(btn,"Synchronising");try{await api("saveAttendance",{userId:currentUser.userId,courseId:val("attCourseId"),status:val("attStatus")});alert("Attendance saved.");}finally{endSync(btn);}}
-
-function setCourseFreePaid(){
-  const access=val("newCourseAccess");
-  const price=document.getElementById("newCoursePrice");
-  if(price && access==="FREE")price.value=0;
-  if(price && access==="PAID" && Number(price.value||0)===0)price.value=1;
-}
-async function setCourseAccess(courseId,access,btn){
-  beginSync(btn,"Synchronising");
-  try{
-    await api("setCourseAccess",{courseId,access});
-    alert("Course set to "+access+".");
-    await loadCourses();
-  }finally{endSync(btn);}
-}
-async function requestEnrollment(courseId,btn){
-  beginSync(btn,"Synchronising");
-  try{
-    const data=await api("requestEnrollment",{userId:currentUser.userId,courseId});
-    alert(data.message||"Approval request sent to Admin.");
-    await loadCourses();
-  }finally{endSync(btn);}
-}
-async function loadEnrollmentRequests(){
-  const btn=buttonFromEvent();beginSync(btn,"Synchronising");
-  try{
-    const data=await api("getEnrollmentRequests",{adminId:currentUser.userId});
-    const box=document.getElementById("enrollmentRequests");
-    const rows=data.requests||[];
-    box.innerHTML=rows.length?rows.map(r=>`<div class="card enrollment-card"><h3>${r.studentName||r.userId}</h3><p class="muted">Course: ${r.courseName||r.courseId}<br>Status: ${r.status}</p><button class="success" onclick="approveEnrollment('${r.enrollmentId}','APPROVED',this)">Approve</button> <button class="danger" onclick="approveEnrollment('${r.enrollmentId}','REJECTED',this)">Reject</button></div>`).join(""):"<p class='muted'>No pending approvals.</p>";
-  }finally{endSync(btn);}
-}
-async function approveEnrollment(enrollmentId,status,btn){
-  beginSync(btn,"Synchronising");
-  try{
-    await api("approveEnrollment",{enrollmentId,status,adminId:currentUser.userId});
-    alert("Enrollment "+status+".");
-    await loadEnrollmentRequests();
-  }finally{endSync(btn);}
-}
-async function loadAdminStudents(){
-  const btn=buttonFromEvent();beginSync(btn,"Synchronising");
-  try{
-    const data=await api("getAdminStudents",{adminId:currentUser.userId});
-    const box=document.getElementById("adminStudentsList");
-    const students=data.students||[];
-    box.innerHTML=students.length?students.map(s=>`<div class="student-row"><div><strong>${s.name}</strong><br><span class="muted">${s.email||""}</span></div><div><div class="progress"><div class="progress-fill" style="width:${s.progress||0}%"></div></div><strong>${s.progress||0}%</strong></div><button onclick="openAdminStudent('${s.userId}',this)">Open</button></div>`).join(""):"<p class='muted'>No enrolled students found.</p>";
-  }finally{endSync(btn);}
-}
-async function openAdminStudent(userId,btn){
-  beginSync(btn,"Synchronising");
-  try{
-    const data=await api("getStudentDetail",{userId});
-    const box=document.getElementById("adminStudentDetail");
-    const courses=data.courses||[];
-    box.innerHTML=`<div class="card"><h2>${data.studentName||"Student"} Studies</h2>${courses.length?courses.map(c=>`<div class="lesson"><h3>${c.courseName}</h3><p class="muted">Status: ${c.status}</p><div class="progress"><div class="progress-fill" style="width:${c.progress||0}%"></div></div><strong>${c.progress||0}%</strong></div>`).join(""):"<p class='muted'>No studies found.</p>"}</div>`;
-  }finally{endSync(btn);}
-}
-
-
-function fileToBase64(file){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(String(reader.result).split(",")[1]);
-    reader.onerror=reject;
-    reader.readAsDataURL(file);
+function buildAllSections(){
+  Object.keys(PAGE_SHEETS).forEach(page=>{
+    const el=document.getElementById(`${page}Forms`);
+    if(el) el.innerHTML=PAGE_SHEETS[page].map(sheet=>renderSheetModule(sheet)).join("");
   });
 }
-async function uploadLessonVideoToDrive(){
-  const btn=buttonFromEvent();
-  beginSync(btn,"Uploading");
-  const status=document.getElementById("lessonUploadStatus");
-  try{
-    if(!canUploadLessons()){alert("Only Admin and Teachers can upload videos.");return;}
-    const file=document.getElementById("lessonVideoFile").files[0];
-    if(!file){alert("Please select a video file first.");return;}
-    if(status){status.textContent="Uploading video to Google Drive...";status.classList.remove("hidden");}
-    const base64=await fileToBase64(file);
-    const data=await api("uploadVideoToDrive",{
-      fileName:file.name,
-      mimeType:file.type || "video/mp4",
-      base64:base64,
-      courseId:val("lessonCourseId"),
-      title:val("lessonTitle"),
-      uploadedBy:currentUser.userId
-    });
-    document.getElementById("lessonVideo").value=data.fileUrl||data.previewUrl||"";
-    const preview=document.getElementById("lessonVideoLinkPreview");
-    if(preview){preview.innerHTML=`Google Drive video link:<br>${data.fileUrl||data.previewUrl}`;preview.classList.remove("hidden");}
-    if(status){status.textContent="Upload complete. The link has been added to the video link field.";}
-  }catch(e){
-    if(status){status.textContent="Upload failed: "+e.message;status.classList.remove("hidden");}
-  }finally{endSync(btn);}
+function collectPayload(sheet){
+  const id=cleanId(sheet);
+  const payload={};
+  (SHEET_FIELDS[sheet] || []).forEach(field=>{
+    const input=document.getElementById(`${id}_${field}`);
+    payload[field]=input ? input.value : "";
+    if(!payload[field]) payload[field]=defaultValue(sheet,field);
+  });
+  return payload;
 }
-
-function val(id){return document.getElementById(id).value;}
-window.addEventListener("load",()=>{const saved=localStorage.getItem("op_school_user");if(saved){currentUser=JSON.parse(saved);showApp();loadDashboard();}});
+async function saveGenericRecord(sheet){
+  const id=cleanId(sheet);
+  try{
+    const payload=collectPayload(sheet);
+    const result=await insertSheetData(sheet,payload);
+    if(result.status==="success"){
+      showMessage(`${id}_message`,`${sheet} record saved successfully.`,"success");
+      clearGenericForm(sheet,true);
+      await loadSheetTable(sheet);
+      await refreshCountsOnly();
+    }else{
+      showMessage(`${id}_message`,result.message || `Could not save ${sheet}.`,"error");
+    }
+  }catch(error){showMessage(`${id}_message`,error.message,"error")}
+}
+function clearGenericForm(sheet, keepDefaults=false){
+  const id=cleanId(sheet);
+  (SHEET_FIELDS[sheet] || []).forEach(field=>{
+    const input=document.getElementById(`${id}_${field}`);
+    if(input) input.value = keepDefaults ? defaultValue(sheet,field) : "";
+  });
+}
+async function loadSheetTable(sheet){
+  const id=cleanId(sheet);
+  const fields=SHEET_FIELDS[sheet] || [];
+  const table=document.getElementById(`${id}_table`);
+  if(!table) return;
+  try{
+    const data=await fetchSheetData(sheet);
+    if(!data.length){
+      table.innerHTML=`<tr><td colspan="${fields.length}">No records found in ${sheet}.</td></tr>`;
+      return;
+    }
+    table.innerHTML=data.map(row=>`<tr>${fields.map(f=>`<td>${row[f] || ""}</td>`).join("")}</tr>`).join("");
+  }catch(error){
+    table.innerHTML=`<tr><td colspan="${fields.length}" class="error">${error.message}</td></tr>`;
+  }
+}
+async function loadPageData(page){
+  const sheets=PAGE_SHEETS[page] || [];
+  for(const sheet of sheets){ await loadSheetTable(sheet); }
+}
+async function checkConnection(){
+  try{
+    if(!isConfigured()){
+      setConnectionStatus(false,"API URL not added");
+      const info=document.getElementById("sheetInfo"); if(info) info.innerHTML="Paste your deployed Google Apps Script Web App URL into API_URL.";
+      return;
+    }
+    const status=await apiGet({action:"status"});
+    if(status.status==="success"){
+      setConnectionStatus(true,"Connected to Google Sheets");
+      const info=document.getElementById("sheetInfo");
+      if(info) info.innerHTML=`<strong>Connected.</strong><br><br><strong>Available tabs:</strong> ${status.tabs.join(", ")}`;
+    }else setConnectionStatus(false,status.message || "Connection failed");
+  }catch(error){
+    setConnectionStatus(false,"Connection failed");
+    const info=document.getElementById("sheetInfo"); if(info) info.innerHTML=error.message;
+  }
+}
+async function registerUser(){
+  try{
+    const payload={UserID:"USR-"+Date.now(),FullName:document.getElementById("regFullName").value.trim(),Email:document.getElementById("regEmail").value.trim().toLowerCase(),Password:document.getElementById("regPassword").value,Role:document.getElementById("regRole").value,Status:"Active",DateCreated:nowIso()};
+    if(!payload.FullName || !payload.Email || !payload.Password){showMessage("authMessage","Please complete all registration fields.","error");return}
+    const result=await apiPost({action:"register",sheet:"Users",payload});
+    if(result.status==="success"){showMessage("authMessage","Account created. You can now login.","success");showAuthTabManual("login")}
+    else showMessage("authMessage",result.message || "Registration failed.","error");
+  }catch(error){showMessage("authMessage",error.message,"error")}
+}
+async function loginUser(){
+  try{
+    const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password=document.getElementById("loginPassword").value;
+    if(!email || !password){showMessage("authMessage","Enter email and password.","error");return}
+    const result=await apiPost({action:"login",sheet:"Users",email,password});
+    if(result.status==="success"){currentUser=result.user;localStorage.setItem("onpointUser",JSON.stringify(currentUser));openApp()}
+    else showMessage("authMessage",result.message || "Login failed.","error");
+  }catch(error){showMessage("authMessage",error.message,"error")}
+}
+function openApp(){
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("appShell").classList.remove("hidden");
+  document.getElementById("userLabel").innerText=currentUser ? `${currentUser.FullName || currentUser.Email} (${currentUser.Role || "User"})` : "Logged in";
+  refreshAll();
+}
+function logoutUser(){
+  localStorage.removeItem("onpointUser");
+  currentUser=null;
+  document.getElementById("appShell").classList.add("hidden");
+  document.getElementById("authScreen").classList.remove("hidden");
+}
+async function loadCount(sheet, elementId){
+  try{const data=await fetchSheetData(sheet); const el=document.getElementById(elementId); if(el) el.innerText=data.length}
+  catch(e){const el=document.getElementById(elementId); if(el) el.innerText="0"}
+}
+async function refreshCountsOnly(){
+  await loadCount("Leads","leadCount");
+  await loadCount("Users","userCount");
+  await loadCount("Projects","projectCount");
+  await loadCount("Products","productCount");
+  await loadCount("Tasks","taskCount");
+  await loadCount("Expenses","expenseCount");
+}
+async function refreshAll(){
+  await checkConnection();
+  await refreshCountsOnly();
+  await loadPageData("dashboard");
+  await loadPageData("crm");
+  await loadPageData("tasks");
+}
+window.addEventListener("load",async()=>{
+  buildAllSections();
+  await checkConnection();
+  if(currentUser) openApp();
+});
 </script>
 </body>
 </html>
+
+<!-- Enterprise workflow upgrade applied -->
