@@ -292,7 +292,7 @@ button.synced{background:var(--green)!important;color:white!important}
   2. Copy the Web App URL.
   3. Paste it below in API_URL.
 */
-const API_URL = "https://script.google.com/macros/s/AKfycbzHtbBca-21NFTb5gCxt00fga__lDNgi4OiAJaN9_h16l6Z3t5vhfwVkgRDtI_x93an/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbwzT1QLpxatOGUPF8d9AXNlKVFZ3aqlJZcD-SAYZqss4lsLPlboQU6-LkOWA05NvD1t/exec";
 
 let currentUser = JSON.parse(localStorage.getItem("onpointUser") || "null");
 let systemPeople = [];
@@ -754,10 +754,10 @@ function buildTaskSummaryRows(tasks){
   return Object.keys(people).sort().map(person=>{
     const p=people[person];
     const closed=p.onTime+p.late;
-    const onTimePct=closed ? Math.round((p.onTime/closed)*100) : 0;
+    const onTimePct=p.total ? Math.round((p.onTime/p.total)*100) : 0;
     const openPct=p.total ? Math.round((p.open/p.total)*100) : 0;
-    const latePct=closed ? Math.round((p.late/closed)*100) : 0;
-    const finalScore=Math.round(((onTimePct)+(100-openPct)+(100-latePct))/3);
+    const latePct=p.total ? Math.round((p.late/p.total)*100) : 0;
+    const finalScore=p.total ? Math.round(((p.onTime/p.total)-(p.late/p.total))*100) : 0;
     return {person,...p,onTimePct,openPct,latePct,finalScore};
   });
 }
@@ -816,7 +816,7 @@ async function renderTaskSummary(button){
           </tbody>
         </table>
       </div>
-      <p class="small-text" style="margin-top:10px">Final Score is the average of On-Time %, Not-Open %, and Not-Late %. For closed-late accuracy, add a CompletedDate, ClosedDate, DateCompleted, DateUpdated, or LastUpdated column to your Tasks sheet.</p>
+      <p class="small-text" style="margin-top:10px">Final Score formula: (Closed On Time / Total Tasks) - (Closed Late / Total Tasks). For closed-late accuracy, add a CompletedDate, ClosedDate, DateCompleted, DateUpdated, or LastUpdated column to your Tasks sheet.</p>
     `;
     finishButtonSync(button,true);
   }catch(error){
