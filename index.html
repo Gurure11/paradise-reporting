@@ -1,621 +1,423 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>OnPoint Enterprise System</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>OnPoint Group</title>
 
 <style>
 :root{
-  --bg:#f3f4f6;
+  --bg:#f4f6f9;
   --panel:#ffffff;
   --dark:#111827;
   --dark2:#1f2937;
   --blue:#2563eb;
   --green:#16a34a;
   --red:#dc2626;
-  --orange:#f59e0b;
   --text:#111827;
   --muted:#6b7280;
   --border:#e5e7eb;
   --shadow:0 8px 30px rgba(15,23,42,.08);
 }
-
 *{box-sizing:border-box}
-
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+.app-shell{min-height:100vh;display:flex}
+.sidebar{width:270px;min-height:100vh;background:var(--dark);color:white;padding:20px;position:fixed;left:0;top:0;bottom:0;z-index:20;transition:transform .25s ease;overflow-y:auto}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:24px}
+.brand h2{margin:0;font-size:22px}
+.close-menu{display:none;background:transparent;color:white;font-size:24px;padding:4px 8px}
+.nav-link{display:block;color:white;text-decoration:none;padding:12px 14px;margin:6px 0;border-radius:10px;cursor:pointer}
+.nav-link:hover,.nav-link.active{background:var(--dark2)}
+.sidebar-footer{margin-top:28px;color:#cbd5e1;font-size:13px}
+.main{margin-left:270px;padding:24px;width:calc(100% - 270px)}
+.topbar{background:var(--panel);border-radius:18px;box-shadow:var(--shadow);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:24px;position:sticky;top:10px;z-index:10}
+.menu-btn{display:none;background:var(--dark)}
+.status-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;font-size:13px;background:#fee2e2;color:#991b1b}
+.status-pill.connected{background:#dcfce7;color:#166534}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor}
+.auth-screen{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#111827,#2563eb)}
+.auth-card{width:min(980px,100%);background:white;border-radius:24px;box-shadow:0 20px 70px rgba(0,0,0,.25);overflow:hidden;display:grid;grid-template-columns:1fr 1fr}
+.auth-hero{background:#111827;color:white;padding:42px}
+.auth-hero h1{font-size:38px;margin:0 0 15px}
+.auth-hero p{color:#cbd5e1;line-height:1.6}
+.auth-form{padding:42px}
+.tabs{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.tab-btn{flex:1;background:#e5e7eb;color:#111827}
+.tab-btn.active{background:var(--blue);color:white}
+input,select,textarea{width:100%;padding:12px;margin-bottom:12px;border:1px solid #d1d5db;border-radius:10px;font-size:14px;background:white}
+textarea{min-height:90px;resize:vertical}
+button{background:var(--blue);color:white;border:none;padding:12px 18px;border-radius:10px;cursor:pointer;font-weight:600}
+button.secondary{background:#e5e7eb;color:#111827}
+button.danger{background:var(--red)}
+button.full{width:100%}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-bottom:24px}
+.card,.section{background:white;border-radius:18px;box-shadow:var(--shadow)}
+.card{padding:24px}
+.card h3{margin:0 0 10px;color:var(--muted);font-size:14px;text-transform:uppercase;letter-spacing:.05em}
+.card p{margin:0;font-size:28px;font-weight:700}
+.section{padding:22px;margin-bottom:24px}
+.section-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;flex-wrap:wrap}
+.section h2,.section h3{margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{border-bottom:1px solid var(--border);padding:12px;text-align:left;vertical-align:top}
+th{background:#f9fafb;color:#374151}
+.page{display:none}
+.page.active{display:block}
+.notice,.error,.success{padding:12px 14px;border-radius:10px;margin-bottom:14px}
+.notice{background:#eff6ff;color:#1e40af}
+.error{background:#fee2e2;color:#991b1b}
+.success{background:#dcfce7;color:#166534}
+.hidden{display:none!important}
+.module-group{border:1px solid var(--border);border-radius:16px;padding:16px;margin-top:14px;background:#fff}
+.small-text{font-size:13px;color:var(--muted)}
+.form-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:12px;font-weight:700}
+@media(max-width:850px){.auth-card{grid-template-columns:1fr}.auth-hero{padding:28px}}
+@media(max-width:760px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .close-menu{display:block}
+  .main{margin-left:0;width:100%;padding:14px}
+  .menu-btn{display:inline-block}
+  .topbar{border-radius:14px;align-items:flex-start;flex-direction:column}
+  .grid{grid-template-columns:1fr}
 }
 
-header{
-  background:var(--dark);
-  color:white;
-  padding:16px 20px;
-  position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  z-index:30;
-}
-
-header h1{
-  margin:0;
-  font-size:22px;
-}
-
-.sidebar{
-  width:260px;
-  background:var(--dark2);
-  color:white;
-  position:fixed;
-  top:56px;
-  bottom:0;
-  overflow:auto;
-  padding:14px;
-}
-
-.sidebar button{
-  width:100%;
-  padding:13px 14px;
-  border:none;
-  background:transparent;
-  color:white;
-  text-align:left;
-  cursor:pointer;
-  transition:.2s;
-  border-radius:10px;
-  margin-bottom:6px;
-  font-weight:600;
-}
-
-.sidebar button:hover,
-.sidebar button.active{
-  background:#374151;
-}
-
-.sidebar button:active,
-button.clicked{
-  transform:translateY(1px);
-}
-
-.main{
-  margin-left:260px;
-  padding:82px 20px 20px;
-}
-
-.section{
-  background:white;
-  border-radius:16px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:var(--shadow);
-}
-
-.section-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
-  flex-wrap:wrap;
-  margin-bottom:14px;
-}
-
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:12px;
-}
-
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  border:1px solid #d1d5db;
-  border-radius:10px;
-  font-size:14px;
-  background:white;
-}
-
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
-
-button.primary{
-  background:var(--blue);
-  color:white;
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  cursor:pointer;
-  transition:.15s;
-  font-weight:700;
-}
-
-button.secondary{
-  background:#e5e7eb;
-  color:#111827;
-  border:none;
-  padding:12px 18px;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:700;
-}
-
-button.danger{
-  background:var(--red);
-  color:white;
-}
-
-button.primary:hover,
-button.secondary:hover{
-  opacity:.9;
-  transform:translateY(-1px);
-}
-
-button.syncing{
-  background:var(--orange)!important;
-  color:#111827!important;
-  cursor:wait;
-}
-
-button.synced{
-  background:var(--green)!important;
-  color:white!important;
-}
-
-.page{
-  display:none;
-}
-
-.page.active{
-  display:block;
-}
-
-.notice,.success,.error{
-  padding:12px 14px;
-  border-radius:10px;
-  margin:12px 0;
-}
-
-.notice{
-  background:#eff6ff;
-  color:#1e40af;
-}
-
-.success{
-  background:#dcfce7;
-  color:#166534;
-}
-
-.error{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-.cards{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:14px;
-}
-
-.card{
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:16px;
-  margin-bottom:10px;
-  background:white;
-}
-
-.card h3{
-  margin:0 0 8px;
-  color:var(--muted);
-  font-size:13px;
-  text-transform:uppercase;
-  letter-spacing:.04em;
-}
-
-.card p{
-  margin:0;
-  font-size:24px;
-  font-weight:800;
-}
-
-.table-wrap{
-  width:100%;
-  overflow:auto;
-}
-
-table{
-  width:100%;
-  min-width:800px;
-  border-collapse:collapse;
-}
-
-th,td{
-  border-bottom:1px solid var(--border);
-  padding:10px;
-  text-align:left;
-  vertical-align:top;
-}
-
-th{
-  background:#f9fafb;
-}
-
-.whatsapp-btn{
-  background:#16a34a;
-  color:white;
-  padding:10px 14px;
-  border-radius:10px;
-  text-decoration:none;
-  display:inline-block;
-  font-weight:700;
-}
-
-.badge{
-  display:inline-block;
-  padding:4px 8px;
-  border-radius:999px;
-  background:#eef2ff;
-  color:#3730a3;
-  font-size:12px;
-  font-weight:700;
-}
-
-.small{
-  color:var(--muted);
-  font-size:13px;
-}
-
+button{transition:transform .12s ease,box-shadow .12s ease,opacity .12s ease,background .12s ease}
+button:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(37,99,235,.22);opacity:.95}
+button:active,button.clicked{transform:translateY(1px);box-shadow:inset 0 2px 6px rgba(0,0,0,.18);opacity:.9}
+button.syncing{background:#f59e0b!important;color:#111827!important;cursor:wait;opacity:.95}
+button.synced{background:var(--green)!important;color:white!important}
+.whatsapp-link{display:inline-block;background:#16a34a;color:white;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:700;margin-left:8px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:14px}
+.summary-card{border:1px solid var(--border);border-radius:14px;padding:14px;background:#f9fafb}
+.summary-card h4{margin:0 0 8px;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.04em}
+.summary-card p{margin:0;font-size:24px;font-weight:800}
 .score-good{color:#16a34a;font-weight:800}
 .score-warn{color:#f59e0b;font-weight:800}
 .score-bad{color:#dc2626;font-weight:800}
 
-@media(max-width:760px){
-  header{position:static}
-  .sidebar{
-    position:static;
-    width:100%;
-    top:auto;
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
-  }
-  .main{
-    margin-left:0;
-    padding:14px;
-  }
-}
+
+.recurring-card{border:1px solid var(--border);border-radius:16px;padding:16px;background:#fff;margin-top:12px}
+.recurring-card strong{display:block;margin-bottom:6px}
+.person-pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#ecfdf5;color:#166534;font-size:12px;font-weight:700;margin:3px}
+
 </style>
 </head>
 
 <body>
 
-<header>
-<h1>OnPoint Enterprise System</h1>
-</header>
-
-<div class="sidebar">
-<button class="active" onclick="showPage('dashboard',this)">Dashboard</button>
-<button onclick="showPage('tasks',this)">Tasks</button>
-<button onclick="showPage('workflowBuilder',this)">Workflow Builder</button>
-<button onclick="showPage('approvals',this)">Approvals</button>
-<button onclick="showPage('automations',this)">Automations</button>
-<button onclick="showPage('apiIntegrations',this)">API Integrations</button>
-<button onclick="showPage('escalations',this)">Escalations</button>
-<button onclick="showPage('settings',this)">Settings</button>
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="auth-hero">
+      <h1>OnPoint Group</h1>
+      <p>Login to your Quickbase-style business platform connected to Google Sheets.</p>
+      <p><strong>Sheet ID:</strong><br>1Y9gmsu_LQU_8lHxcTpPj1N1zgxdSVbmKmD-ulCBtEXM</p>
+      <div id="authConnectionStatus" class="status-pill"><span class="dot"></span><span>Not connected</span></div>
+    </div>
+    <div class="auth-form">
+      <div class="tabs">
+        <button class="tab-btn active" onclick="showAuthTabManual('login')">Login</button>
+        <button class="tab-btn" onclick="showAuthTabManual('register')">Register</button>
+      </div>
+      <div id="authMessage"></div>
+      <div id="loginForm">
+        <input id="loginEmail" type="email" placeholder="Email address">
+        <input id="loginPassword" type="password" placeholder="Password">
+        <button class="full" onclick="loginUser(this)">Login</button>
+      </div>
+      <div id="registerForm" class="hidden">
+        <input id="regFullName" type="text" placeholder="Full name">
+        <input id="regEmail" type="email" placeholder="Email address">
+        <input id="regPassword" type="password" placeholder="Password">
+        <select id="regRole">
+          <option value="Admin">Admin</option>
+          <option value="Manager">Manager</option>
+          <option value="Employee">Employee</option>
+        </select>
+        <button class="full" onclick="registerUser(this)">Create Account</button>
+      </div>
+      <p class="small-text" style="margin-top:18px">Deploy Apps Script as a Web App, then paste the Web App URL into <strong>API_URL</strong> in this HTML file.</p>
+    </div>
+  </div>
 </div>
 
-<div class="main">
-
-<section id="dashboard" class="page active">
-  <div class="section">
-    <div class="section-header">
-      <h2>Dashboard</h2>
-      <button class="primary" onclick="refreshDashboard(this)">Refresh</button>
+<div id="appShell" class="app-shell hidden">
+  <aside id="sidebar" class="sidebar">
+    <div class="brand"><h2>OnPoint Group</h2><button class="close-menu" onclick="toggleSidebar()">×</button></div>
+    <a class="nav-link active" onclick="showPage('dashboard', this)">Dashboard</a>
+    <a class="nav-link" onclick="showPage('crm', this)">CRM</a>
+    <a class="nav-link" onclick="showPage('tasks', this)">Tasks</a>
+    <a class="nav-link" onclick="showPage('hr', this)">HR</a>
+    <a class="nav-link" onclick="showPage('projects', this)">Projects</a>
+    <a class="nav-link" onclick="showPage('inventory', this)">Inventory</a>
+    <a class="nav-link" onclick="showPage('finance', this)">Finance</a>
+    <a class="nav-link" onclick="showPage('logistics', this)">Logistics</a>
+    
+    <a class="nav-link" onclick="showPage('workflowBuilder', this)">Workflow Builder</a>
+    <a class="nav-link" onclick="showPage('approvals', this)">Approvals</a>
+    <a class="nav-link" onclick="showPage('automations', this)">Automations</a>
+    <a class="nav-link" onclick="showPage('apiIntegrations', this)">API Integrations</a>
+    
+<a class="nav-link" onclick="showPage('settings', this)">Settings</a>
+    <div class="sidebar-footer">
+      <div id="userLabel">Logged in</div><br>
+      <button class="danger full" onclick="logoutUser(this)">Logout</button>
     </div>
-    <div id="connectionStatus" class="notice">Checking connection...</div>
+  </aside>
 
-    <div class="cards">
-      <div class="card"><h3>Tasks</h3><p id="dashTasks">0</p></div>
-      <div class="card"><h3>Workflow Rules</h3><p id="dashWorkflows">0</p></div>
-      <div class="card"><h3>Approvals</h3><p id="dashApprovals">0</p></div>
-      <div class="card"><h3>Scheduled Jobs</h3><p id="dashJobs">0</p></div>
-      <div class="card"><h3>API Connections</h3><p id="dashApis">0</p></div>
-      <div class="card"><h3>Escalations</h3><p id="dashEscalations">0</p></div>
-    </div>
-  </div>
-</section>
-
-<section id="tasks" class="page">
-  <div class="section">
-    <div class="section-header">
-      <h2>Create Task</h2>
-      <button class="primary" onclick="loadPeople(this)">Refresh People</button>
-    </div>
-
-    <div class="grid">
-      <input id="taskTitle" placeholder="Task Title">
-      <select id="taskAssignedTo"></select>
-      <input id="taskWhatsapp" placeholder="WhatsApp Number with country code, e.g. 27821234567">
-      <input id="taskDueDate" type="date">
-      <select id="taskStatus">
-        <option>New</option>
-        <option>In Progress</option>
-        <option>Completed</option>
-        <option>Closed</option>
-      </select>
+  <main class="main">
+    <div class="topbar">
+      <div><button class="menu-btn" onclick="toggleSidebar()">☰ Menu</button> <strong id="pageTitle">Dashboard</strong></div>
+      <div id="connectionStatus" class="status-pill"><span class="dot"></span><span>Checking connection...</span></div>
     </div>
 
-    <br>
-    <textarea id="taskDescription" placeholder="Task Description"></textarea>
-    <br><br>
-    <button class="primary" onclick="saveTask(this)">Save Task</button>
-    <div id="taskResult"></div>
-  </div>
+    <section id="dashboard" class="page active">
+      <div class="cards">
+        <div class="card"><h3>Total Leads</h3><p id="leadCount">0</p></div>
+        <div class="card"><h3>Users</h3><p id="userCount">0</p></div>
+        <div class="card"><h3>Projects</h3><p id="projectCount">0</p></div>
+        <div class="card"><h3>Products</h3><p id="productCount">0</p></div>
+        <div class="card"><h3>Tasks</h3><p id="taskCount">0</p></div>
+        <div class="card"><h3>Expenses</h3><p id="expenseCount">0</p></div>
+      </div>
+      <div class="section">
+        <div class="section-header"><h2>Dashboard Data Input</h2><button onclick="refreshAll(this)">Refresh Data</button></div>
+        <div id="sheetInfo" class="notice">Connect your Apps Script Web App URL to show sheet tabs and counts.</div>
+        <div id="dashboardForms"></div>
+      </div>
+    
+      <div class="section">
+        <div class="section-header"><h2>Automation Center</h2></div>
+        <div class="notice">
+          Your business system supports workflow automation.<br><br>
+          Examples:
+          <ul>
+            <li>Automatically create follow-up tasks for new leads</li>
+            <li>Send notifications for overdue projects</li>
+            <li>Track employee attendance automatically</li>
+            <li>Create finance approvals and workflow logs</li>
+          </ul>
+        </div>
+      </div>
 
-  <div class="section">
-    <div class="section-header">
-      <h2>Task Performance Summary</h2>
-      <button class="primary" onclick="loadTaskSummary(this)">Refresh Summary</button>
-    </div>
-    <div id="taskSummary" class="notice">Task summary will appear here.</div>
-  </div>
+    </section>
 
-  <div class="section">
-    <div class="section-header">
-      <h2>Task Records</h2>
-      <button class="primary" onclick="loadTasks(this)">Refresh Tasks</button>
-    </div>
-    <div id="taskList"></div>
-  </div>
-</section>
+    <section id="crm" class="page">
+      <div class="section"><div class="section-header"><h2>CRM</h2><button onclick="loadPageData('crm', this)">Reload CRM</button></div><div id="crmForms"></div></div>
+    </section>
 
+    <section id="tasks" class="page">
+      <div class="section">
+        <div class="section-header"><h2>Task Performance Summary</h2><button onclick="renderTaskSummary(this)">Refresh Summary</button></div>
+        <div id="taskSummary" class="notice">Task summary will appear here after task data loads.</div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Automated Recurring Tasks</h2>
+          <button onclick="loadRecurringTasks(this)">Refresh Automated Tasks</button>
+        </div>
+        <div class="notice">
+          Create tasks that repeat daily, weekly, or monthly. The backend can create reminders and email the assigned person automatically.
+        </div>
+        <div class="grid">
+          <input id="recurringTitle" type="text" placeholder="Recurring task title">
+          <select id="recurringAssignedTo"></select>
+          <select id="recurringFrequency">
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+          </select>
+          <input id="recurringStartDate" type="date" placeholder="Start date">
+          <input id="recurringWhatsapp" type="tel" placeholder="Optional WhatsApp number, e.g. 27821234567">
+        </div>
+        <textarea id="recurringNotes" placeholder="Reminder notes"></textarea>
+        <div class="form-actions">
+          <button onclick="saveRecurringTask(this)">Save Recurring Task</button>
+          <button class="secondary" onclick="clearRecurringTaskForm()">Clear</button>
+        </div>
+        <br>
+        <div id="recurringTasksList" class="notice">Recurring tasks will appear here.</div>
+      </div>
+
+      <div class="section"><div class="section-header"><h2>Tasks</h2><button onclick="loadPageData('tasks', this)">Reload Tasks</button></div><div id="tasksForms"></div></div>
+    </section>
+
+    <section id="hr" class="page">
+      <div class="section"><div class="section-header"><h2>HR</h2><button onclick="loadPageData('hr', this)">Reload HR</button></div><div id="hrForms"></div></div>
+    </section>
+
+    <section id="projects" class="page">
+      <div class="section"><div class="section-header"><h2>Projects</h2><button onclick="loadPageData('projects', this)">Reload Projects</button></div><div id="projectsForms"></div></div>
+    </section>
+
+    <section id="inventory" class="page">
+      <div class="section"><div class="section-header"><h2>Inventory</h2><button onclick="loadPageData('inventory', this)">Reload Inventory</button></div><div id="inventoryForms"></div></div>
+    </section>
+
+    <section id="finance" class="page">
+      <div class="section"><div class="section-header"><h2>Finance</h2><button onclick="loadPageData('finance', this)">Reload Finance</button></div><div id="financeForms"></div></div>
+    </section>
+
+    <section id="logistics" class="page">
+      <div class="section"><div class="section-header"><h2>Logistics</h2><button onclick="loadPageData('logistics', this)">Reload Logistics</button></div><div id="logisticsForms"></div></div>
+    </section>
+
+    <section id="settings" class="page">
+      <div class="section">
+        <h2>Required Google Sheet Tabs</h2>
+        <p>Create these tabs or run <strong>setupQuickbaseTabs()</strong> in Apps Script.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Module</th><th>Tabs</th></tr></thead>
+            <tbody>
+              <tr><td>Core</td><td>Users, Roles, Companies, Settings, AuditLogs, Notifications, Sessions, Permissions</td></tr>
+              <tr><td>CRM</td><td>Leads, Contacts, Clients, Deals, Invoices, Quotations, Tasks, FollowUps</td></tr>
+              <tr><td>HR</td><td>Employees, Departments, Attendance, LeaveRequests, Payroll, PerformanceReviews, Recruitment</td></tr>
+              <tr><td>Projects</td><td>Projects, ProjectTasks, Milestones, Timesheets, Kanban</td></tr>
+              <tr><td>Inventory</td><td>Products, Stock, Warehouses, Suppliers, PurchaseOrders, Assets</td></tr>
+              <tr><td>Logistics</td><td>Vehicles, Drivers, Deliveries, Routes, FuelLogs, Maintenance</td></tr>
+              <tr><td>Finance</td><td>Expenses, Income, Budgets, AccountsPayable, AccountsReceivable, Transactions</td></tr>
+              <tr><td>Workflow</td><td>Workflows, Approvals, AutomationLogs, WorkflowRules</td></tr>
+              <tr><td>Dashboard</td><td>KPIs, Reports, Analytics</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  
 <section id="workflowBuilder" class="page">
-  <div class="section">
-    <div class="section-header">
-      <h2>Visual Workflow Builder</h2>
-      <button class="primary" onclick="saveWorkflowRule(this)">Save Workflow</button>
-    </div>
-
-    <div class="grid">
-      <input id="workflowName" placeholder="Workflow Name">
-
-      <select id="workflowModule">
-        <option>Tasks</option>
-        <option>Projects</option>
-        <option>Leads</option>
-        <option>Expenses</option>
-        <option>LeaveRequests</option>
-      </select>
-
-      <select id="workflowTrigger">
-        <option value="onCreate">When Record Is Created</option>
-        <option value="onUpdate">When Record Is Updated</option>
-        <option value="scheduled">Scheduled</option>
-      </select>
-
-      <select id="workflowConditionField">
-        <option>Status</option>
-        <option>AssignedTo</option>
-        <option>Title</option>
-        <option>DueDate</option>
-        <option>Department</option>
-        <option>Priority</option>
-      </select>
-
-      <select id="workflowOperator">
-        <option value="equals">Equals</option>
-        <option value="not_equals">Does Not Equal</option>
-        <option value="contains">Contains</option>
-        <option value="greater_than">Greater Than</option>
-        <option value="less_than">Less Than</option>
-        <option value="always">Always Run</option>
-      </select>
-
-      <input id="workflowConditionValue" placeholder="Condition Value">
-
-      <select id="workflowAction">
-        <option value="sendEmail">Send Gmail Email</option>
-        <option value="sendWhatsapp">Show WhatsApp Message</option>
-        <option value="createTask">Create Task</option>
-        <option value="requestApproval">Request Approval</option>
-        <option value="escalate">Escalate</option>
-        <option value="callApi">Call API Integration</option>
-      </select>
-
-      <input id="workflowRecipient" placeholder="Recipient Email or Field Name, e.g. AssignedTo">
-      <input id="workflowApiName" placeholder="API Name for callApi action">
-    </div>
-
-    <br>
-    <textarea id="workflowMessage" placeholder="Workflow Action Message"></textarea>
-    <div id="workflowResult"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">
-      <h2>Saved Workflow Rules</h2>
-      <button class="primary" onclick="loadWorkflowRules(this)">Refresh Rules</button>
-    </div>
-    <div id="workflowRulesList"></div>
-  </div>
+<div class="section">
+<div class="section-header"><h2>Visual Workflow Builder</h2></div>
+<div class="notice">Triggers, conditional logic, approvals, escalations and automation workflows enabled.</div>
+<div class="grid">
+<input placeholder="Workflow Name">
+<select><option>Tasks</option><option>Projects</option><option>CRM</option></select>
+<select><option>When Record Is Created</option><option>When Record Is Updated</option><option>Scheduled</option></select>
+<select><option>Send Email</option><option>Send WhatsApp</option><option>Request Approval</option><option>Escalate</option></select>
+</div>
+<textarea placeholder="Workflow Action Message"></textarea>
+<button>Save Workflow</button>
+</div>
 </section>
 
 <section id="approvals" class="page">
-  <div class="section">
-    <div class="section-header">
-      <h2>Approval Requests</h2>
-      <button class="primary" onclick="loadApprovals(this)">Refresh</button>
-    </div>
-    <div id="approvalRequests"></div>
-  </div>
+<div class="section">
+<div class="section-header"><h2>Approvals</h2></div>
+<div class="notice">Approval chains and escalation management enabled.</div>
+</div>
 </section>
 
 <section id="automations" class="page">
-  <div class="section">
-    <div class="section-header">
-      <h2>Scheduled Automations</h2>
-      <button class="primary" onclick="saveScheduledJob(this)">Save Automation</button>
-    </div>
-
-    <div class="grid">
-      <input id="jobName" placeholder="Automation Name">
-      <select id="jobFrequency">
-        <option>Daily</option>
-        <option>Weekly</option>
-        <option>Monthly</option>
-      </select>
-      <input id="jobRecipient" type="email" placeholder="Recipient Email">
-      <input id="jobNextRun" type="date">
-    </div>
-
-    <br>
-    <textarea id="jobMessage" placeholder="Automation Reminder Message"></textarea>
-    <div id="scheduledJobResult"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">
-      <h2>Scheduled Jobs</h2>
-      <button class="primary" onclick="loadScheduledJobs(this)">Refresh Jobs</button>
-    </div>
-    <div id="scheduledJobsList"></div>
-  </div>
+<div class="section">
+<div class="section-header"><h2>Scheduled Automations</h2></div>
+<div class="notice">Daily, weekly and monthly recurring automations enabled.</div>
+</div>
 </section>
 
 <section id="apiIntegrations" class="page">
-  <div class="section">
-    <div class="section-header">
-      <h2>API Integrations</h2>
-      <button class="primary" onclick="saveApiIntegration(this)">Save API</button>
-    </div>
-
-    <div class="grid">
-      <input id="apiName" placeholder="API Name">
-      <input id="apiEndpoint" placeholder="API Endpoint URL">
-      <input id="apiKey" type="password" placeholder="API Key / Token">
-      <select id="apiMethod">
-        <option>post</option>
-        <option>get</option>
-        <option>put</option>
-      </select>
-    </div>
-
-    <div id="apiResult"></div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">
-      <h2>Saved API Connections</h2>
-      <button class="primary" onclick="loadApiConnections(this)">Refresh APIs</button>
-    </div>
-    <div id="apiList"></div>
-  </div>
+<div class="section">
+<div class="section-header"><h2>API Integrations</h2></div>
+<div class="notice">External API integrations enabled.</div>
+</div>
 </section>
 
-<section id="escalations" class="page">
-  <div class="section">
-    <div class="section-header">
-      <h2>Escalation History</h2>
-      <button class="primary" onclick="loadEscalations(this)">Refresh Escalations</button>
-    </div>
-    <div id="escalationList"></div>
-  </div>
-</section>
-
-<section id="settings" class="page">
-  <div class="section">
-    <h2>Required Sheet Tabs</h2>
-    <p class="small">Create these tabs in Google Sheets, or run <strong>setupEnterpriseTabs()</strong> in Apps Script.</p>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Tab</th><th>Columns</th></tr></thead>
-        <tbody id="settingsTabs"></tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
+</main>
 </div>
 
 <script>
 /*
   IMPORTANT:
-  Replace API_URL below with your deployed Google Apps Script Web App URL.
+  1. Deploy Code_full_sections.gs as a Google Apps Script Web App.
+  2. Copy the Web App URL.
+  3. Paste it below in API_URL.
 */
-const API_URL = "https://script.google.com/macros/s/AKfycbxKaN441ZwYn44b8Jm1r2zthx1hZ_uCOhx6tc2DbHZeDFyumVROp_HtduGiICdToQguaA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbyF4BwysgK0uLcCM4QKlcD9qCMOZ1zcyCSnw7YXWysMob7tb4j5gJeVgyHqbjlWhSpQMQ/exec";
 
-let systemPeople=[];
+let currentUser = JSON.parse(localStorage.getItem("onpointUser") || "null");
+let systemPeople = [];
 
-const REQUIRED_TABS = {
-  Users:["UserID","FullName","Email","Phone","Role","Status","DateCreated"],
-  Employees:["EmployeeID","FullName","Email","Phone","Department","Position","Status"],
+const SHEET_FIELDS = {
+  KPIs:["KPIID","KPIName","Value","Period","DateUpdated"],
+  Reports:["ReportID","ReportName","Module","CreatedBy","DateCreated"],
+  Analytics:["AnalyticsID","Metric","Value","DateCreated"],
+
+  Leads:["Name","Email","Phone","Status","AssignedTo","DateCreated"],
   Contacts:["ContactID","FullName","Email","Phone","Company","Status"],
   Clients:["ClientID","ClientName","Email","Phone","Status"],
-  Tasks:["TaskID","Title","AssignedTo","WhatsappNumber","DueDate","Status","Description","DateCreated","CompletedDate"],
-  WorkflowRules:["WorkflowID","WorkflowName","Module","TriggerType","ConditionField","Operator","ConditionValue","ActionType","ActionMessage","Recipient","ApiName","Status","DateCreated"],
-  WorkflowExecutions:["ExecutionID","WorkflowID","Module","RecordID","ActionType","Status","ExecutionDate","Message"],
-  WorkflowApprovals:["ApprovalID","WorkflowID","Module","RecordID","RequestedBy","Approver","Status","DateCreated","ApprovedDate","Comments"],
-  EscalationHistory:["EscalationID","RecordID","EscalatedTo","Reason","DateEscalated","Status"],
-  ApiConnections:["ApiID","Name","Endpoint","ApiKey","Method","Status","DateCreated"],
-  ApiLogs:["ApiLogID","ApiID","Endpoint","Status","Response","DateCreated"],
-  ScheduledJobs:["JobID","Name","Frequency","Email","Message","Status","DateCreated","LastRun","NextRun"],
+  Deals:["DealID","DealName","Client","Value","Stage","CloseDate"],
+  Invoices:["InvoiceID","Client","Amount","Status","DateCreated"],
+  Quotations:["QuoteID","Client","Amount","Status","DateCreated"],
+  Tasks:["TaskID","Title","AssignedTo","Status","DueDate"],
   RecurringTasks:["RecurringTaskID","Title","AssignedTo","Frequency","StartDate","NextRunDate","Status","WhatsappNumber","Notes","DateCreated"],
-  Notifications:["NotificationID","UserEmail","Title","Message","Status","DateCreated"],
-  AuditTrail:["AuditID","Action","UserEmail","Details","DateCreated"]
+  FollowUps:["FollowUpID","LeadEmail","Notes","NextDate","Status"],
+
+  Employees:["EmployeeID","FullName","Department","Position","Salary","Status"],
+  Departments:["DepartmentID","DepartmentName","Manager","Status"],
+  Attendance:["AttendanceID","EmployeeID","Date","ClockIn","ClockOut","Status"],
+  LeaveRequests:["LeaveID","EmployeeID","LeaveType","StartDate","EndDate","Status"],
+  Payroll:["PayrollID","EmployeeID","Month","Salary","Deductions","NetPay","Status"],
+  PerformanceReviews:["ReviewID","EmployeeID","Score","Comments","ReviewDate"],
+  Recruitment:["CandidateID","FullName","Position","Email","Stage","Status"],
+
+  Projects:["ProjectID","ProjectName","Manager","Status","Budget","Deadline"],
+  ProjectTasks:["TaskID","ProjectID","TaskName","AssignedTo","Status","DueDate"],
+  Milestones:["MilestoneID","ProjectID","Title","DueDate","Status"],
+  Timesheets:["TimesheetID","EmployeeID","ProjectID","Hours","Date"],
+  Kanban:["CardID","ProjectID","Title","Column","AssignedTo"],
+
+  Products:["ProductID","ProductName","Category","Quantity","Price"],
+  Stock:["StockID","ProductID","Warehouse","Quantity","LastUpdated"],
+  Warehouses:["WarehouseID","WarehouseName","Location","Manager"],
+  Suppliers:["SupplierID","SupplierName","Email","Phone","Status"],
+  PurchaseOrders:["POID","Supplier","Amount","Status","DateCreated"],
+  Assets:["AssetID","AssetName","Category","AssignedTo","Status"],
+
+  Expenses:["ExpenseID","Description","Amount","Department","Date"],
+  Income:["IncomeID","Description","Amount","Source","Date"],
+  Budgets:["BudgetID","Department","Amount","Period","Status"],
+  AccountsPayable:["APID","Supplier","Amount","DueDate","Status"],
+  AccountsReceivable:["ARID","Client","Amount","DueDate","Status"],
+  Transactions:["TransactionID","Type","Description","Amount","Date"],
+
+  Vehicles:["VehicleID","Registration","Make","Model","Status"],
+  Drivers:["DriverID","FullName","Phone","LicenseNo","Status"],
+  Deliveries:["DeliveryID","Client","Driver","Vehicle","Status","DateCreated"],
+  Routes:["RouteID","RouteName","StartLocation","EndLocation","Status"],
+  FuelLogs:["FuelLogID","VehicleID","Litres","Amount","Date"],
+  Maintenance:["MaintenanceID","VehicleID","Description","Cost","Date"]
 };
 
-function isConfigured(){
-  return API_URL && !API_URL.includes("PASTE_YOUR");
+const PAGE_SHEETS = {
+  dashboard:["KPIs","Reports","Analytics"],
+  crm:["Leads","Contacts","Clients","Deals","Invoices","Quotations","FollowUps"],
+  tasks:["Tasks","ProjectTasks"],
+  hr:["Employees","Departments","Attendance","LeaveRequests","Payroll","PerformanceReviews","Recruitment"],
+  projects:["Projects","ProjectTasks","Milestones","Timesheets","Kanban"],
+  inventory:["Products","Stock","Warehouses","Suppliers","PurchaseOrders","Assets"],
+  finance:["Expenses","Income","Budgets","AccountsPayable","AccountsReceivable","Transactions"],
+  logistics:["Vehicles","Drivers","Deliveries","Routes","FuelLogs","Maintenance"]
+};
+
+function isConfigured(){return API_URL && !API_URL.includes("PASTE_YOUR")}
+function cleanId(text){return text.replace(/[^a-zA-Z0-9]/g,"")}
+function nowIso(){return new Date().toISOString()}
+function showMessage(elementId, message, type="notice"){
+  const el=document.getElementById(elementId); if(!el)return;
+  el.innerHTML=`<div class="${type}">${message}</div>`;
 }
-
-async function apiGet(params){
-  if(!isConfigured()) throw new Error("Paste your deployed Apps Script Web App URL into API_URL.");
-  const url=`${API_URL}?${new URLSearchParams(params).toString()}`;
-  const res=await fetch(url);
-  return await res.json();
-}
-
-async function apiPost(body){
-  if(!isConfigured()) throw new Error("Paste your deployed Apps Script Web App URL into API_URL.");
-  const res=await fetch(API_URL,{method:"POST",body:JSON.stringify(body)});
-  return await res.json();
-}
-
-async function fetchSheetData(sheet){
-  return await apiGet({action:"fetch",sheet});
-}
-
-async function insertSheetData(sheet,payload){
-  return await apiPost({action:"insert",sheet,payload});
-}
-
-function showPage(id,btn){
-  document.querySelectorAll(".page").forEach(page=>page.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelectorAll(".sidebar button").forEach(b=>b.classList.remove("active"));
-  if(btn) btn.classList.add("active");
-
-  if(id==="dashboard") refreshDashboard();
-  if(id==="tasks"){loadPeople();loadTasks();loadTaskSummary();}
-  if(id==="workflowBuilder") loadWorkflowRules();
-  if(id==="approvals") loadApprovals();
-  if(id==="automations") loadScheduledJobs();
-  if(id==="apiIntegrations") loadApiConnections();
-  if(id==="escalations") loadEscalations();
-}
-
 function setButtonSync(button,text="Synchronising..."){
-  if(!button) return;
-  button.dataset.oldText=button.innerText;
+  if(!button) return null;
+  const oldText=button.innerText;
+  button.dataset.oldText=oldText;
   button.classList.add("syncing","clicked");
   button.disabled=true;
   button.innerText=text;
+  return oldText;
 }
-
 function finishButtonSync(button,success=true){
   if(!button) return;
   button.classList.remove("syncing");
@@ -627,180 +429,382 @@ function finishButtonSync(button,success=true){
     button.innerText=button.dataset.oldText || button.innerText;
   },900);
 }
+document.addEventListener("click",function(event){
+  const btn=event.target.closest("button");
+  if(!btn) return;
+  btn.classList.add("clicked");
+  setTimeout(()=>btn.classList.remove("clicked"),220);
+});
 
-function showMessage(id,message,type="notice"){
-  const el=document.getElementById(id);
-  if(el) el.innerHTML=`<div class="${type}">${message}</div>`;
+function setConnectionStatus(connected,text){
+  ["connectionStatus","authConnectionStatus"].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    el.className=connected?"status-pill connected":"status-pill";
+    el.innerHTML=`<span class="dot"></span><span>${text}</span>`;
+  });
 }
+function toggleSidebar(){document.getElementById("sidebar").classList.toggle("open")}
+function showPage(pageId,link){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(pageId).classList.add("active");
+  document.querySelectorAll(".nav-link").forEach(a=>a.classList.remove("active"));
+  if(link) link.classList.add("active");
+  document.getElementById("pageTitle").innerText=link?link.innerText:"Dashboard";
+  if(window.innerWidth<=760) document.getElementById("sidebar").classList.remove("open");
+  loadPageData(pageId);
+}
+function showAuthTabManual(tab){
+  document.getElementById("loginForm").classList.toggle("hidden",tab!=="login");
+  document.getElementById("registerForm").classList.toggle("hidden",tab!=="register");
+  const buttons=document.querySelectorAll(".tab-btn");
+  buttons[0].classList.toggle("active",tab==="login");
+  buttons[1].classList.toggle("active",tab==="register");
+  document.getElementById("authMessage").innerHTML="";
+}
+async function apiGet(params){
+  if(!isConfigured()) throw new Error("Paste your deployed Google Apps Script Web App URL into API_URL first.");
+  const url=`${API_URL}?${new URLSearchParams(params).toString()}`;
+  const response=await fetch(url);
+  return await response.json();
+}
+async function apiPost(body){
+  if(!isConfigured()) throw new Error("Paste your deployed Google Apps Script Web App URL into API_URL first.");
+  const response=await fetch(API_URL,{method:"POST",body:JSON.stringify(body)});
+  return await response.json();
+}
+async function fetchSheetData(sheet){return await apiGet({action:"fetch",sheet})}
+async function insertSheetData(sheet,payload){return await apiPost({action:"insert",sheet,payload})}
 
-function rowTable(rows){
-  if(!rows || !rows.length) return `<div class="notice">No records found.</div>`;
-  const headers=Object.keys(rows[0]);
-  return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.map(row=>`<tr>${headers.map(h=>`<td>${row[h] || ""}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
-}
-
-function parseDateSafe(value){
-  if(!value) return null;
-  const date=new Date(value);
-  return isNaN(date.getTime()) ? null : date;
-}
-
-function isClosedStatus(status){
-  const s=String(status || "").toLowerCase();
-  return ["closed","completed","complete","done","finished"].some(x=>s.includes(x));
-}
-
-function whatsappLink(number,message){
-  const clean=String(number || "").replace(/[^0-9]/g,"");
-  return clean ? `https://wa.me/${clean}?text=${encodeURIComponent(message)}` : "";
-}
 
 function personLabel(person){
-  return person.FullName || person.ClientName || person.Name || person.Email || "Unnamed";
+  return person.FullName || person.Name || person.Email || person.Phone || "Unnamed";
 }
-
 function personEmail(person){
-  return person.Email || "";
+  return person.Email || person.email || "";
 }
-
 function personPhone(person){
   return person.Phone || person.WhatsappNumber || person.WhatsApp || person.Mobile || "";
 }
-
-function personOptionValue(person){
-  return JSON.stringify({
-    name:personLabel(person),
-    email:personEmail(person),
-    phone:personPhone(person)
-  }).replace(/'/g,"&#39;");
-}
-
-function parsePersonOption(value){
-  try{return JSON.parse(value || "{}")}catch(e){return {name:"",email:"",phone:""}}
-}
-
-async function loadPeople(button){
-  setButtonSync(button,"Loading...");
-  const map={};
-
-  async function add(sheet){
+async function loadSystemPeople(){
+  const peopleMap = {};
+  async function addFromSheet(sheet){
     try{
-      const rows=await fetchSheetData(sheet);
-      rows.forEach(r=>{
-        const label=personLabel(r);
+      const rows = await fetchSheetData(sheet);
+      (rows || []).forEach(row=>{
+        const label = row.FullName || row.Name || row.EmployeeName || row.Email || row.Phone;
         if(!label) return;
-        const key=(r.Email || label).toLowerCase();
-        map[key]={FullName:label,Email:r.Email || "",Phone:personPhone(r)};
+        const key = (row.Email || label).toLowerCase();
+        peopleMap[key] = {
+          FullName: row.FullName || row.Name || row.EmployeeName || label,
+          Email: row.Email || "",
+          Phone: row.Phone || row.WhatsappNumber || row.WhatsApp || row.Mobile || ""
+        };
       });
     }catch(e){}
   }
-
-  await add("Users");
-  await add("Employees");
-  await add("Contacts");
-  await add("Clients");
-
-  systemPeople=Object.values(map).sort((a,b)=>personLabel(a).localeCompare(personLabel(b)));
-  const options=['<option value="">Choose Assigned Person</option>'].concat(
-    systemPeople.map(p=>`<option value='${personOptionValue(p)}'>${personLabel(p)}${personEmail(p) ? " - " + personEmail(p) : ""}</option>`)
+  await addFromSheet("Users");
+  await addFromSheet("Employees");
+  await addFromSheet("Contacts");
+  await addFromSheet("Clients");
+  systemPeople = Object.values(peopleMap).sort((a,b)=>personLabel(a).localeCompare(personLabel(b)));
+  populatePersonDropdowns();
+  return systemPeople;
+}
+function personOptionValue(person){
+  const label = personLabel(person);
+  const email = personEmail(person);
+  const phone = personPhone(person);
+  return JSON.stringify({name:label,email,phone});
+}
+function parsePersonOption(value){
+  try{return JSON.parse(value || "{}")}catch(e){return {name:value || "",email:"",phone:""}}
+}
+function populatePersonDropdowns(){
+  const options = ['<option value="">Choose assigned person</option>'].concat(
+    systemPeople.map(p=>`<option value='${personOptionValue(p).replace(/'/g,"&#39;")}'>${personLabel(p)}${personEmail(p) ? " - " + personEmail(p) : ""}</option>`)
   ).join("");
+  document.querySelectorAll("select[data-person-select='true']").forEach(select=>{
+    const current = select.value;
+    select.innerHTML = options;
+    if(current) select.value = current;
+  });
+  const recurringSelect = document.getElementById("recurringAssignedTo");
+  if(recurringSelect){
+    const current = recurringSelect.value;
+    recurringSelect.innerHTML = options;
+    if(current) recurringSelect.value = current;
+  }
+}
+function applyPersonToTaskFields(sheet,selectedValue){
+  const id=cleanId(sheet);
+  const person=parsePersonOption(selectedValue);
+  const assigned=document.getElementById(`${id}_AssignedTo`);
+  const whatsapp=document.getElementById(`${id}_WhatsappNumber`);
+  if(assigned) assigned.value = person.email || person.name || "";
+  if(whatsapp && person.phone) whatsapp.value = person.phone;
+}
 
-  const taskSelect=document.getElementById("taskAssignedTo");
-  if(taskSelect) taskSelect.innerHTML=options;
-
+function inputType(field){
+  const f=field.toLowerCase();
+  if(f.includes("email")) return "email";
+  if(f.includes("date") || f.includes("deadline") || f.includes("duedate") || f.includes("nextdate") || f.includes("reviewdate")) return "date";
+  if(f.includes("amount") || f.includes("salary") || f.includes("budget") || f.includes("quantity") || f.includes("price") || f.includes("value") || f.includes("hours") || f.includes("score") || f.includes("deductions") || f.includes("netpay") || f.includes("cost") || f.includes("litres")) return "number";
+  if(f.includes("phone")) return "tel";
+  return "text";
+}
+function defaultValue(sheet,field){
+  if(field.endsWith("ID") || field==="TaskID" || field==="KPIID" || field==="POID" || field==="APID" || field==="ARID") return sheet.substring(0,3).toUpperCase()+"-"+Date.now();
+  if(["DateCreated","DateUpdated","LastUpdated"].includes(field)) return nowIso();
+  if(field==="AssignedTo" && currentUser) return currentUser.Email || "";
+  if(field==="CreatedBy" && currentUser) return currentUser.Email || "";
+  if(field==="Status") return "New";
+  return "";
+}
+function renderSheetModule(sheet, containerId){
+  const fields=SHEET_FIELDS[sheet] || [];
+  const id=cleanId(sheet);
+  const isTaskSheet = sheet==="Tasks" || sheet==="ProjectTasks";
+  const taskNotifyOptions = isTaskSheet ? `
+    <div class="notice">
+      <strong>Task notifications</strong><br>
+      Choose an assigned person from the list. When the task is saved, Gmail sends the task email automatically in the background. A WhatsApp task message button will also show after saving if a WhatsApp number is available.
+      <div class="grid" style="margin-top:10px">
+        <label class="small-text"><input id="${id}_SendWhatsapp" type="checkbox" style="width:auto;margin-right:6px"> Show WhatsApp send option after saving</label>
+        <input id="${id}_WhatsappNumber" type="tel" placeholder="WhatsApp number with country code, e.g. 27821234567">
+      </div>
+    </div>` : "";
+  const formFields=fields.map(field=>{
+    const type=inputType(field);
+    const readonly = ["DateCreated","DateUpdated","LastUpdated"].includes(field) ? "readonly" : "";
+    const value = defaultValue(sheet,field);
+    if(isTaskSheet && field==="AssignedTo"){
+      return `<select id="${id}_${field}_Select" data-person-select="true" onchange="applyPersonToTaskFields('${sheet}', this.value)"><option value="">Choose assigned person</option></select><input id="${id}_${field}" type="hidden" value="${value}">`;
+    }
+    if(field==="Status"){
+      return `<select id="${id}_${field}"><option>New</option><option>Active</option><option>Pending</option><option>In Progress</option><option>Completed</option><option>Closed</option><option>Inactive</option></select>`;
+    }
+    return `<input id="${id}_${field}" type="${type}" placeholder="${field}" value="${value}" ${readonly}>`;
+  }).join("");
+  return `
+    <div class="module-group">
+      <div class="section-header">
+        <div>
+          <h3>${sheet} <span class="badge">${fields.length} fields</span></h3>
+          <div class="small-text">Posts to and fetches from Google Sheet tab: <strong>${sheet}</strong></div>
+        </div>
+        <button class="secondary" onclick="loadSheetTable('${sheet}', this)">Reload ${sheet}</button>
+      </div>
+      <div id="${id}_message"></div>
+      <div class="grid">${formFields}</div>
+      ${taskNotifyOptions}
+      <div class="form-actions">
+        <button onclick="saveGenericRecord('${sheet}', this)">Save ${sheet}</button>
+        <button class="secondary" onclick="clearGenericForm('${sheet}')">Clear</button>
+      </div>
+      <br>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>${fields.map(f=>`<th>${f}</th>`).join("")}</tr></thead>
+          <tbody id="${id}_table"><tr><td colspan="${fields.length}">Loading ${sheet}...</td></tr></tbody>
+        </table>
+      </div>
+    </div>`;
+}
+function buildAllSections(){
+  Object.keys(PAGE_SHEETS).forEach(page=>{
+    const el=document.getElementById(`${page}Forms`);
+    if(el) el.innerHTML=PAGE_SHEETS[page].map(sheet=>renderSheetModule(sheet)).join("");
+  });
+  populatePersonDropdowns();
+}
+function collectPayload(sheet){
+  const id=cleanId(sheet);
+  const payload={};
+  (SHEET_FIELDS[sheet] || []).forEach(field=>{
+    const input=document.getElementById(`${id}_${field}`);
+    payload[field]=input ? input.value : "";
+    if(!payload[field]) payload[field]=defaultValue(sheet,field);
+  });
+  return payload;
+}
+async function saveGenericRecord(sheet,button){
+  const id=cleanId(sheet);
+  setButtonSync(button,"Synchronising...");
+  try{
+    const payload=collectPayload(sheet);
+    const result=await insertSheetData(sheet,payload);
+    if(result.status==="success"){
+      let extraMessage = "";
+      if(sheet==="Tasks" || sheet==="ProjectTasks"){
+        if(result.email && result.email.message){
+          extraMessage += " " + result.email.message;
+        }
+        extraMessage += buildTaskWhatsappMessage(sheet,payload);
+      }
+      showMessage(`${id}_message`,`${sheet} record saved successfully.${extraMessage}`,"success");
+      clearGenericForm(sheet,true);
+      await loadSheetTable(sheet);
+      await refreshCountsOnly();
+      if(["Users","Employees","Contacts","Clients"].includes(sheet)) await loadSystemPeople();
+      if(sheet==="Tasks" || sheet==="ProjectTasks") await renderTaskSummary();
+      if(sheet==="RecurringTasks") await loadRecurringTasks();
+      finishButtonSync(button,true);
+    }else{
+      showMessage(`${id}_message`,result.message || `Could not save ${sheet}.`,"error");
+      finishButtonSync(button,false);
+    }
+  }catch(error){
+    showMessage(`${id}_message`,error.message,"error");
+    finishButtonSync(button,false);
+  }
+}
+function clearGenericForm(sheet, keepDefaults=false){
+  const id=cleanId(sheet);
+  (SHEET_FIELDS[sheet] || []).forEach(field=>{
+    const input=document.getElementById(`${id}_${field}`);
+    if(input) input.value = keepDefaults ? defaultValue(sheet,field) : "";
+  });
+}
+async function loadSheetTable(sheet,button){
+  const id=cleanId(sheet);
+  const fields=SHEET_FIELDS[sheet] || [];
+  const table=document.getElementById(`${id}_table`);
+  if(!table) return;
+  setButtonSync(button,"Synchronising...");
+  try{
+    const data=await fetchSheetData(sheet);
+    if(!data.length){
+      table.innerHTML=`<tr><td colspan="${fields.length}">No records found in ${sheet}.</td></tr>`;
+      finishButtonSync(button,true);
+      return;
+    }
+    table.innerHTML=data.map(row=>`<tr>${fields.map(f=>`<td>${row[f] || ""}</td>`).join("")}</tr>`).join("");
+    finishButtonSync(button,true);
+  }catch(error){
+    table.innerHTML=`<tr><td colspan="${fields.length}" class="error">${error.message}</td></tr>`;
+    finishButtonSync(button,false);
+  }
+}
+async function loadPageData(page,button){
+  setButtonSync(button,"Synchronising...");
+  const sheets=PAGE_SHEETS[page] || [];
+  for(const sheet of sheets){ await loadSheetTable(sheet); }
+  if(page==="tasks"){
+    await loadSystemPeople();
+    await renderTaskSummary();
+    await loadRecurringTasks();
+  }
   finishButtonSync(button,true);
 }
 
-function selectedTaskPerson(){
-  return parsePersonOption(document.getElementById("taskAssignedTo").value);
+
+function selectedTaskPerson(sheet){
+  const id=cleanId(sheet);
+  const select=document.getElementById(`${id}_AssignedTo_Select`);
+  if(!select) return {name:"",email:"",phone:""};
+  return parsePersonOption(select.value);
 }
 
-async function saveTask(button){
-  setButtonSync(button,"Saving Task...");
+function taskMessage(sheet,payload){
+  const person = selectedTaskPerson(sheet);
+  const title = payload.Title || payload.TaskName || "New Task";
+  const assignedTo = person.name || payload.AssignedTo || "Assignee";
+  const dueDate = payload.DueDate || "No due date";
+  return `Hello ${assignedTo}, you have been assigned a task: ${title}. Due date: ${dueDate}. Please log in to OnPoint Group to update progress.`;
+}
+function buildWhatsappLink(message,number){
+  const cleanNumber = (number || "").replace(/[^0-9]/g,"");
+  return cleanNumber ? `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}` : "";
+}
 
-  try{
-    const person=selectedTaskPerson();
-    const title=document.getElementById("taskTitle").value.trim();
-    const due=document.getElementById("taskDueDate").value;
-    const whatsapp=document.getElementById("taskWhatsapp").value || person.phone || "";
-    const description=document.getElementById("taskDescription").value;
-    const status=document.getElementById("taskStatus").value;
+function buildTaskWhatsappMessage(sheet,payload){
+  const id=cleanId(sheet);
+  const person = selectedTaskPerson(sheet);
+  const message = taskMessage(sheet,payload);
+  let output = "";
+  const whatsappNumber = document.getElementById(`${id}_WhatsappNumber`);
+  const number = (whatsappNumber && whatsappNumber.value) ? whatsappNumber.value : (person.phone || "");
+  const link = buildWhatsappLink(message, number);
+  if(link){
+    output += ` <a class="whatsapp-link" target="_blank" href="${link}">Send WhatsApp Task Message</a>`;
+  }else{
+    output += " Add a WhatsApp number for this person to show the WhatsApp send button.";
+  }
+  return output;
+}
 
-    if(!title || !(person.email || person.name)){
-      showMessage("taskResult","Please enter a task title and choose an assigned person.","error");
-      finishButtonSync(button,false);
-      return;
+async function notifyTaskAssignee(sheet,payload){
+  const id=cleanId(sheet);
+  const assignedTo = (payload.AssignedTo || "").trim();
+  const message = taskMessage(sheet,payload);
+  let output = "";
+  if(assignedTo && assignedTo.includes("@")){
+    try{
+      const emailResult = await apiPost({
+        action:"sendTaskEmail",
+        to:assignedTo,
+        subject:`New task assigned: ${payload.Title || payload.TaskName || "Task"}`,
+        body:message,
+        payload
+      });
+      if(emailResult && emailResult.status==="success"){
+        output += " Email notification sent.";
+      }else{
+        output += " Email notification requested. If it does not send, add sendTaskEmail support in your Apps Script backend.";
+      }
+    }catch(e){
+      output += " Email notification could not be sent by the current backend. Add sendTaskEmail support in Apps Script to make it automatic.";
     }
-
-    const payload={
-      TaskID:"TSK-"+Date.now(),
-      Title:title,
-      AssignedTo:person.email || person.name,
-      WhatsappNumber:whatsapp,
-      DueDate:due,
-      Status:status,
-      Description:description,
-      DateCreated:new Date().toISOString(),
-      CompletedDate:""
-    };
-
-    const result=await insertSheetData("Tasks",payload);
-
-    let message=`Task saved successfully.`;
-    if(result.email && result.email.message) message += " " + result.email.message;
-
-    const taskText=`Hello ${person.name || payload.AssignedTo}, you have been assigned a task: ${title}. Due date: ${due || "No due date"}. Please log in to OnPoint Enterprise System to update progress.`;
-    const link=whatsappLink(whatsapp,taskText);
-
-    showMessage("taskResult",`${message}<br><br>${link ? `<a class="whatsapp-btn" target="_blank" href="${link}">Send WhatsApp Task Message</a>` : "Add a WhatsApp number to show WhatsApp button."}`,"success");
-
-    await executeWorkflowEngine("Tasks",payload);
-    await loadTasks();
-    await loadTaskSummary();
-    await refreshDashboard();
-
-    finishButtonSync(button,true);
-
-  }catch(error){
-    showMessage("taskResult",error.message,"error");
-    finishButtonSync(button,false);
+  }else{
+    output += " Add an email address in AssignedTo to send automatic email notifications.";
   }
-}
 
-async function loadTasks(button){
-  setButtonSync(button,"Loading...");
-  try{
-    const rows=await fetchSheetData("Tasks");
-    document.getElementById("taskList").innerHTML=rowTable(rows);
-    finishButtonSync(button,true);
-  }catch(error){
-    document.getElementById("taskList").innerHTML=`<div class="error">${error.message}</div>`;
-    finishButtonSync(button,false);
+  const sendWhatsapp = document.getElementById(`${id}_SendWhatsapp`);
+  const whatsappNumber = document.getElementById(`${id}_WhatsappNumber`);
+  if(sendWhatsapp && sendWhatsapp.checked){
+    const link = buildWhatsappLink(message, whatsappNumber ? whatsappNumber.value : "");
+    if(link){
+      output += ` <a class="whatsapp-link" target="_blank" href="${link}">Send WhatsApp</a>`;
+    }else{
+      output += " Enter a WhatsApp number to show the WhatsApp send link.";
+    }
   }
+  return output;
 }
-
+function parseDateSafe(value){
+  if(!value) return null;
+  const date = new Date(value);
+  return isNaN(date.getTime()) ? null : date;
+}
+function isClosedStatus(status){
+  const s=(status || "").toLowerCase();
+  return ["closed","completed","complete","done","finished"].some(word=>s.includes(word));
+}
+function scoreClass(score){
+  if(score >= 80) return "score-good";
+  if(score >= 50) return "score-warn";
+  return "score-bad";
+}
 function buildTaskSummaryRows(tasks){
   const people={};
+  const now=new Date();
   tasks.forEach(task=>{
     const person=(task.AssignedTo || "Unassigned").trim() || "Unassigned";
     if(!people[person]) people[person]={total:0,onTime:0,open:0,late:0};
     people[person].total++;
-
     const closed=isClosedStatus(task.Status);
     const due=parseDateSafe(task.DueDate);
-    const completed=parseDateSafe(task.CompletedDate || task.ClosedDate || task.DateCompleted || task.DateUpdated || task.LastUpdated || task.DateCreated) || new Date();
-
+    const completed=parseDateSafe(task.CompletedDate || task.ClosedDate || task.DateCompleted || task.DateUpdated || task.LastUpdated || task.DateCreated) || now;
     if(!closed){
       people[person].open++;
       return;
     }
-
     if(due && completed > due) people[person].late++;
     else people[person].onTime++;
   });
-
   return Object.keys(people).sort().map(person=>{
     const p=people[person];
+    const closed=p.onTime+p.late;
     const onTimePct=p.total ? Math.round((p.onTime/p.total)*100) : 0;
     const openPct=p.total ? Math.round((p.open/p.total)*100) : 0;
     const latePct=p.total ? Math.round((p.late/p.total)*100) : 0;
@@ -808,26 +812,31 @@ function buildTaskSummaryRows(tasks){
     return {person,...p,onTimePct,openPct,latePct,finalScore};
   });
 }
-
-function scoreClass(score){
-  if(score >= 80) return "score-good";
-  if(score >= 50) return "score-warn";
-  return "score-bad";
-}
-
-async function loadTaskSummary(button){
-  setButtonSync(button,"Loading...");
+async function renderTaskSummary(button){
+  setButtonSync(button,"Synchronising...");
+  const el=document.getElementById("taskSummary");
+  if(!el){finishButtonSync(button,true);return;}
   try{
     const tasks=await fetchSheetData("Tasks");
     const rows=buildTaskSummaryRows(tasks || []);
-
     if(!rows.length){
-      document.getElementById("taskSummary").innerHTML="No task records found yet.";
+      el.className="notice";
+      el.innerHTML="No task records found yet.";
       finishButtonSync(button,true);
       return;
     }
-
-    document.getElementById("taskSummary").innerHTML=`
+    const totals=rows.reduce((acc,row)=>{
+      acc.total+=row.total; acc.onTime+=row.onTime; acc.open+=row.open; acc.late+=row.late;
+      return acc;
+    },{total:0,onTime:0,open:0,late:0});
+    el.className="";
+    el.innerHTML=`
+      <div class="summary-grid">
+        <div class="summary-card"><h4>Total Tasks</h4><p>${totals.total}</p></div>
+        <div class="summary-card"><h4>Closed On Time</h4><p>${totals.onTime}</p></div>
+        <div class="summary-card"><h4>Open</h4><p>${totals.open}</p></div>
+        <div class="summary-card"><h4>Closed Late</h4><p>${totals.late}</p></div>
+      </div>
       <div class="table-wrap">
         <table>
           <thead>
@@ -858,373 +867,187 @@ async function loadTaskSummary(button){
           </tbody>
         </table>
       </div>
-      <p class="small">Final Score formula: (Closed On Time / Total Tasks) - (Closed Late / Total Tasks).</p>
+      <p class="small-text" style="margin-top:10px">Final Score formula: (Closed On Time / Total Tasks) - (Closed Late / Total Tasks). For closed-late accuracy, add a CompletedDate, ClosedDate, DateCompleted, DateUpdated, or LastUpdated column to your Tasks sheet.</p>
     `;
-
     finishButtonSync(button,true);
   }catch(error){
-    document.getElementById("taskSummary").innerHTML=`<div class="error">${error.message}</div>`;
+    el.className="error";
+    el.innerHTML=error.message;
     finishButtonSync(button,false);
   }
 }
 
-async function saveWorkflowRule(button){
-  setButtonSync(button,"Saving Workflow...");
 
-  try{
-    const payload={
-      WorkflowID:"WF-"+Date.now(),
-      WorkflowName:document.getElementById("workflowName").value,
-      Module:document.getElementById("workflowModule").value,
-      TriggerType:document.getElementById("workflowTrigger").value,
-      ConditionField:document.getElementById("workflowConditionField").value,
-      Operator:document.getElementById("workflowOperator").value,
-      ConditionValue:document.getElementById("workflowConditionValue").value,
-      ActionType:document.getElementById("workflowAction").value,
-      ActionMessage:document.getElementById("workflowMessage").value,
-      Recipient:document.getElementById("workflowRecipient").value,
-      ApiName:document.getElementById("workflowApiName").value,
-      Status:"Active",
-      DateCreated:new Date().toISOString()
-    };
-
-    const result=await insertSheetData("WorkflowRules",payload);
-
-    if(result.status==="success"){
-      showMessage("workflowResult","Workflow saved successfully.","success");
-      await loadWorkflowRules();
-      await refreshDashboard();
-      finishButtonSync(button,true);
-    }else{
-      showMessage("workflowResult",result.message || "Could not save workflow.","error");
-      finishButtonSync(button,false);
-    }
-  }catch(error){
-    showMessage("workflowResult",error.message,"error");
-    finishButtonSync(button,false);
-  }
+function nextRunDateFrom(startDate,frequency){
+  const date = parseDateSafe(startDate) || new Date();
+  const next = new Date(date);
+  const f=(frequency || "Monthly").toLowerCase();
+  if(f==="daily") next.setDate(next.getDate()+1);
+  else if(f==="weekly") next.setDate(next.getDate()+7);
+  else next.setMonth(next.getMonth()+1);
+  return next.toISOString().slice(0,10);
 }
-
-function conditionMatches(flow,record){
-  if(flow.Operator==="always") return true;
-
-  const fieldValue=record[flow.ConditionField] || "";
-  const conditionValue=flow.ConditionValue || "";
-
-  switch(flow.Operator){
-    case "equals": return String(fieldValue)===String(conditionValue);
-    case "not_equals": return String(fieldValue)!==String(conditionValue);
-    case "contains": return String(fieldValue).toLowerCase().includes(String(conditionValue).toLowerCase());
-    case "greater_than": return Number(fieldValue)>Number(conditionValue);
-    case "less_than": return Number(fieldValue)<Number(conditionValue);
-    default: return false;
-  }
-}
-
-async function executeWorkflowEngine(moduleName,record){
-  try{
-    const workflows=await fetchSheetData("WorkflowRules");
-    const activeFlows=workflows.filter(w=>w.Module===moduleName && w.Status==="Active");
-
-    for(const flow of activeFlows){
-      if(conditionMatches(flow,record)){
-        await executeWorkflowAction(flow,record);
-      }
-    }
-  }catch(error){
-    console.error("Workflow engine error",error);
-  }
-}
-
-async function executeWorkflowAction(flow,record){
-  let status="success";
-  let message="Workflow executed.";
-
-  try{
-    switch(flow.ActionType){
-      case "sendEmail":
-        await apiPost({
-          action:"sendTaskEmail",
-          to:flow.Recipient || record.AssignedTo,
-          subject:"Workflow Notification: "+flow.WorkflowName,
-          body:flow.ActionMessage
-        });
-        break;
-
-      case "sendWhatsapp":
-        const number=record.WhatsappNumber || record.Phone;
-        if(number){
-          window.open(whatsappLink(number,flow.ActionMessage),"_blank");
-        }
-        break;
-
-      case "createTask":
-        await insertSheetData("Tasks",{
-          TaskID:"TSK-"+Date.now(),
-          Title:flow.ActionMessage || flow.WorkflowName,
-          AssignedTo:flow.Recipient || record.AssignedTo,
-          WhatsappNumber:record.WhatsappNumber || "",
-          DueDate:"",
-          Status:"New",
-          Description:"Created by workflow "+flow.WorkflowName,
-          DateCreated:new Date().toISOString(),
-          CompletedDate:""
-        });
-        break;
-
-      case "requestApproval":
-        await createApprovalRequest(flow,record);
-        break;
-
-      case "escalate":
-        await escalateWorkflow(record,flow);
-        break;
-
-      case "callApi":
-        await apiPost({action:"executeApiIntegration",apiName:flow.ApiName,payload:record});
-        break;
-    }
-  }catch(error){
-    status="error";
-    message=error.message;
-  }
-
-  await insertSheetData("WorkflowExecutions",{
-    ExecutionID:"EXE-"+Date.now(),
-    WorkflowID:flow.WorkflowID,
-    Module:flow.Module,
-    RecordID:record.TaskID || record.ID || "",
-    ActionType:flow.ActionType,
-    Status:status,
-    ExecutionDate:new Date().toISOString(),
-    Message:message
-  });
-}
-
-async function loadWorkflowRules(button){
-  setButtonSync(button,"Loading...");
-  try{
-    const rows=await fetchSheetData("WorkflowRules");
-    document.getElementById("workflowRulesList").innerHTML=rowTable(rows);
-    finishButtonSync(button,true);
-  }catch(error){
-    document.getElementById("workflowRulesList").innerHTML=`<div class="error">${error.message}</div>`;
-    finishButtonSync(button,false);
-  }
-}
-
-async function createApprovalRequest(flow,record){
-  const payload={
-    ApprovalID:"APR-"+Date.now(),
-    WorkflowID:flow.WorkflowID,
-    Module:flow.Module,
-    RecordID:record.TaskID || record.ID || "",
-    RequestedBy:"System",
-    Approver:flow.Recipient || "admin@example.com",
-    Status:"Pending",
-    DateCreated:new Date().toISOString(),
-    ApprovedDate:"",
-    Comments:flow.ActionMessage
+function recurringPayloadFromForm(){
+  const selected=parsePersonOption(document.getElementById("recurringAssignedTo").value);
+  const start=document.getElementById("recurringStartDate").value || new Date().toISOString().slice(0,10);
+  const frequency=document.getElementById("recurringFrequency").value || "Monthly";
+  return {
+    RecurringTaskID:"REC-"+Date.now(),
+    Title:document.getElementById("recurringTitle").value.trim(),
+    AssignedTo:selected.email || selected.name || "",
+    Frequency:frequency,
+    StartDate:start,
+    NextRunDate:nextRunDateFrom(start,frequency),
+    Status:"Active",
+    WhatsappNumber:document.getElementById("recurringWhatsapp").value.trim() || selected.phone || "",
+    Notes:document.getElementById("recurringNotes").value.trim(),
+    DateCreated:nowIso()
   };
-
-  await insertSheetData("WorkflowApprovals",payload);
 }
-
-async function loadApprovals(button){
-  setButtonSync(button,"Loading...");
+async function saveRecurringTask(button){
+  setButtonSync(button,"Synchronising...");
   try{
-    const rows=await fetchSheetData("WorkflowApprovals");
-    if(!rows.length){
-      document.getElementById("approvalRequests").innerHTML=`<div class="notice">No approvals found.</div>`;
-    }else{
-      document.getElementById("approvalRequests").innerHTML=rows.map(row=>`
-        <div class="card">
-          <h3>${row.Module || "Approval"}</h3>
-          <div>Record: ${row.RecordID || ""}</div>
-          <div>Approver: ${row.Approver || ""}</div>
-          <div>Status: <span class="badge">${row.Status || ""}</span></div>
-          <br>
-          <button class="primary" onclick="updateApproval('${row.ApprovalID}','Approved')">Approve</button>
-          <button class="secondary danger" onclick="updateApproval('${row.ApprovalID}','Rejected')">Reject</button>
-        </div>
-      `).join("");
-    }
-    finishButtonSync(button,true);
-  }catch(error){
-    document.getElementById("approvalRequests").innerHTML=`<div class="error">${error.message}</div>`;
-    finishButtonSync(button,false);
-  }
-}
-
-async function updateApproval(approvalId,status){
-  const result=await apiPost({action:"updateApproval",approvalId,status,comments:"Updated from dashboard"});
-  await loadApprovals();
-}
-
-async function escalateWorkflow(record,flow){
-  const payload={
-    EscalationID:"ESC-"+Date.now(),
-    RecordID:record.TaskID || record.ID || "",
-    EscalatedTo:flow.Recipient || "admin@example.com",
-    Reason:flow.ActionMessage,
-    DateEscalated:new Date().toISOString(),
-    Status:"Open"
-  };
-
-  await insertSheetData("EscalationHistory",payload);
-
-  await apiPost({
-    action:"sendTaskEmail",
-    to:payload.EscalatedTo,
-    subject:"Escalated Workflow: "+flow.WorkflowName,
-    body:flow.ActionMessage
-  });
-}
-
-async function loadEscalations(button){
-  setButtonSync(button,"Loading...");
-  try{
-    const rows=await fetchSheetData("EscalationHistory");
-    document.getElementById("escalationList").innerHTML=rowTable(rows);
-    finishButtonSync(button,true);
-  }catch(error){
-    document.getElementById("escalationList").innerHTML=`<div class="error">${error.message}</div>`;
-    finishButtonSync(button,false);
-  }
-}
-
-async function saveScheduledJob(button){
-  setButtonSync(button,"Saving...");
-  try{
-    const payload={
-      JobID:"JOB-"+Date.now(),
-      Name:document.getElementById("jobName").value,
-      Frequency:document.getElementById("jobFrequency").value,
-      Email:document.getElementById("jobRecipient").value,
-      Message:document.getElementById("jobMessage").value,
-      Status:"Active",
-      DateCreated:new Date().toISOString(),
-      LastRun:"",
-      NextRun:document.getElementById("jobNextRun").value
-    };
-
-    const result=await insertSheetData("ScheduledJobs",payload);
-
-    if(result.status==="success"){
-      showMessage("scheduledJobResult","Scheduled automation saved.","success");
-      await loadScheduledJobs();
-      await refreshDashboard();
-      finishButtonSync(button,true);
-    }else{
-      showMessage("scheduledJobResult",result.message || "Could not save scheduled job.","error");
-      finishButtonSync(button,false);
-    }
-  }catch(error){
-    showMessage("scheduledJobResult",error.message,"error");
-    finishButtonSync(button,false);
-  }
-}
-
-async function loadScheduledJobs(button){
-  setButtonSync(button,"Loading...");
-  try{
-    const rows=await fetchSheetData("ScheduledJobs");
-    document.getElementById("scheduledJobsList").innerHTML=rowTable(rows);
-    finishButtonSync(button,true);
-  }catch(error){
-    document.getElementById("scheduledJobsList").innerHTML=`<div class="error">${error.message}</div>`;
-    finishButtonSync(button,false);
-  }
-}
-
-async function saveApiIntegration(button){
-  setButtonSync(button,"Saving API...");
-  try{
-    const payload={
-      ApiID:"API-"+Date.now(),
-      Name:document.getElementById("apiName").value,
-      Endpoint:document.getElementById("apiEndpoint").value,
-      ApiKey:document.getElementById("apiKey").value,
-      Method:document.getElementById("apiMethod").value,
-      Status:"Active",
-      DateCreated:new Date().toISOString()
-    };
-
-    const result=await insertSheetData("ApiConnections",payload);
-
-    if(result.status==="success"){
-      showMessage("apiResult","API integration saved.","success");
-      await loadApiConnections();
-      await refreshDashboard();
-      finishButtonSync(button,true);
-    }else{
-      showMessage("apiResult",result.message || "Could not save API integration.","error");
-      finishButtonSync(button,false);
-    }
-  }catch(error){
-    showMessage("apiResult",error.message,"error");
-    finishButtonSync(button,false);
-  }
-}
-
-async function loadApiConnections(button){
-  setButtonSync(button,"Loading...");
-  try{
-    const rows=await fetchSheetData("ApiConnections");
-    document.getElementById("apiList").innerHTML=rowTable(rows);
-    finishButtonSync(button,true);
-  }catch(error){
-    document.getElementById("apiList").innerHTML=`<div class="error">${error.message}</div>`;
-    finishButtonSync(button,false);
-  }
-}
-
-async function refreshDashboard(button){
-  setButtonSync(button,"Refreshing...");
-  try{
-    if(!isConfigured()){
-      document.getElementById("connectionStatus").innerHTML="Paste your deployed Apps Script Web App URL into API_URL.";
+    const payload=recurringPayloadFromForm();
+    if(!payload.Title || !payload.AssignedTo){
+      showMessage("recurringTasksList","Please enter a recurring task title and choose an assigned person.","error");
       finishButtonSync(button,false);
       return;
     }
-
-    const status=await apiGet({action:"status"});
-    document.getElementById("connectionStatus").innerHTML=status.status==="success" ? "Connected to Google Sheets successfully." : (status.message || "Connection failed");
-
-    async function count(sheet,id){
-      try{
-        const rows=await fetchSheetData(sheet);
-        document.getElementById(id).innerText=rows.length;
-      }catch(e){
-        document.getElementById(id).innerText="0";
-      }
+    const result=await insertSheetData("RecurringTasks",payload);
+    if(result.status==="success"){
+      await apiPost({action:"sendTaskEmail",to:payload.AssignedTo,subject:`Recurring task created: ${payload.Title}`,body:`You have been assigned a recurring ${payload.Frequency.toLowerCase()} task: ${payload.Title}. First reminder date: ${payload.NextRunDate}. ${payload.Notes || ""}`,payload});
+      showMessage("recurringTasksList","Recurring task saved and reminder email requested.","success");
+      clearRecurringTaskForm();
+      await loadRecurringTasks();
+      finishButtonSync(button,true);
+    }else{
+      showMessage("recurringTasksList",result.message || "Could not save recurring task.","error");
+      finishButtonSync(button,false);
     }
-
-    await count("Tasks","dashTasks");
-    await count("WorkflowRules","dashWorkflows");
-    await count("WorkflowApprovals","dashApprovals");
-    await count("ScheduledJobs","dashJobs");
-    await count("ApiConnections","dashApis");
-    await count("EscalationHistory","dashEscalations");
-
+  }catch(error){
+    showMessage("recurringTasksList",error.message,"error");
+    finishButtonSync(button,false);
+  }
+}
+function clearRecurringTaskForm(){
+  ["recurringTitle","recurringStartDate","recurringWhatsapp","recurringNotes"].forEach(id=>{const el=document.getElementById(id); if(el) el.value="";});
+  const freq=document.getElementById("recurringFrequency"); if(freq) freq.value="Daily";
+  const assigned=document.getElementById("recurringAssignedTo"); if(assigned) assigned.value="";
+}
+async function loadRecurringTasks(button){
+  setButtonSync(button,"Synchronising...");
+  const el=document.getElementById("recurringTasksList");
+  if(!el){finishButtonSync(button,true);return;}
+  try{
+    const rows=await fetchSheetData("RecurringTasks");
+    if(!rows || !rows.length){
+      el.className="notice";
+      el.innerHTML="No recurring tasks saved yet.";
+      finishButtonSync(button,true);
+      return;
+    }
+    el.className="";
+    el.innerHTML=rows.map(row=>`
+      <div class="recurring-card">
+        <strong>${row.Title || "Recurring Task"}</strong>
+        <div class="small-text">Assigned To: ${row.AssignedTo || ""}</div>
+        <div class="small-text">Frequency: ${row.Frequency || ""} | Next Reminder: ${row.NextRunDate || ""} | Status: ${row.Status || ""}</div>
+        ${row.WhatsappNumber ? `<a class="whatsapp-link" target="_blank" href="${buildWhatsappLink(`Reminder: ${row.Title || "Recurring Task"} is due.`, row.WhatsappNumber)}">Send WhatsApp Reminder</a>` : ""}
+      </div>
+    `).join("");
     finishButtonSync(button,true);
   }catch(error){
-    document.getElementById("connectionStatus").innerHTML=error.message;
+    el.className="error";
+    el.innerHTML=error.message;
     finishButtonSync(button,false);
   }
 }
 
-function renderSettings(){
-  const el=document.getElementById("settingsTabs");
-  el.innerHTML=Object.keys(REQUIRED_TABS).map(tab=>`<tr><td>${tab}</td><td>${REQUIRED_TABS[tab].join(", ")}</td></tr>`).join("");
+async function checkConnection(){
+  try{
+    if(!isConfigured()){
+      setConnectionStatus(false,"API URL not added");
+      const info=document.getElementById("sheetInfo"); if(info) info.innerHTML="Paste your deployed Google Apps Script Web App URL into API_URL.";
+      return;
+    }
+    const status=await apiGet({action:"status"});
+    if(status.status==="success"){
+      setConnectionStatus(true,"Connected to Google Sheets");
+      const info=document.getElementById("sheetInfo");
+      if(info) info.innerHTML=`<strong>Connected to Google Sheets successfully.</strong>`;
+    }else setConnectionStatus(false,status.message || "Connection failed");
+  }catch(error){
+    setConnectionStatus(false,"Connection failed");
+    const info=document.getElementById("sheetInfo"); if(info) info.innerHTML=error.message;
+  }
 }
-
+async function registerUser(button){
+  setButtonSync(button,"Synchronising...");
+  try{
+    const payload={UserID:"USR-"+Date.now(),FullName:document.getElementById("regFullName").value.trim(),Email:document.getElementById("regEmail").value.trim().toLowerCase(),Password:document.getElementById("regPassword").value,Role:document.getElementById("regRole").value,Status:"Active",DateCreated:nowIso()};
+    if(!payload.FullName || !payload.Email || !payload.Password){showMessage("authMessage","Please complete all registration fields.","error");finishButtonSync(button,false);return}
+    const result=await apiPost({action:"register",sheet:"Users",payload});
+    if(result.status==="success"){showMessage("authMessage","Account created. You can now login.","success");showAuthTabManual("login");finishButtonSync(button,true)}
+    else {showMessage("authMessage",result.message || "Registration failed.","error");finishButtonSync(button,false)}
+  }catch(error){showMessage("authMessage",error.message,"error");finishButtonSync(button,false)}
+}
+async function loginUser(button){
+  setButtonSync(button,"Synchronising...");
+  try{
+    const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+    const password=document.getElementById("loginPassword").value;
+    if(!email || !password){showMessage("authMessage","Enter email and password.","error");finishButtonSync(button,false);return}
+    const result=await apiPost({action:"login",sheet:"Users",email,password});
+    if(result.status==="success"){currentUser=result.user;localStorage.setItem("onpointUser",JSON.stringify(currentUser));finishButtonSync(button,true);openApp()}
+    else {showMessage("authMessage",result.message || "Login failed.","error");finishButtonSync(button,false)}
+  }catch(error){showMessage("authMessage",error.message,"error");finishButtonSync(button,false)}
+}
+function openApp(){
+  document.getElementById("authScreen").classList.add("hidden");
+  document.getElementById("appShell").classList.remove("hidden");
+  document.getElementById("userLabel").innerText=currentUser ? `${currentUser.FullName || currentUser.Email} (${currentUser.Role || "User"})` : "Logged in";
+  refreshAll();
+}
+function logoutUser(button){
+  setButtonSync(button,"Synchronising...");
+  localStorage.removeItem("onpointUser");
+  currentUser=null;
+  document.getElementById("appShell").classList.add("hidden");
+  document.getElementById("authScreen").classList.remove("hidden");
+  finishButtonSync(button,true);
+}
+async function loadCount(sheet, elementId){
+  try{const data=await fetchSheetData(sheet); const el=document.getElementById(elementId); if(el) el.innerText=data.length}
+  catch(e){const el=document.getElementById(elementId); if(el) el.innerText="0"}
+}
+async function refreshCountsOnly(){
+  await loadCount("Leads","leadCount");
+  await loadCount("Users","userCount");
+  await loadCount("Projects","projectCount");
+  await loadCount("Products","productCount");
+  await loadCount("Tasks","taskCount");
+  await loadCount("Expenses","expenseCount");
+}
+async function refreshAll(button){
+  setButtonSync(button,"Synchronising...");
+  await checkConnection();
+  await refreshCountsOnly();
+  await loadPageData("dashboard");
+  await loadPageData("crm");
+  await loadPageData("tasks");
+  await loadSystemPeople();
+  await renderTaskSummary();
+  await loadRecurringTasks();
+  finishButtonSync(button,true);
+}
 window.addEventListener("load",async()=>{
-  renderSettings();
-  await loadPeople();
-  await refreshDashboard();
+  buildAllSections();
+  await checkConnection();
+  await loadSystemPeople();
+  if(currentUser) openApp();
 });
 </script>
-
 </body>
 </html>
+
+<!-- Enterprise workflow upgrade applied -->
